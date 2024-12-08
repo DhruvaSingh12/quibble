@@ -2,20 +2,75 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: 255, 240%, 90%; /* Light Lavender */
+    --foreground: 250, 15%, 10%; /* Dark Purple */
+
+    --card: 255, 245%, 98%; /* Soft White */
+    --card-foreground: 250, 15%, 15%; /* Deep Purple */
+
+    --popover: 255, 245%, 98%;
+    --popover-foreground: 250, 15%, 10%;
+
+    --primary: 270, 70%, 50%; /* Purple */
+    --primary-foreground: 270, 90%, 98%; /* Soft White */
+
+    --secondary: 270, 20%, 80%; /* Lavender */
+    --secondary-foreground: 270, 15%, 15%; /* Deep Purple */
+
+    --muted: 270, 20%, 95%; /* Light Lavender */
+    --muted-foreground: 270, 25%, 30%; /* Grayish Purple */
+
+    --accent: 250, 40%, 65%; /* Lavender Blue */
+    --accent-foreground: 250, 35%, 50%; /* Deep Blue Purple */
+
+    --destructive: 0, 80%, 55%; /* Soft Red */
+    --destructive-foreground: 0, 90%, 98%; /* Light Pink */
+
+    --border: 270, 20%, 85%; /* Muted Lavender */
+    --input: 270, 20%, 85%; /* Muted Lavender */
+    --ring: 270, 70%, 50%; /* Purple Ring */
+
+    --radius: 1rem;
+  }
+
+  .dark {
+    --background: 240, 10%, 5%; /* Almost Black */
+    --foreground: 240, 10%, 95%; /* Off-White */
+
+    --card: 240, 10%, 10%; /* Dark Gray */
+    --card-foreground: 240, 10%, 95%; /* Off-White */
+
+    --popover: 240, 10%, 8%;
+    --popover-foreground: 240, 10%, 95%;
+
+    --primary: 240, 5%, 45%; /* Medium Gray */
+    --primary-foreground: 240, 5%, 95%; /* Off-White */
+
+    --secondary: 240, 5%, 25%; /* Dark Gray */
+    --secondary-foreground: 240, 10%, 90%; /* Light Gray */
+
+    --muted: 240, 5%, 15%; /* Dark Gray */
+    --muted-foreground: 240, 5%, 70%; /* Medium Gray */
+
+    --accent: 240, 5%, 20%; /* Soft Black */
+    --accent-foreground: 240, 5%, 95%; /* Off-White */
+
+    --destructive: 0, 70%, 45%; /* Soft Red */
+    --destructive-foreground: 0, 80%, 98%; /* Light Pink */
+
+    --border: 240, 5%, 20%; /* Grayish Black */
+    --input: 240, 5%, 20%; /* Grayish Black */
+    --ring: 240, 5%, 50%; /* Gray Ring */
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
