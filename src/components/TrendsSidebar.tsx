@@ -1,13 +1,13 @@
 import { validateRequest } from "@/auth";
 import prisma from "@/lib/prisma";
-import { userDataSelect } from "@/lib/types";
 import { Loader2, PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import UserAvatar from "./UserAvatar";
-import { Button } from "./ui/Button";
 import { unstable_cache } from "next/cache";
 import { formatNumber } from "@/lib/utils";
+import FollowButton from "./FollowButton";
+import { getUserDataSelect } from "@/lib/types";
 
 interface TrendsSidebarProps {
     className?: string;
@@ -32,38 +32,56 @@ export default function TrendsSidebar({ className }: TrendsSidebarProps) {
 
 async function WhoToFollow() {
     const { user } = await validateRequest();
+  
     if (!user) return null;
-
-
+  
     const usersToFollow = await prisma.user.findMany({
-        where: {
-            NOT: {
-                id: user.id
-            },
+      where: {
+        NOT: {
+          id: user.id,
         },
-        select: userDataSelect,
-        take: 5
-    })
-
+        followers: {
+          none: {
+            followerId: user.id,
+          },
+        },
+      },
+      select: getUserDataSelect(user.id),
+      take: 5,
+    });
+  
     return (
-        <div>
-            <h2 className="text-xl font-semibold mb-3">Who to follow</h2>
-            <div>
-                {usersToFollow.map((user) => (
-                    <div key={user.id} className="flex items-center justify-between gap-3">
-                        <Link href={`/users/${user.username}`} className="flex items-center gap-3">
-                            <UserAvatar avatarUrl={user.avatarUrl} className="flex-none" />
-                            <div className="flex flex-col">
-                                <span className="line-clamp-1 break-all font-semibold hover:underline">{user.displayName}</span>
-                                <span className="line-clamp-1 break-all text-muted-foreground">@{user.username}</span>
-                            </div>
-                        </Link>
-                        <Button className="rounded-full p-3 bg-accent-foreground"><PlusIcon size={23} /></Button>
-                    </div>
-                ))}
-            </div>
-        </div>
-    )
+      <div>
+        <div className="text-xl font-semibold mb-2">Who to follow</div>
+        {usersToFollow.map((user) => (
+          <div key={user.id} className="flex items-center justify-between gap-5">
+            <Link
+              href={`/users/${user.username}`}
+              className="flex items-center gap-3"
+            >
+              <UserAvatar avatarUrl={user.avatarUrl} className="flex-none" />
+              <div>
+                <p className="line-clamp-1 break-all font-semibold hover:underline">
+                  {user.displayName}
+                </p>
+                <p className="line-clamp-1 break-all text-muted-foreground">
+                  @{user.username}
+                </p>
+              </div>
+            </Link>
+            <FollowButton
+              userId={user.id}
+              initialState={{
+                followers: user._count.followers,
+                isFollowedByUser: user.followers.some(
+                  ({ followerId }) => followerId === user.id,
+                ),
+              }}
+            />
+          </div>
+        ))}
+      </div>
+    );
 }
 
 const getTrendingTopics = unstable_cache(
@@ -92,7 +110,7 @@ async function TrendingTopics() {
         <div>
             <h2 className="text-xl font-semibold mb-3">Trending Topics</h2>
             <div>
-                {trendingTopics.map(({hashtag, count}) => {
+                {trendingTopics.map(({ hashtag, count }) => {
                     const title = hashtag.split("#")[1];
 
                     return (
