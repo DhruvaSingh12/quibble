@@ -5,7 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuPortal
 import UserAvatar from "./UserAvatar";
 import Link from "next/link";
 import { logout } from "@/app/(auth)/actions";
-import { Check, LogOutIcon, Monitor, MonitorIcon } from "lucide-react";
+import { Check, LogOutIcon, MonitorIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
 import { useQueryClient } from "@tanstack/react-query";
@@ -23,7 +23,7 @@ export default function UserButton({ className }: UserButtonProps) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className={cn("rounded-full flex-none", className)}>
-          <UserAvatar avatarUrl={user?.avatarUrl} size={45} className="w-[40px] lg:w-[48px]" />
+          <UserAvatar avatarUrl={user?.avatarUrl} size={500} className="w-[40px] lg:w-[48px]" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
@@ -31,7 +31,7 @@ export default function UserButton({ className }: UserButtonProps) {
         <DropdownMenuSeparator />
         <Link href={'/users/${user.username}'}>
           <DropdownMenuItem>
-            <UserAvatar avatarUrl={user?.avatarUrl} size={24} className="mr-2" />
+            <UserAvatar avatarUrl={user?.avatarUrl} size={500} className="w-[24px] mr-2" />
             Profile
           </DropdownMenuItem>
         </Link>

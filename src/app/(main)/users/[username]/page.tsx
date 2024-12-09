@@ -11,6 +11,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 import UserPosts from "./UserPosts";
+import Linkify from "@/components/Linkify";
 
 interface PageProps {
   params: { username: string };
@@ -33,8 +34,10 @@ const getUser = cache(async (username: string, loggedInUserId: string) => {
 });
 
 export async function generateMetadata({
-  params: { username },
+  params,
 }: PageProps): Promise<Metadata> {
+  const { username } = await params;
+
   const { user: loggedInUser } = await validateRequest();
 
   if (!loggedInUser) return {};
@@ -46,7 +49,10 @@ export async function generateMetadata({
   };
 }
 
-export default async function Page({ params: { username } }: PageProps) {
+
+export default async function Page({ params }: { params: { username: string } }) {
+  const { username } = await params;
+
   const { user: loggedInUser } = await validateRequest();
 
   if (!loggedInUser) {
@@ -63,11 +69,15 @@ export default async function Page({ params: { username } }: PageProps) {
     <main className="w-full p-3 lg:p-5 mt-[3px] lg:mt-[8px] flex-col rounded-2xl items-center justify-center space-y-5 bg-accent">
       <div className="w-full min-w-0 space-y-5">
         <UserProfile user={user} loggedInUserId={loggedInUser.id} />
-        <div className="rounded-2xl bg-card p-5 shadow-sm">
-          <h2 className="text-center text-2xl font-bold">
-            {user.displayName}&apos;s posts
-          </h2>
+        <div className="rounded-lg bg-card p-4 shadow-md text-card">
+          <div className="p-2 rounded-lg bg-muted-foreground">
+            <h2 className="text-center text-lg font-semibold">
+              {user.displayName}&apos;s Posts
+            </h2>
+          </div>
+
         </div>
+
         <UserPosts userId={user.id} />
       </div>
     </main>
@@ -120,9 +130,11 @@ async function UserProfile({ user, loggedInUserId }: UserProfileProps) {
       {user.bio && (
         <>
           <hr />
-          <div className="overflow-hidden whitespace-pre-line break-words">
-            {user.bio}
-          </div>
+          <Linkify>
+            <div className="overflow-hidden whitespace-pre-line break-words">
+              {user.bio}
+            </div>
+          </Linkify>
         </>
       )}
     </div>

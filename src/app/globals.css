@@ -26,11 +26,12 @@
     --accent-foreground: 250, 35%, 50%; /* Deep Blue Purple */
 
     --destructive: 0, 80%, 55%; /* Soft Red */
-    --destructive-foreground: 0, 90%, 98%; /* Light Pink */
+    --destructive-foreground: 255, 245%, 98%; /* Soft White */
 
     --border: 270, 20%, 85%; /* Muted Lavender */
     --input: 270, 20%, 85%; /* Muted Lavender */
     --ring: 270, 70%, 50%; /* Purple Ring */
+
 
     --radius: 1rem;
   }
@@ -58,11 +59,13 @@
     --accent-foreground: 240, 5%, 95%; /* Off-White */
 
     --destructive: 0, 70%, 45%; /* Soft Red */
-    --destructive-foreground: 0, 80%, 98%; /* Light Pink */
+    --destructive-foreground: 240, 10%, 25%; /* Light Gray */
 
     --border: 240, 5%, 20%; /* Grayish Black */
     --input: 240, 5%, 20%; /* Grayish Black */
     --ring: 240, 5%, 50%; /* Gray Ring */
+
+    --radius: 1rem;
   }
 }
 

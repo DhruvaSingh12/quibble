@@ -7,6 +7,7 @@ import UserAvatar from "../UserAvatar";
 import { formatRelativeDate } from "@/lib/utils";
 import { useSession } from "@/providers/SessionProvider";
 import DeleteButton from "./delete/DeleteButton";
+import Linkify from "../Linkify";
 
 interface PostProps {
     post: PostData;
@@ -33,27 +34,26 @@ export default function Post({ post }: PostProps) {
     const { user } = useSession();
 
     return (
-        <article className="space-y-3 group/delete rounded-2xl bg-card p-3 lg:p-5 shadow-sm" suppressHydrationWarning={true}>
+        <article className="space-y-3 group/delete rounded-2xl bg-card p-3 lg:p-5 shadow-sm" >
             <div className="flex flex-col justify-between gap-3">
                 <div className="flex flex-wrap items-center gap-3 justify-between">
                     <div className="flex items-center gap-3">
-                        <Link href={`/users/${post.user.username}`}>
-                            <UserAvatar avatarUrl={post.user.avatarUrl} />
+                        <Link href={`/users/${post.user.username}`} passHref>
+                            <UserAvatar size={500} className="w-[50px]" avatarUrl={post.user.avatarUrl} />
                         </Link>
                         <div>
                             <Link href={`/users/${post.user.username}`} className="block text-[16px] hover:underline">
                                 {post.user.displayName}
                             </Link>
-                            <Link href={`/posts/${post.id}`} className="block text-[12px] text-muted-foreground">
+                            <p className="block text-[12px] text-muted-foreground">
                                 {formatRelativeDate(new Date(post.createdAt))}
-                            </Link>
+                            </p>
                         </div>
                     </div>
                     {user?.id === post.user.id && (
                         <div
-                            className={`ml-auto transition-opacity ${
-                                isDropdownOpen ? "opacity-100" : "opacity-0 group-hover/delete:opacity-100"
-                            }`}
+                            className={`ml-auto transition-opacity ${isDropdownOpen ? "opacity-100" : "opacity-0 group-hover/delete:opacity-100"
+                                }`}
                         >
                             <DeleteButton
                                 post={post}
@@ -64,19 +64,23 @@ export default function Post({ post }: PostProps) {
                 </div>
 
                 <div>
-                    <Link href={`/posts/${post.id}`}>
-                        <p className="text-[16px] whitespace-pre-line break-words text-justify text-muted-foreground">
-                            {displayedContent}
-                        </p>
-                    </Link>
-                    {needsTruncation && (
-                        <button
-                            onClick={toggleExpanded}
-                            className="text-primary hover:underline mt-2 block text-sm"
-                        >
-                            {isExpanded ? "Read less" : "Read more"}
-                        </button>
-                    )}
+                    <Linkify >
+                        <div>
+                            <Link href={`/posts/${post.id}`} passHref>
+                                <p className="text-[16px] whitespace-pre-line break-words text-justify text-muted-foreground">
+                                    {displayedContent}
+                                </p>
+                            </Link>
+                        </div>
+                        {needsTruncation && (
+                            <button
+                                onClick={toggleExpanded}
+                                className="text-primary hover:underline mt-2 block text-sm"
+                            >
+                                {isExpanded ? "Read less" : "Read more"}
+                            </button>
+                        )}
+                    </Linkify>
                 </div>
             </div>
         </article>
