@@ -19,6 +19,10 @@ import { PasswordInput } from "@/components/ui/PasswordInput";
 
 export default function SignUpForm() {
   const [error, setError] = useState<string>();
+
+  if (error) {
+    console.log("Sign-up error:", error);
+  }
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<SignUpValues>({

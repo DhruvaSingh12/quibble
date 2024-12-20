@@ -3,11 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 function NotFound() {
   const router = useRouter();
-  const [hovered, setHovered] = useState(false);
 
   const handleBackToHome = () => {
     router.push("/");
@@ -30,15 +28,13 @@ function NotFound() {
           <Image width={400} height={400} src="/404.png" alt="404 Not Found" />
         </div>
         <h1 className="text-center text-4xl font-extrabold text-white drop-shadow-xl">
-          Oops! We can’t find that page
+          Oops! We can&apos;t find that page
         </h1>
         <p className="mx-4 text-center text-xl text-gray-300 drop-shadow-md">
           The page you are looking for might have been moved or deleted.
         </p>
         <div
           onClick={handleBackToHome}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
           className="mt-4 transform cursor-pointer rounded-full bg-purple-700 px-10 py-3 text-xl text-white shadow-lg drop-shadow-2xl transition-transform hover:scale-105 hover:bg-purple-600"
         >
           Take me home
