@@ -8,6 +8,7 @@ import { formatRelativeDate } from "@/lib/utils";
 import { useSession } from "@/providers/SessionProvider";
 import DeleteButton from "./delete/DeleteButton";
 import Linkify from "../Linkify";
+import UserTooltip from "../UserTooltip";
 
 interface PostProps {
     post: PostData;
@@ -38,13 +39,17 @@ export default function Post({ post }: PostProps) {
             <div className="flex flex-col justify-between gap-3">
                 <div className="flex flex-wrap items-center gap-3 justify-between">
                     <div className="flex items-center gap-3">
-                        <Link href={`/users/${post.user.username}`} passHref>
-                            <UserAvatar size={500} className="w-[50px]" avatarUrl={post.user.avatarUrl} />
-                        </Link>
-                        <div>
-                            <Link href={`/users/${post.user.username}`} className="block text-[16px] hover:underline">
-                                {post.user.displayName}
+                        <UserTooltip user={post.user}>
+                            <Link href={`/users/${post.user.username}`} passHref>
+                                <UserAvatar size={500} className="w-[50px]" avatarUrl={post.user.avatarUrl} />
                             </Link>
+                        </UserTooltip>
+                        <div>
+                            <UserTooltip user={post.user}>
+                                <Link href={`/users/${post.user.username}`} className="block text-[16px] hover:underline">
+                                    {post.user.displayName}
+                                </Link>
+                            </UserTooltip>
                             <p className="block text-[12px] text-muted-foreground">
                                 {formatRelativeDate(new Date(post.createdAt))}
                             </p>
