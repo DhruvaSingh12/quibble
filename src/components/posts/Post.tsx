@@ -6,7 +6,7 @@ import { PostData } from "../../lib/types";
 import UserAvatar from "../UserAvatar";
 import { formatRelativeDate } from "@/lib/utils";
 import { useSession } from "@/providers/SessionProvider";
-import DeleteButton from "./PostActions";
+import PostActions from "./PostActions"; 
 import Linkify from "../Linkify";
 import UserTooltip from "../UserTooltip";
 
@@ -55,17 +55,15 @@ export default function Post({ post }: PostProps) {
                             </p>
                         </div>
                     </div>
-                    {user?.id === post.user.id && (
-                        <div
-                            className={`ml-auto transition-opacity ${isDropdownOpen ? "opacity-100" : "opacity-0 group-hover/delete:opacity-100"
-                                }`}
-                        >
-                            <DeleteButton
-                                post={post}
-                                onDropdownToggle={setIsDropdownOpen}
-                            />
-                        </div>
-                    )}
+                    <div
+                        className={`ml-auto transition-opacity ${isDropdownOpen ? "opacity-100" : "opacity-0 group-hover/delete:opacity-100"
+                            }`}
+                    >
+                        <PostActions
+                            post={post}
+                            onDropdownToggle={setIsDropdownOpen}
+                        />
+                    </div>
                 </div>
 
                 <div className="relative">

@@ -1,11 +1,19 @@
+"use client";
+
 import { PostData } from "@/lib/types";
 import { useState } from "react";
 import DeletePostDialog from "./delete/DeletePostDialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/DropdownMenu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/DropdownMenu";
 import { Button } from "@/components/ui/Button";
 import { MoreHorizontalIcon, Trash2 } from "lucide-react";
 import { HiOutlineShare } from "react-icons/hi";
 import ShareModal from "./share/ShareModal";
+import { useSession } from "@/providers/SessionProvider";
 
 interface PostActionsProps {
   post: PostData;
@@ -21,6 +29,7 @@ export default function PostActions({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
 
+  const { user } = useSession();
   const pageLink = `${window.location.origin}/posts/${post.id}`;
 
   return (
@@ -33,16 +42,7 @@ export default function PostActions({
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuItem
-            className="items-center justify-center hover:bg-muted-foreground"
-            onClick={() => setShowDeleteDialog(true)}
-          >
-            <span className="flex gap-3 text-destructive">
-              <Trash2 className="size-4" />
-              Delete
-            </span>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="items-center justify-center hover:bg-muted-foreground"
+            className="items-center hover:cursor-pointer justify-center hover:bg-muted-foreground"
             onClick={() => setShowShareModal(true)}
           >
             <span className="flex gap-3 text-primary">
@@ -50,6 +50,17 @@ export default function PostActions({
               Share
             </span>
           </DropdownMenuItem>
+          {user?.id === post.user.id && (
+            <DropdownMenuItem
+              className="items-center hover:cursor-pointer justify-center hover:bg-muted-foreground"
+              onClick={() => setShowDeleteDialog(true)}
+            >
+              <span className="flex gap-3 text-destructive">
+                <Trash2 className="size-4" />
+                Delete
+              </span>
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
       <DeletePostDialog
