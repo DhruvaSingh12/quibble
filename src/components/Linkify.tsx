@@ -39,13 +39,10 @@ function LinkifyUrl({ children }: LinkifyProps) {
     );
 }
 
-
-
-
 function LinkifyUsername({ children }: LinkifyProps) {
     return (
         <LinkIt
-            regex={/(@[a-zA-Z0-9_-]+)/}
+            regex={/(@[a-zA-Z0-9_-]+)\b/}
             component={(match, key) => (
                 <span
                     key={key}

@@ -6,7 +6,7 @@ import { PostData } from "../../lib/types";
 import UserAvatar from "../UserAvatar";
 import { formatRelativeDate } from "@/lib/utils";
 import { useSession } from "@/providers/SessionProvider";
-import DeleteButton from "./delete/DeleteButton";
+import DeleteButton from "./PostActions";
 import Linkify from "../Linkify";
 import UserTooltip from "../UserTooltip";
 
@@ -68,24 +68,40 @@ export default function Post({ post }: PostProps) {
                     )}
                 </div>
 
-                <div>
-                    <Linkify >
-                        <div>
-                            <Link href={`/posts/${post.id}`} passHref>
-                                <p className="text-[16px] whitespace-pre-line break-words text-justify text-muted-foreground">
-                                    {displayedContent}
-                                </p>
-                            </Link>
-                        </div>
-                        {needsTruncation && (
-                            <button
-                                onClick={toggleExpanded}
-                                className="text-primary hover:underline mt-2 block text-sm"
-                            >
-                                {isExpanded ? "Read less" : "Read more"}
-                            </button>
-                        )}
+                <div className="relative">
+                    <Linkify>
+                        <p className="text-[16px] whitespace-pre-line break-words text-justify text-muted-foreground">
+                            {displayedContent}
+                        </p>
                     </Linkify>
+                    {needsTruncation && (
+                        <button
+                            onClick={toggleExpanded}
+                            className="text-primary hover:underline mt-2 block text-sm"
+                        >
+                            {isExpanded ? "Read less" : "Read more"}
+                        </button>
+                    )}
+                    <Link href={`/posts/${post.id}`} passHref>
+                        <button
+                            className="absolute bottom-0 right-0 mt-2 mr-1 transition-transform text-muted-foreground hover:bg-background p-2 hover:shadow-lg rounded-full hover:scale-110 flex items-center gap-1"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth={1.5}
+                                stroke="currentColor"
+                                className="w-4 h-4"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M9 5l7 7-7 7"
+                                />
+                            </svg>
+                        </button>
+                    </Link>
                 </div>
             </div>
         </article>
