@@ -29,7 +29,7 @@ export default function UserButton({ className }: UserButtonProps) {
       <DropdownMenuContent>
         <DropdownMenuItem className="items-center justify-center">@{user?.username}</DropdownMenuItem>
         <DropdownMenuSeparator />
-        <Link href={'/users/${user.username}'}>
+        <Link href={'/users/' + user?.username} passHref>
           <DropdownMenuItem>
             <UserAvatar avatarUrl={user?.avatarUrl} size={500} className="w-[24px] mr-2" />
             Profile

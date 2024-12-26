@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/Button";
-import { Bell, Bookmark, Home, Mail } from "lucide-react";
+import { Bell, Book, Bookmark, Home, Mail } from "lucide-react";
 import Link from "next/link";
 
 interface MenuBarProps {
@@ -54,6 +54,18 @@ export default function MenuBar({ className }: MenuBarProps) {
         <Link href="/bookmarks">
           <Bookmark />
           <span className="hidden lg:inline">Bookmarks</span>
+        </Link>
+      </Button>
+
+      <Button
+        variant="ghost"
+        className="flex items-center justify-start gap-3"
+        title="Dictionary"
+        asChild
+      >
+        <Link href="/dictionary">
+          <Book />
+          <span className="hidden lg:inline">Dictionary</span>
         </Link>
       </Button>
     </div>

@@ -5,7 +5,6 @@ import Link from "next/link";
 import { PostData } from "../../lib/types";
 import UserAvatar from "../UserAvatar";
 import { formatRelativeDate } from "@/lib/utils";
-import { useSession } from "@/providers/SessionProvider";
 import PostActions from "./PostActions"; 
 import Linkify from "../Linkify";
 import UserTooltip from "../UserTooltip";
@@ -31,8 +30,6 @@ export default function Post({ post }: PostProps) {
     const displayedContent = isExpanded || !needsTruncation
         ? post.content
         : truncateAtWordBoundary(post.content, MAX_CONTENT_LENGTH);
-
-    const { user } = useSession();
 
     return (
         <article className="space-y-3 group/delete rounded-2xl bg-card p-3 lg:p-5 shadow-sm" >
