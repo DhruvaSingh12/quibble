@@ -58,8 +58,12 @@ export default function DictionaryPage() {
         });
         setHistoryIndex(0);
       }
-    } catch (err: any) {
-      setError(err.message || "An error occurred.");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message || "An error occurred.");
+      } else {
+        setError("An error occurred.");
+      }
     } finally {
       setLoading(false);
     }

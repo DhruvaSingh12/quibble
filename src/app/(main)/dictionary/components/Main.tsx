@@ -55,8 +55,12 @@ export default function Main({
       if (words.length > 15) {
         setShowMoreState("show-more");
       }
-    } catch (err: any) {
-      setRelatedError(err.message || "An error occurred while fetching related words.");
+    } catch (err) {
+      if (err instanceof Error) {
+        setRelatedError(err.message || "An error occurred while fetching related words.");
+      } else {
+        setRelatedError("An unknown error occurred while fetching related words.");
+      }
     } finally {
       setRelatedLoading(false);
     }
@@ -190,7 +194,7 @@ export default function Main({
                   </div>
                 ))}
                 <div className="mt-6 relative">
-                <h3 className="text-lg font-semibold text-foreground border-b">Related Words:</h3>
+                  <h3 className="text-lg font-semibold text-foreground border-b">Related Words:</h3>
                   {relatedLoading && <p className="text-sm text-muted-foreground">Loading...</p>}
                   {relatedError && <p className="text-sm text-destructive">{relatedError}</p>}
                   {!relatedLoading && visibleWords.length > 0 && (
