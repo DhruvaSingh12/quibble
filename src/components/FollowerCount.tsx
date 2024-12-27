@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import FollowerModal from "./FollowerModal";
-import { Follower } from "@/lib/types";
+import { FollowerInfo } from "@/lib/types";
+import { formatNumber } from "@/lib/utils";
 
 interface FollowerCountProps {
     userId: string;
@@ -11,7 +12,7 @@ interface FollowerCountProps {
 
 function FollowerCount({ userId, initialState }: FollowerCountProps) {
     const [data] = useState(initialState);
-    const [followerList, setFollowerList] = useState<Follower[]>([]);
+    const [followerList, setFollowerList] = useState<FollowerInfo[]>([]);
     const [showModal, setShowModal] = useState(false);
 
     const fetchFollowers = async () => {
@@ -37,10 +38,10 @@ function FollowerCount({ userId, initialState }: FollowerCountProps) {
     return (
         <div>
             <span
-                className="flex flex-row gap-2 cursor-pointer"
+                className="flex flex-row gap-1.5 hover:underline cursor-pointer"
                 onClick={openModal}
             >
-                <p className="font-semibold">{data.followers}</p>{" "}
+                <p className="font-semibold">{formatNumber(data.followers)}</p>
                 {data.followers === 1 ? "Follower" : "Followers"}
             </span>
             {showModal && (

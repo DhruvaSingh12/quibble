@@ -2,11 +2,10 @@ import React from "react";
 import UserAvatar from "./UserAvatar";
 import { FaX } from "react-icons/fa6";
 import Link from "next/link";
-import { Follower } from "@/lib/types";
-import FollowButton from "./FollowButton";
+import { FollowerInfo } from "@/lib/types";
 
 interface FollowerModalProps {
-    followers: Follower[];
+    followers: FollowerInfo[];
     onClose: () => void;
 }
 
@@ -20,50 +19,48 @@ function FollowerModal({ followers, onClose }: FollowerModalProps) {
                 >
                     <FaX size={14} />
                 </button>
-                <h2 className="text-lg font-semibold mb-4">
-                    Followers
-                </h2>
+                <h2 className="text-lg font-semibold mb-4">Followers</h2>
                 <ul className="space-y-4">
-                    {followers.map((follower, index) => (
-                        <li key={follower.id} className="flex relative items-center gap-4">
-                            <p className="text-lg mr-2">{index + 1}.</p>
-                            <Link href={`/users/${follower.username}`} target="_blank" rel="noopener noreferrer" title={`View ${follower.displayName}'s profile`}>
-                                <UserAvatar
-                                    avatarUrl={follower.avatarUrl}
-                                    size={500}
-                                    className="w-12 lg:w-16 h-12 lg:h-16 rounded-full"
-                                />
-                            </Link>
-                            <div>
+                    {followers.map((follower, index) => {
+                        if (!follower || !follower.id) {
+                            console.warn(`Invalid follower at index ${index}:`, follower);
+                            return null; 
+                        }
+
+                        return (
+                            <li key={follower.id} className="flex relative items-center gap-4">
+                                <p className="text-lg mr-2">{index + 1}.</p>
                                 <Link
                                     href={`/users/${follower.username}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="font-semibold text-lg hover:underline"
+                                    title={`View ${follower.displayName}'s profile`}
                                 >
-                                    {follower.displayName}
+                                    <UserAvatar
+                                        avatarUrl={follower.avatarUrl}
+                                        size={500}
+                                        className="w-12 lg:w-16 h-12 lg:h-16 rounded-full"
+                                    />
                                 </Link>
-                                <p className="text-sm text-muted-foreground">
-                                    @{follower.username}
-                                </p>
-                                {follower.bio && (
-                                    <p className="text-sm">
-                                        {follower.bio}
+                                <div>
+                                    <Link
+                                        href={`/users/${follower.username}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="font-semibold text-lg hover:underline"
+                                    >
+                                        {follower.displayName}
+                                    </Link>
+                                    <p className="text-sm text-muted-foreground">
+                                        @{follower.username}
                                     </p>
-                                )}
-                            </div>
-                            <div className="absolute right-4">
-                                <FollowButton
-                                    userId={follower.id}
-                                    initialState={{
-                                        isFollowedByUser: follower.isFollowing ?? false,
-                                        followers: follower.followersCount ?? 0,
-                                        followerList: follower.followerList || [],
-                                    }}
-                                />
-                            </div>
-                        </li>
-                    ))}
+                                    {follower.bio && (
+                                        <p className="text-sm">{follower.bio}</p>
+                                    )}
+                                </div>
+                            </li>
+                        );
+                    })}
                 </ul>
             </div>
         </div>

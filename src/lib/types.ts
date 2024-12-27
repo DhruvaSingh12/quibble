@@ -49,7 +49,13 @@ export interface PostsPage {
 export interface FollowerInfo {
     followers: number;
     isFollowedByUser: boolean;
-    followerList: {
+    id: string;
+    username: string;
+    displayName: string;
+    avatarUrl: string | null;
+    bio: string | null;
+    createdAt: string;
+    followerInfo?: { 
         id: string;
         username: string;
         name: string;
@@ -93,23 +99,4 @@ export interface DictionaryResponse {
         url: string;
     };
     sourceUrls: string[];
-}
-
-export interface Follower {
-    id: string;
-    username: string;
-    displayName: string;
-    avatarUrl: string | null;
-    bio: string | null;
-    createdAt: string;
-    isFollowing?: boolean; // Add this if it's part of your data
-    followersCount?: number; // Add this if it's part of your data
-    followerList?: { // Add this if it's part of your data
-        id: string;
-        username: string;
-        name: string;
-        avatarUrl: string | null;
-        bio: string | null;
-        joined: string;
-    }[];
 }

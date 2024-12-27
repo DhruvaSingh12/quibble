@@ -91,10 +91,16 @@ interface UserProfileProps {
 
 async function UserProfile({ user, loggedInUserId }: UserProfileProps) {
   const followerInfo: FollowerInfo = {
+    id: user.id,
+    username: user.username,
+    displayName: user.displayName,
+    avatarUrl: user.avatarUrl,
     followers: user._count.followers,
     isFollowedByUser: user.followers.some(
       ({ followerId }) => followerId === loggedInUserId,
     ),
+    bio: user.bio,
+    createdAt: user.createdAt.toISOString(),
   };
 
   return (
@@ -110,13 +116,13 @@ async function UserProfile({ user, loggedInUserId }: UserProfileProps) {
             <h1 className="text-3xl font-bold">{user.displayName}</h1>
             <div className="text-muted-foreground">@{user.username}</div>
           </div>
-          <div>Joined: {formatDate(user.createdAt, "MMM d, yyyy")}</div>
-          <div className="flex items-center gap-3">
-            <span>
-              Posts:{" "}
+          <div className="flex flex-row gap-1.5">Since: <p className="font-semibold">{formatDate(user.createdAt, "do MMM yyyy")}</p></div>
+          <div className="flex items-center gap-5">
+            <span className="flex flex-row gap-1.5">
               <span className="font-semibold">
                 {formatNumber(user._count.posts)}
               </span>
+              <p>{user._count.posts > 1 ? "Posts" : "Post"}</p>
             </span>
             <FollowerCount userId={user.id} initialState={followerInfo} />
           </div>

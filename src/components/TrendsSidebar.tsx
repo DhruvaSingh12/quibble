@@ -54,10 +54,10 @@ async function WhoToFollow() {
       <div>
         <div className="text-xl font-semibold mb-2">Who to follow</div>
         {usersToFollow.map((user) => (
-          <div key={user.id} className="flex items-center justify-between gap-5">
+          <div key={user.id} className="flex items-center justify-between">
             <Link
               href={`/users/${user.username}`}
-              className="flex items-center gap-3"
+              className="flex items-center gap-3 mb-2"
             >
               <UserAvatar avatarUrl={user.avatarUrl} className="flex-none" />
               <div>
@@ -72,10 +72,16 @@ async function WhoToFollow() {
             <FollowButton
               userId={user.id}
               initialState={{
+                id: user.id,
+                username: user.username,
+                displayName: user.displayName,
+                avatarUrl: user.avatarUrl,
                 followers: user._count.followers,
                 isFollowedByUser: user.followers.some(
                   ({ followerId }) => followerId === user.id,
                 ),
+                bio: user.bio,
+                createdAt: user.createdAt.toISOString(),
               }}
             />
           </div>

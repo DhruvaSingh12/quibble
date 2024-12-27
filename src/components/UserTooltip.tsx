@@ -1,26 +1,32 @@
 "use client";
 
-import { UserData } from "@/lib/types";
-import { useSession } from "@/providers/SessionProvider";
+import { FollowerInfo, UserData } from "@/lib/types";
 import { PropsWithChildren } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/Tooltip";
 import Link from "next/link";
 import UserAvatar from "./UserAvatar";
 import Linkify from "./Linkify";
-import FollowerCount from "./FollowerCount";
+import { useSession } from "@/providers/SessionProvider";
+import FollowButton from "./FollowButton";
 
 interface UserTooltipProps extends PropsWithChildren {
     user: UserData;
 }
 
-export default function UserTooltip({ user, children }: UserTooltipProps) {
+export default function UserTooltip({ children, user }: UserTooltipProps) {
     const { user: loggedInUser } = useSession();
 
-    const followerList = {
+    const followerList: FollowerInfo = {
+        id: user.id,
+        username: user.username,
+        displayName: user.displayName,
+        avatarUrl: user.avatarUrl,
         followers: user._count.followers,
         isFollowedByUser: !!user.followers.some(
-            ({ followerId }) => followerId === loggedInUser.id
+            ({ followerId }) => followerId === loggedInUser.id,
         ),
+        bio: user.bio,
+        createdAt: user.createdAt.toISOString(),
     };
 
     return (
@@ -35,6 +41,9 @@ export default function UserTooltip({ user, children }: UserTooltipProps) {
                             <Link href={`/users/${user.username}`}>
                                 <UserAvatar size={70} avatarUrl={user.avatarUrl} />
                             </Link>
+                            {loggedInUser.id !== user.id && (
+                                <FollowButton userId={user.id} initialState={followerList} />
+                            )}
                         </div>
                         <div>
                             <Link href={`/users/${user.username}`}>
@@ -53,7 +62,10 @@ export default function UserTooltip({ user, children }: UserTooltipProps) {
                                 </div>
                             </Linkify>
                         )}
-                        <FollowerCount userId={user.id} initialState={followerList} />
+                        <div className="text-sm flex flex-row gap-1.5 text-muted-foreground">
+                            <span className="font-semibold">{user._count.followers}</span>
+                            <p>{user._count.followers === 1 ? "follower" : "followers"}</p>
+                        </div>
                     </div>
                 </TooltipContent>
             </Tooltip>
