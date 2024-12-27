@@ -28,8 +28,8 @@ export default function FollowButton({
   const { mutate } = useMutation({
     mutationFn: () =>
       data.isFollowedByUser
-        ? kyInstance.delete(`/api/users/${userId}/followers`)
-        : kyInstance.post(`/api/users/${userId}/followers`),
+        ? kyInstance.delete(`/api/users/${userId}/followers`) 
+        : kyInstance.post(`/api/users/${userId}/followers`), 
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey });
 
@@ -40,6 +40,7 @@ export default function FollowButton({
           (previousState?.followers || 0) +
           (previousState?.isFollowedByUser ? -1 : 1),
         isFollowedByUser: !previousState?.isFollowedByUser,
+        followerList: previousState?.followerList || [],
       }));
 
       return { previousState };
@@ -54,17 +55,18 @@ export default function FollowButton({
     },
   });
 
+
   return (
     <Button
-    variant={data.isFollowedByUser ? "secondary" : "default"}
-    onClick={() => mutate()}
-    className="p-4 rounded-full"
-  >
-    {data.isFollowedByUser ? (
-      <UserMinus className="w-5 h-5" aria-label="Unfollow" />
-    ) : (
-      <UserPlus2Icon className="w-5 h-5" aria-label="Follow" />
-    )}
-  </Button>
+      variant={data.isFollowedByUser ? "secondary" : "default"}
+      onClick={() => mutate()}
+      className="p-4 rounded-full"
+    >
+      {data.isFollowedByUser ? (
+        <UserMinus className="w-5 h-5" aria-label="Unfollow" />
+      ) : (
+        <UserPlus2Icon className="w-5 h-5" aria-label="Follow" />
+      )}
+    </Button>
   );
 }

@@ -16,7 +16,7 @@ export function getUserDataSelect(loggedInUserId: string) {
                 followerId: true,
             },
         },
-        _count: { //count user props
+        _count: {
             select: {
                 posts: true,
                 followers: true,
@@ -49,6 +49,14 @@ export interface PostsPage {
 export interface FollowerInfo {
     followers: number;
     isFollowedByUser: boolean;
+    followerList: {
+        id: string;
+        username: string;
+        name: string;
+        avatarUrl: string | null;
+        bio: string | null;
+        joined: string;
+    }[];
 }
 
 export interface Phonetic {
@@ -56,34 +64,52 @@ export interface Phonetic {
     audio?: string;
     sourceUrl?: string;
     license?: {
-      name: string;
-      url: string;
+        name: string;
+        url: string;
     };
-  }
-  
-  export interface Definition {
+}
+
+export interface Definition {
     definition: string;
     synonyms: string[];
     antonyms: string[];
     example?: string;
-  }
-  
-  export interface Meaning {
+}
+
+export interface Meaning {
     partOfSpeech: string;
     definitions: Definition[];
     synonyms: string[];
     antonyms: string[];
-  }
-  
-  export interface DictionaryResponse {
+}
+
+export interface DictionaryResponse {
     word: string;
     phonetics: Phonetic[];
     meanings: Meaning[];
     origin?: string;
     license?: {
-      name: string;
-      url: string;
+        name: string;
+        url: string;
     };
     sourceUrls: string[];
-  }
-  
+}
+
+export interface Follower {
+    id: string;
+    username: string;
+    displayName: string;
+    avatarUrl: string | null;
+    bio: string | null;
+    createdAt: string;
+    isFollowing?: boolean; // Add this if it's part of your data
+    followersCount?: number; // Add this if it's part of your data
+    followerList?: { // Add this if it's part of your data
+        id: string;
+        username: string;
+        name: string;
+        avatarUrl: string | null;
+        bio: string | null;
+        joined: string;
+    }[];
+}

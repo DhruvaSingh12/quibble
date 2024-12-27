@@ -1,12 +1,11 @@
 "use client";
 
-import { FollowerInfo, UserData } from "@/lib/types";
+import { UserData } from "@/lib/types";
 import { useSession } from "@/providers/SessionProvider";
 import { PropsWithChildren } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/Tooltip";
 import Link from "next/link";
 import UserAvatar from "./UserAvatar";
-import FollowButton from "./FollowButton";
 import Linkify from "./Linkify";
 import FollowerCount from "./FollowerCount";
 
@@ -17,13 +16,12 @@ interface UserTooltipProps extends PropsWithChildren {
 export default function UserTooltip({ user, children }: UserTooltipProps) {
     const { user: loggedInUser } = useSession();
 
-    const followerState: FollowerInfo = {
+    const followerList = {
         followers: user._count.followers,
         isFollowedByUser: !!user.followers.some(
             ({ followerId }) => followerId === loggedInUser.id
-        )
-    }
-
+        ),
+    };
 
     return (
         <TooltipProvider>
@@ -31,15 +29,12 @@ export default function UserTooltip({ user, children }: UserTooltipProps) {
                 <TooltipTrigger asChild>
                     {children}
                 </TooltipTrigger>
-                <TooltipContent>
+                <TooltipContent role="tooltip" aria-label={`Details about ${user.displayName}`}>
                     <div className="flex max-w-80 flex-col gap-3 break-words px-1 py-2.5 md:min-w-52">
                         <div className="flex items-center justify-between gap-2">
                             <Link href={`/users/${user.username}`}>
                                 <UserAvatar size={70} avatarUrl={user.avatarUrl} />
                             </Link>
-                            {loggedInUser.id !== user.id && (
-                                <FollowButton userId={user.id} initialState={followerState} />
-                            )}
                         </div>
                         <div>
                             <Link href={`/users/${user.username}`}>
@@ -58,7 +53,7 @@ export default function UserTooltip({ user, children }: UserTooltipProps) {
                                 </div>
                             </Linkify>
                         )}
-                        <FollowerCount userId={user.id} initialState={followerState} />
+                        <FollowerCount userId={user.id} initialState={followerList} />
                     </div>
                 </TooltipContent>
             </Tooltip>
