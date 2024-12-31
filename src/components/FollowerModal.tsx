@@ -12,7 +12,7 @@ interface FollowerModalProps {
 function FollowerModal({ followers, onClose }: FollowerModalProps) {
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-muted relative rounded-lg p-6 w-96 max-h-[80vh] overflow-y-auto">
+            <div className="bg-muted relative rounded-lg p-6 w-[330px] lg:w-96 max-h-[80vh] overflow-y-auto">
                 <button
                     className="absolute top-4 right-4 hover:bg-black/20 rounded-full p-2 transition-transform duration-500"
                     onClick={onClose}

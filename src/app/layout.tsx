@@ -7,6 +7,9 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Toaster } from "@/components/ui/Toaster";
 import React from "react";
 import ReactQueryProvider from "@/providers/ReactQueryProvider";
+import { NextSSRPlugin} from "@uploadthing/react/next-ssr-plugin";
+import { fileRouter } from "./api/uploadthing/core";
+import { extractRouterConfig } from "uploadthing/server";
 
 const font = Figtree({ subsets: ["latin"] });
 
@@ -28,6 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning={true}>
       <body className={`${font.className} w-full h-full`}>
+        <NextSSRPlugin routerConfig={extractRouterConfig(fileRouter)} />
         <ReactQueryProvider>
           <ThemeProvider
             attribute="class"

@@ -1,4 +1,6 @@
+import { User } from 'lucide-react';
 import { LinkIt } from 'react-linkify-it';
+import UserLinkWithTooltip from './UserLinkWithTooltip';
 
 interface LinkifyProps {
     children: React.ReactNode;
@@ -44,13 +46,9 @@ function LinkifyUsername({ children }: LinkifyProps) {
         <LinkIt
             regex={/(@[a-zA-Z0-9_-]+)\b/}
             component={(match, key) => (
-                <span
-                    key={key}
-                    className="text-primary hover:underline cursor-pointer"
-                    onClick={() => window.location.href = `/users/${match.slice(1)}`}
-                >
+                <UserLinkWithTooltip key={key} username={match.slice(1)}>
                     {match}
-                </span>
+                </UserLinkWithTooltip>
             )}
         >
             {children}

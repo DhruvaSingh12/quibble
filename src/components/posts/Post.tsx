@@ -65,9 +65,9 @@ export default function Post({ post }: PostProps) {
 
                 <div className="relative">
                     <Linkify>
-                        <p className="text-[16px] whitespace-pre-line break-words text-justify text-muted-foreground">
+                        <div className="text-[16px] whitespace-pre-line break-words text-justify text-muted-foreground">
                             {displayedContent}
-                        </p>
+                        </div>
                     </Linkify>
                     {needsTruncation && (
                         <button

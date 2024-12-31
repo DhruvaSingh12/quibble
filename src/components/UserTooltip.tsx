@@ -16,25 +16,26 @@ interface UserTooltipProps extends PropsWithChildren {
 export default function UserTooltip({ children, user }: UserTooltipProps) {
     const { user: loggedInUser } = useSession();
 
+    if (!user) {
+        return <div>Loading...</div>;
+    }
+
     const followerList: FollowerInfo = {
         id: user.id,
         username: user.username,
         displayName: user.displayName,
         avatarUrl: user.avatarUrl,
-        followers: user._count.followers,
-        isFollowedByUser: !!user.followers.some(
+        followers: user._count?.followers ?? 0,
+        isFollowedByUser: !!user.followers?.some(
             ({ followerId }) => followerId === loggedInUser.id,
         ),
         bio: user.bio,
-        createdAt: user.createdAt.toISOString(),
     };
 
     return (
         <TooltipProvider>
             <Tooltip>
-                <TooltipTrigger asChild>
-                    {children}
-                </TooltipTrigger>
+                <TooltipTrigger asChild>{children}</TooltipTrigger>
                 <TooltipContent role="tooltip" aria-label={`Details about ${user.displayName}`}>
                     <div className="flex max-w-80 flex-col gap-3 break-words px-1 py-2.5 md:min-w-52">
                         <div className="flex items-center justify-between gap-2">
@@ -51,20 +52,16 @@ export default function UserTooltip({ children, user }: UserTooltipProps) {
                                     {user.displayName}
                                 </div>
                             </Link>
-                            <p className="text-sm text-muted-foreground">
-                                @{user.username}
-                            </p>
+                            <p className="text-sm text-muted-foreground">@{user.username}</p>
                         </div>
                         {user.bio && (
                             <Linkify>
-                                <div className="line-clamp-4 whitespace-pre-line">
-                                    {user.bio}
-                                </div>
+                                <div className="line-clamp-4 whitespace-pre-line">{user.bio}</div>
                             </Linkify>
                         )}
                         <div className="text-sm flex flex-row gap-1.5 text-muted-foreground">
-                            <span className="font-semibold">{user._count.followers}</span>
-                            <p>{user._count.followers === 1 ? "follower" : "followers"}</p>
+                            <span className="font-semibold">{user._count?.followers ?? 0}</span>
+                            <p>{(user._count?.followers ?? 0) === 1 ? "follower" : "followers"}</p>
                         </div>
                     </div>
                 </TooltipContent>

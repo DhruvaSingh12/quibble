@@ -54,7 +54,6 @@ export interface FollowerInfo {
     displayName: string;
     avatarUrl: string | null;
     bio: string | null;
-    createdAt: string;
     followerInfo?: { 
         id: string;
         username: string;

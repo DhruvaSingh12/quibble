@@ -2,7 +2,7 @@
 
 import {
   FaEnvelopeOpenText,
-  FaFacebook,
+  FaInstagram,
   FaLinkedin,
   FaWhatsapp,
 } from "react-icons/fa";
@@ -26,8 +26,8 @@ const ShareModal: React.FC<ShareModalProps> = ({ pageLink, onClose }) => {
   const handleShareClick = (platform: string) => {
     let shareUrl = "";
     switch (platform) {
-      case "facebook":
-        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${pageLink}`;
+      case "instagram":
+        shareUrl = `https://www.instagram.com/`;
         break;
       case "twitter":
         shareUrl = `https://twitter.com/intent/tweet?url=${pageLink}`;
@@ -66,14 +66,14 @@ const ShareModal: React.FC<ShareModalProps> = ({ pageLink, onClose }) => {
         <h2 className="text-xl text-foreground font-semibold mb-6">Share via</h2>
 
         <div className="grid grid-cols-3 lg:grid-cols-5 items-center justify-center gap-4 mb-6">
-          {/* Facebook */}
-          <div
-            onClick={() => handleShareClick("facebook")}
+          {/* Instagram */}
+            <div
+            onClick={() => handleShareClick("instagram")}
             className="flex flex-col items-center cursor-pointer p-4 rounded-lg hover:bg-muted transition"
-          >
-            <FaFacebook className="w-8 h-8 text-blue-700" />
-            <span className="text-sm mt-2">Facebook</span>
-          </div>
+            >
+            <FaInstagram size={40} className="text-pink-600" />
+            <span className="text-sm mt-2">Instagram</span>
+            </div>
 
           {/* Twitter */}
           <div
