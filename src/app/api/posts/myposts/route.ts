@@ -3,9 +3,12 @@ import prisma from "@/lib/prisma";
 import { getPostDataInclude, PostsPage } from "@/lib/types";
 import { NextRequest } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   try {
-    const cursor = req.nextUrl.searchParams.get("cursor") || undefined;
+    const url = new URL(req.url);
+    const cursor = url.searchParams.get("cursor") || undefined;
     const pageSize = 12;
     const { user } = await validateRequest();
 
