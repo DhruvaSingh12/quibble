@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -37,8 +37,9 @@
     "ky": "^1.7.4",
     "lucia": "^3.2.2",
     "lucide-react": "^0.468.0",
-    "next": "15.1.1",
+    "next": "^15.3.1",
     "next-themes": "^0.4.4",
+    "node-fetch": "^3.3.2",
     "react": "^18.2.0",
     "react-cropper": "^2.3.3",
     "react-dom": "^18.2.0",
@@ -53,6 +54,7 @@
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "uploadthing": "^7.4.1",
+    "youtube-transcript": "^1.2.1",
     "zod": "^3.24.1"
   },
   "devDependencies": {

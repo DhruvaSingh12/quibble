@@ -1,4 +1,3 @@
-import { User } from 'lucide-react';
 import { LinkIt } from 'react-linkify-it';
 import UserLinkWithTooltip from './UserLinkWithTooltip';
 

@@ -84,7 +84,6 @@ async function WhoToFollow() {
                   ({ followerId }) => followerId === user.id,
                 ),
                 bio: user.bio,
-                createdAt: user.createdAt.toISOString(),
               }}
             />
           </div>

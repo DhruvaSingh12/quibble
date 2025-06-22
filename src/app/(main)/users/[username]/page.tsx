@@ -1,7 +1,6 @@
 import { validateRequest } from "@/auth";
 import FollowButton from "@/components/FollowButton";
 import FollowerCount from "@/components/FollowerCount";
-import { Button } from "@/components/ui/Button";
 import UserAvatar from "@/components/UserAvatar";
 import prisma from "@/lib/prisma";
 import { FollowerInfo, getUserDataSelect, UserData } from "@/lib/types";
@@ -15,7 +14,7 @@ import Linkify from "@/components/Linkify";
 import EditProfileButton from "./components/EditProfileButton";
 
 interface PageProps {
-  params: { username: string };
+  params: Promise<{ username: string }>;
 }
 
 const getUser = cache(async (username: string, loggedInUserId: string) => {
@@ -34,9 +33,8 @@ const getUser = cache(async (username: string, loggedInUserId: string) => {
   return user;
 });
 
-export async function generateMetadata({
-  params,
-}: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  // params is a Promise, so await it
   const { username } = await params;
 
   const { user: loggedInUser } = await validateRequest();
@@ -50,8 +48,7 @@ export async function generateMetadata({
   };
 }
 
-
-export default async function Page({ params }: { params: { username: string } }) {
+export default async function Page({ params }: PageProps) {
   const { username } = await params;
 
   const { user: loggedInUser } = await validateRequest();
@@ -76,7 +73,6 @@ export default async function Page({ params }: { params: { username: string } })
               {user.displayName}&apos;s Posts
             </h2>
           </div>
-
         </div>
 
         <UserPosts userId={user.id} />
@@ -116,7 +112,9 @@ async function UserProfile({ user, loggedInUserId }: UserProfileProps) {
             <h1 className="text-3xl font-bold">{user.displayName}</h1>
             <div className="text-muted-foreground">@{user.username}</div>
           </div>
-          <div className="flex flex-row gap-1.5">Since: <p className="font-semibold">{formatDate(user.createdAt, "do MMM yyyy")}</p></div>
+          <div className="flex flex-row gap-1.5">
+            Since: <p className="font-semibold">{formatDate(user.createdAt, "do MMM yyyy")}</p>
+          </div>
           <div className="flex items-center gap-5">
             <span className="flex flex-row gap-1.5">
               <span className="font-semibold">

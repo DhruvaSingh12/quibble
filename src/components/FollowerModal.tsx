@@ -54,9 +54,6 @@ function FollowerModal({ followers, onClose }: FollowerModalProps) {
                                     <p className="text-sm text-muted-foreground">
                                         @{follower.username}
                                     </p>
-                                    {follower.bio && (
-                                        <p className="text-sm">{follower.bio}</p>
-                                    )}
                                 </div>
                             </li>
                         );
