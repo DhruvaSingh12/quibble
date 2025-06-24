@@ -1,14 +1,14 @@
 "use client";
 
 import { useSession } from "@/providers/SessionProvider";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuPortal, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from "./ui/DropdownMenu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/DropdownMenu";
 import UserAvatar from "./UserAvatar";
 import Link from "next/link";
 import { logout } from "@/app/(auth)/actions";
-import { Check, LogOutIcon, MonitorIcon } from "lucide-react";
+import { LogOutIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useTheme } from "next-themes";
 import { useQueryClient } from "@tanstack/react-query";
+import { ThemeToggleButton } from "./ToggleButton";
 
 interface UserButtonProps {
   className?: string;
@@ -16,7 +16,6 @@ interface UserButtonProps {
 
 export default function UserButton({ className }: UserButtonProps) {
   const { user } = useSession();
-  const { theme, setTheme } = useTheme();
   const queryClient = useQueryClient();
 
   return (
@@ -35,18 +34,12 @@ export default function UserButton({ className }: UserButtonProps) {
             Profile
           </DropdownMenuItem>
         </Link>
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
-            <MonitorIcon size={24} className="mr-2 text-muted-foreground" />Theme
-          </DropdownMenuSubTrigger>
-          <DropdownMenuPortal>
-            <DropdownMenuSubContent>
-              <DropdownMenuItem onClick={() => setTheme("system")}>System Default {theme === "system" && <Check className="ms-2 size-4" />}</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("light")}>Light {theme === "light" && <Check className="ms-2 size-4" />}</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("dark")}>Dark {theme === "dark" && <Check className="ms-2 size-4" />}</DropdownMenuItem>
-            </DropdownMenuSubContent>
-          </DropdownMenuPortal>
-        </DropdownMenuSub>
+        <DropdownMenuItem asChild>
+          <div className="flex items-center justify-between w-full cursor-pointer">
+            <span>Theme</span>
+            <ThemeToggleButton />
+          </div>
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => {
           queryClient.clear();
           logout();

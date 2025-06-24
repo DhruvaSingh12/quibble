@@ -8,7 +8,7 @@ import MyPosts from './components/MyPosts';
 export default function Home() {
 
   return (
-    <div className="w-full p-3 lg:p-5 mt-[3px] lg:mt-[8px] flex-col rounded-2xl items-center justify-center space-y-5 bg-accent">
+    <div className="w-full mt-[3px] lg:mt-[8px] flex-col rounded-2xl items-center justify-center space-y-5">
       <PostEditor />
       <Tabs defaultValue='for-you'>
         <TabsList>

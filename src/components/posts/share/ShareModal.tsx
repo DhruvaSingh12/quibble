@@ -2,132 +2,162 @@
 
 import {
   FaEnvelopeOpenText,
-  FaInstagram,
   FaLinkedin,
   FaWhatsapp,
+  FaCopy,
+  FaCheck,
 } from "react-icons/fa";
 import { FaX, FaXTwitter } from "react-icons/fa6";
-import { useState } from "react";
-import ToastNotification from "./ToastNotification";
+import { useState, useEffect } from "react";
 
 interface ShareModalProps {
   pageLink: string;
   onClose: () => void;
 }
 
+interface SharePlatform {
+  id: string;
+  name: string;
+  icon: React.ReactNode;
+  color: string;
+}
+
 const ShareModal: React.FC<ShareModalProps> = ({ pageLink, onClose }) => {
-  const [isToastOpen, setIsToastOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(pageLink);
-    setIsToastOpen(true);
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
+  const sharePlatforms: SharePlatform[] = [
+    {
+      id: "twitter",
+      name: "Twitter",
+      icon: <FaXTwitter className="h-6 w-6" />,
+      color: "text-foreground",
+    },
+    {
+      id: "linkedin",
+      name: "LinkedIn",
+      icon: <FaLinkedin className="h-7 w-7" />,
+      color: "text-primary",
+    },
+    {
+      id: "whatsapp",
+      name: "WhatsApp",
+      icon: <FaWhatsapp className="h-7 w-7" />,
+      color: "text-accent-foreground",
+    },
+    {
+      id: "gmail",
+      name: "Email",
+      icon: <FaEnvelopeOpenText className="h-6 w-6" />,
+      color: "text-muted-foreground",
+    },
+    {
+      id: "copy",
+      name: "Copy link",
+      icon: <FaCopy className="h-5 w-5" />,
+      color: "text-card-foreground",
+    },
+  ];
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(pageLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy link:", err);
+    }
   };
-
   const handleShareClick = (platform: string) => {
+    if (platform === "copy") {
+      handleCopyLink();
+      return;
+    }
+
     let shareUrl = "";
+    const encodedLink = encodeURIComponent(pageLink);
+
     switch (platform) {
-      case "instagram":
-        shareUrl = `https://www.instagram.com/`;
-        break;
       case "twitter":
-        shareUrl = `https://twitter.com/intent/tweet?url=${pageLink}`;
+        shareUrl = `https://twitter.com/intent/tweet?url=${encodedLink}&text=Check%20this%20out!`;
         break;
       case "linkedin":
-        shareUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${pageLink}`;
+        shareUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodedLink}&title=Check%20this%20out`;
         break;
       case "whatsapp":
-        shareUrl = `https://wa.me/?text=${pageLink}`;
+        shareUrl = `https://wa.me/?text=Check%20this%20out:%20${encodedLink}`;
         break;
       case "gmail":
-        shareUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=&su=Check%20this%20out&body=${encodeURIComponent(
-          pageLink
-        )}`;
+        shareUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=&su=Check%20this%20out&body=I%20thought%20you%20might%20find%20this%20interesting:%20${encodedLink}`;
         break;
       default:
         break;
     }
 
     if (shareUrl) {
-      window.open(shareUrl, "_blank");
+      window.open(shareUrl, "_blank", "noopener,noreferrer");
     }
 
     onClose();
   };
 
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      setIsVisible(false);
+      setTimeout(onClose, 200);
+    }
+  };
+
+  const handleClose = () => {
+    setIsVisible(false);
+    setTimeout(onClose, 200);
+  };
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-70 px-6">
-      <div className="bg-background w-[300px] lg:w-[500px] text-card-foreground rounded-lg shadow-lg p-6 relative">
-        <button
-          className="absolute top-6 right-6 p-2 hover:bg-neutral-500/35 rounded-full text-muted-foreground hover:text-foreground"
-          onClick={onClose}
-        >
-          <FaX size={16} />
-        </button>
-        <h2 className="text-xl text-foreground font-semibold mb-6">Share via</h2>
-
-        <div className="grid grid-cols-3 lg:grid-cols-5 items-center justify-center gap-4 mb-6">
-          {/* Instagram */}
-            <div
-            onClick={() => handleShareClick("instagram")}
-            className="flex flex-col items-center cursor-pointer p-4 rounded-lg hover:bg-muted transition"
-            >
-            <FaInstagram size={40} className="text-pink-600" />
-            <span className="text-sm mt-2">Instagram</span>
-            </div>
-
-          {/* Twitter */}
-          <div
-            onClick={() => handleShareClick("twitter")}
-            className="flex flex-col items-center cursor-pointer p-4 rounded-lg hover:bg-muted transition"
+    <div
+      className={`fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm transition-all duration-300 ${
+        isVisible ? "opacity-100" : "opacity-0"
+      }`}
+      onClick={handleBackdropClick}
+    >
+      <div
+        className={`mx-0 w-full max-w-sm rounded-t-3xl bg-card shadow-2xl transition-all duration-300 ${
+          isVisible ? "translate-y-0" : "translate-y-full"
+        }`}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 pb-4">
+          <h2 className="text-lg pl-4 font-medium text-card-foreground">Share</h2>
+          <button
+            onClick={handleClose}
+            className="rounded-full hover:bg-muted p-2 text-muted-foreground"
           >
-            <FaXTwitter className="w-8 h-8 text-foreground" />
-            <span className="text-sm mt-2">Twitter</span>
-          </div>
-
-          {/* LinkedIn */}
-          <div
-            onClick={() => handleShareClick("linkedin")}
-            className="flex flex-col items-center cursor-pointer p-4 rounded-lg hover:bg-muted transition"
-          >
-            <FaLinkedin className="w-8 h-8 text-blue-600" />
-            <span className="text-sm mt-2">LinkedIn</span>
-          </div>
-
-          {/* WhatsApp */}
-          <div
-            onClick={() => handleShareClick("whatsapp")}
-            className="flex flex-col items-center cursor-pointer p-4 rounded-lg hover:bg-muted transition"
-          >
-            <FaWhatsapp className="w-8 h-8 text-green-600" />
-            <span className="text-sm mt-2">WhatsApp</span>
-          </div>
-
-          {/* Gmail */}
-          <div
-            onClick={() => handleShareClick("gmail")}
-            className="flex flex-col items-center cursor-pointer p-4 rounded-lg hover:bg-muted transition"
-          >
-            <FaEnvelopeOpenText className="w-8 h-8 text-primary" />
-            <span className="text-sm mt-2">Mail</span>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-center">
-          <button onClick={handleCopyLink} className="w-full">
-            <div className="bg-muted w-[260px] lg:w-[440px] text-muted-foreground hover:underline rounded-lg px-6 py-2 overflow-hidden whitespace-nowrap text-ellipsis">
-              {pageLink}
-            </div>
+            <FaX className="h-4 w-4" />
           </button>
         </div>
-      </div>
 
-      {isToastOpen && (
-        <ToastNotification
-          title="Link Copied"
-          description="The link has been copied to your clipboard."
-          onClose={() => setIsToastOpen(false)}
-        />
-      )}
+        {/* Share Options */}
+        <div className="px-2 pb-8">
+          <div className="grid grid-cols-3 gap-2">
+            {sharePlatforms.map((platform) => (
+              <button
+                key={platform.id}
+                onClick={() => handleShareClick(platform.id)}
+                className={`flex flex-col hover:bg-muted items-center justify-center rounded-2xl p-3 transition-colors ${platform.color} relative`}
+              >
+                <div className="flex-shrink-0">{platform.icon}</div>
+                {platform.id === "copy" && copied && (
+                  <div className="absolute right-2 top-2">
+                    <FaCheck className="h-3 w-3 text-primary" />
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
