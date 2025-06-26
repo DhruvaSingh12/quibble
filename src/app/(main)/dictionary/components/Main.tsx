@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { DictionaryResponse } from "@/lib/types";
 import ErrorMessage from "./ErrorMessage";
 import DictionaryLoadingSkeleton from "./LoadingSkeleton";
@@ -10,8 +10,8 @@ interface MainProps {
   data: DictionaryResponse | null;
   error: string;
   loading: boolean;
-  activeTab: "phonetics" | "meanings" | "synonyms" | "license";
-  handleTabClick: (tab: "phonetics" | "meanings" | "synonyms" | "license") => void;
+  activeTab: "meanings" | "synonyms";
+  handleTabClick: (tab: "meanings" | "synonyms") => void;
   handleSynonymAntonymClick: (word: string) => void;
 }
 
@@ -29,8 +29,30 @@ export default function Main({
   const [relatedError, setRelatedError] = useState("");
   const [showMoreState, setShowMoreState] = useState<"show-more" | "show-less">("show-more");
 
+  // Memoize combined synonyms and antonyms to avoid redundant processing
+  const combinedSynonymsAntonyms = useMemo(() => {
+    if (!data) return { synonyms: [], antonyms: [] };
+    
+    const allSynonyms = new Set<string>();
+    const allAntonyms = new Set<string>();
+    
+    data.meanings.forEach(meaning => {
+      meaning.synonyms.forEach(syn => allSynonyms.add(syn));
+      meaning.antonyms.forEach(ant => allAntonyms.add(ant));
+      meaning.definitions.forEach(def => {
+        def.synonyms.forEach(syn => allSynonyms.add(syn));
+        def.antonyms.forEach(ant => allAntonyms.add(ant));
+      });
+    });
+    
+    return {
+      synonyms: Array.from(allSynonyms),
+      antonyms: Array.from(allAntonyms)
+    };
+  }, [data]);
+
   useEffect(() => {
-    if (activeTab === "synonyms" && data?.word) {
+    if (activeTab === "synonyms" && data?.word && relatedWords.length === 0) {
       fetchRelatedWords(data.word);
     }
   }, [activeTab, data]);
@@ -45,10 +67,15 @@ export default function Main({
     try {
       const response = await fetch(`https://api.datamuse.com/words?ml=${word}&max=30`);
       if (!response.ok) {
-        throw new Error("Failed to fetch related words.");
+        throw new Error("Unable to fetch related words at this time.");
       }
       const result = await response.json();
-      const words = result.map((item: { word: string }) => item.word);
+      const words = result.map((item: { word: string }) => item.word).filter((w: string) => w !== word);
+
+      if (words.length === 0) {
+        setRelatedError("No related words found.");
+        return;
+      }
 
       setRelatedWords(words);
       setVisibleWords(words.slice(0, 15));
@@ -57,9 +84,9 @@ export default function Main({
       }
     } catch (err) {
       if (err instanceof Error) {
-        setRelatedError(err.message || "An error occurred while fetching related words.");
+        setRelatedError(err.message);
       } else {
-        setRelatedError("An unknown error occurred while fetching related words.");
+        setRelatedError("Failed to load related words.");
       }
     } finally {
       setRelatedLoading(false);
@@ -77,185 +104,137 @@ export default function Main({
   };
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full">
       {error && <ErrorMessage message={error} />}
       {loading && <DictionaryLoadingSkeleton />}
 
       {data && (
-        <div className="bg-card p-4 lg:p-7 rounded-2xl shadow-lg w-full h-full">
-          <h1 className="text-3xl font-bold text-center mb-5 text-foreground">{data.word}</h1>
-
-          {/* Tabs */}
-          <Tabs value={activeTab} onValueChange={(value) => handleTabClick(value as "phonetics" | "meanings" | "synonyms" | "license")}>
-            <TabsList className="flex flex-wrap bg-background">
-              <TabsTrigger value="phonetics">Phonetics</TabsTrigger>
-              <TabsTrigger value="meanings">Meanings</TabsTrigger>
-              <TabsTrigger value="synonyms">Synonyms & Antonyms</TabsTrigger>
-              <TabsTrigger value="license">License & Source</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="phonetics">
-              <div className="mb-6 h-full">
-                <h3 className="text-lg font-semibold text-foreground border-b">Phonetics:</h3>
-                {data.phonetics.map((phonetic, index) => (
-                  <div key={index} className="mt-4 flex items-center justify-between">
-                    {phonetic.text && (
-                      <div className="text-muted-foreground flex flex-row gap-2 items-center">
-                        <span className="font-semibold mr-1">{index + 1}.</span>
-                        <p className="font-semibold">Text:</p> {phonetic.text}
-                      </div>
-                    )}
-                    {phonetic.audio && (
-                      <audio controls className="ml-4">
-                        <source src={phonetic.audio} type="audio/mpeg" />
-                        Your browser does not support the audio element.
-                      </audio>
-                    )}
-                  </div>
-                ))}
+        <div className="bg-card rounded-xl border w-full">
+          {/* Header Section */}
+          <div className="p-4 sm:p-6 border-b">
+            <div className="flex items-center justify-between">
+              <div className="min-w-0 flex-1">
+                <h1 className="text-xl sm:text-2xl font-semibold text-foreground truncate">{data.word}</h1>
+                {data.phonetics.length > 0 && data.phonetics[0].text && (
+                  <p className="text-muted-foreground mt-1 text-sm sm:text-base">/{data.phonetics[0].text}/</p>
+                )}
               </div>
+              {data.phonetics.length > 0 && data.phonetics[0].audio && (
+                <div className="ml-4 flex-shrink-0">
+                  <audio controls className="h-8 w-20 sm:w-auto">
+                    <source src={data.phonetics[0].audio} type="audio/mpeg" />
+                  </audio>
+                </div>
+              )}
+            </div>
+          </div>
+          {/* Content Section */}
+          <div className="p-4 sm:p-6">
+            <Tabs value={activeTab} onValueChange={(value) => handleTabClick(value as "meanings" | "synonyms")}>
+              <TabsList className="w-full bg-muted/30 mb-4 sm:mb-6">
+                <TabsTrigger value="meanings" className="flex-1 text-sm sm:text-base">Definitions</TabsTrigger>
+                <TabsTrigger value="synonyms" className="flex-1 text-sm sm:text-base">Related</TabsTrigger>
+              </TabsList>
+
+            <TabsContent value="meanings" className="space-y-3 sm:space-y-4">
+              {data.meanings.slice(0, 2).map((meaning, index) => (
+                <div key={index} className="space-y-2 sm:space-y-3">
+                  <h3 className="text-xs sm:text-sm font-medium text-primary uppercase tracking-wide">
+                    {meaning.partOfSpeech}
+                  </h3>
+                  <div className="space-y-2">
+                    {meaning.definitions.slice(0, 2).map((definition, idx) => (
+                      <div key={idx} className="group">
+                        <p className="text-sm sm:text-base text-foreground leading-relaxed">
+                          {meaning.definitions.length > 1 && (
+                            <span className="text-muted-foreground mr-2 text-xs sm:text-sm">{idx + 1}.</span>
+                          )}
+                          {definition.definition}
+                        </p>
+                        {definition.example && (
+                          <p className="text-xs sm:text-sm text-muted-foreground italic mt-1 pl-3 sm:pl-4 border-l-2 border-muted">
+                            "{definition.example}"
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </TabsContent>
 
-            <TabsContent value="meanings">
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-foreground border-b">Meanings:</h3>
-                {data.meanings.map((meaning, index) => (
-                  <div key={index} className="mt-4">
-                    <h4 className="text-md font-bold text-foreground underline">{meaning.partOfSpeech}</h4>
-                    <div className="mt-2">
-                      {meaning.definitions.length > 0 && (
-                        <p className="text-muted-foreground font-semibold">
-                          {meaning.definitions.length > 1 ? "Definitions:" : "Definition:"}
-                        </p>
-                      )}
-                      <div className="mt-2">
-                        {meaning.definitions.map((definition, idx) => (
-                          <div key={idx} className="border rounded-lg p-4 mb-2">
-                            <p className="text-muted-foreground">
-                              {meaning.definitions.length > 1 && (
-                                <span className="font-semibold mr-1">{idx + 1}.</span>
-                              )}
-                              {definition.definition}
-                            </p>
-                            {definition.example && (
-                              <p className="mt-2 text-sm text-muted-foreground">
-                                <span className="font-semibold">Example:</span> {definition.example}
-                              </p>
-                            )}
-                          </div>
+            <TabsContent value="synonyms" className="space-y-3 sm:space-y-4">
+              {/* Dictionary Synonyms & Antonyms - More Compact */}
+              {(combinedSynonymsAntonyms.synonyms.length > 0 || combinedSynonymsAntonyms.antonyms.length > 0) && (
+                <div className="space-y-3">
+                  {combinedSynonymsAntonyms.synonyms.length > 0 && (
+                    <div>
+                      <h3 className="text-xs sm:text-sm font-medium text-foreground mb-2">Similar</h3>
+                      <div className="flex flex-wrap gap-1 sm:gap-1.5">
+                        {combinedSynonymsAntonyms.synonyms.slice(0, 12).map((synonym, idx) => (
+                          <button
+                            key={idx}
+                            className="px-2 sm:px-2.5 py-1 rounded-md text-xs bg-primary/5 text-primary hover:bg-primary/10 transition-colors border border-primary/10"
+                            onClick={() => handleSynonymAntonymClick(synonym)}
+                          >
+                            {synonym}
+                          </button>
                         ))}
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="synonyms">
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-foreground border-b">Synonyms & Antonyms:</h3>
-                {data.meanings.map((meaning, index) => (
-                  <div key={index} className="mt-4">
-                    <h4 className="text-md font-bold text-foreground underline">{meaning.partOfSpeech}</h4>
-                    <div className="mt-2">
-                      {meaning.synonyms.length > 0 && (
-                        <div>
-                          <p className="font-semibold text-foreground">Synonyms:</p>
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {meaning.synonyms.map((synonym, idx) => (
-                              <span
-                                key={idx}
-                                className="bg-background px-3 py-1 rounded-full text-sm text-muted-foreground hover:bg-secondary cursor-pointer"
-                                onClick={() => handleSynonymAntonymClick(synonym)}
-                              >
-                                {synonym}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      {meaning.antonyms.length > 0 && (
-                        <div className="mt-4">
-                          <p className="font-semibold text-foreground">Antonyms:</p>
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {meaning.antonyms.map((antonym, idx) => (
-                              <span
-                                key={idx}
-                                className="bg-background px-3 py-1 rounded-full text-sm text-muted-foreground hover:bg-secondary cursor-pointer"
-                                onClick={() => handleSynonymAntonymClick(antonym)}
-                              >
-                                {antonym}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-                <div className="mt-6 relative">
-                  <h3 className="text-lg font-semibold text-foreground border-b">Related Words:</h3>
-                  {relatedLoading && <p className="text-sm text-muted-foreground">Loading...</p>}
-                  {relatedError && <p className="text-sm text-destructive">{relatedError}</p>}
-                  {!relatedLoading && visibleWords.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {visibleWords.map((word, idx) => (
-                        <span
-                          key={idx}
-                          className="bg-background px-3 py-1 rounded-full text-sm text-muted-foreground hover:bg-secondary cursor-pointer"
-                          onClick={() => handleSynonymAntonymClick(word)}
-                        >
-                          {word}
-                        </span>
-                      ))}
-                    </div>
                   )}
-                  {relatedWords.length > 15 && (
-                    <button
-                      className="text-primary absolute right-2 hover:underline mt-2 block text-sm"
-                      onClick={handleShowMoreClick}
-                    >
-                      {showMoreState === "show-more" ? "Show More" : "Show Less"}
-                    </button>
+                  {combinedSynonymsAntonyms.antonyms.length > 0 && (
+                    <div>
+                      <h3 className="text-xs sm:text-sm font-medium text-foreground mb-2">Opposite</h3>
+                      <div className="flex flex-wrap gap-1 sm:gap-1.5">
+                        {combinedSynonymsAntonyms.antonyms.slice(0, 8).map((antonym, idx) => (
+                          <button
+                            key={idx}
+                            className="px-2 sm:px-2.5 py-1 rounded-md text-xs bg-destructive/5 text-destructive hover:bg-destructive/10 transition-colors border border-destructive/10"
+                            onClick={() => handleSynonymAntonymClick(antonym)}
+                          >
+                            {antonym}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
-              </div>
-            </TabsContent>
+              )}
 
-            <TabsContent value="license">
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold text-foreground border-b">License & Source:</h3>
-                {data.license && (
-                  <div className="mt-4">
-                    <p className="text-muted-foreground">
-                      <span className="font-semibold">License:</span>{" "}
-                      <a
-                        href={data.license.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >
-                        {data.license.name}
-                      </a>
-                    </p>
+              {/* Related Words - Simplified */}
+              <div>
+                <h3 className="text-xs sm:text-sm font-medium text-foreground mb-2">Related</h3>
+                {relatedLoading && (
+                  <div className="flex gap-1 sm:gap-1.5 flex-wrap">
+                    {[...Array(8)].map((_, i) => (
+                      <div key={i} className="h-6 w-12 sm:w-16 bg-muted animate-pulse rounded-md" />
+                    ))}
                   </div>
                 )}
-                {data.sourceUrls.map((url, index) => (
-                  <div key={index} className="flex flex-row gap-2 mt-2 items-center">
-                    <p className="text-muted-foreground font-semibold">Source:</p>
-                    <a
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline block"
-                    >
-                      {url}
-                    </a>
+                {relatedError && (
+                  <p className="text-xs text-muted-foreground">{relatedError}</p>
+                )}
+                {!relatedLoading && visibleWords.length > 0 && (
+                  <div className="flex flex-wrap gap-1 sm:gap-1.5">
+                    {visibleWords.slice(0, 15).map((word, idx) => (
+                      <button
+                        key={idx}
+                        className="px-2 sm:px-2.5 py-1 rounded-md text-xs bg-secondary/50 text-secondary-foreground hover:bg-secondary/70 transition-colors"
+                        onClick={() => handleSynonymAntonymClick(word)}
+                      >
+                        {word}
+                      </button>
+                    ))}
                   </div>
-                ))}
+                )}
+                {!relatedLoading && !relatedError && visibleWords.length === 0 && (
+                  <p className="text-xs text-muted-foreground">No related words available</p>
+                )}
               </div>
             </TabsContent>
           </Tabs>
+          </div>
         </div>
       )}
     </div>

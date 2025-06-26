@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { FaEraser } from "react-icons/fa";
+import { X } from "lucide-react";
 
 interface ClearButtonProps {
   onClick: () => void;
@@ -10,9 +10,10 @@ const ClearButton: FC<ClearButtonProps> = ({ onClick, className }) => {
   return (
     <button
       onClick={onClick}
-      className={`rounded-lg hover:bg-danger-dark ${className}`}
+      className={`rounded-lg hover:bg-secondary transition-colors p-1 ${className}`}
+      aria-label="Clear search"
     >
-      <FaEraser size={22}/>
+      <X size={18}/>
     </button>
   );
 };

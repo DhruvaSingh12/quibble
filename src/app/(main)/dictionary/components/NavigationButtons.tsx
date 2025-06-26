@@ -29,7 +29,13 @@ export const BackButton: FC<NavigationButtonProps> = ({
   return (
     <button
       onClick={handleBack}
-      className="transform bg-background rounded-full p-2 text-muted-foreground"
+      disabled={historyIndex >= history.length - 1}
+      className={`transform bg-background rounded-full p-2 transition-colors ${
+        historyIndex >= history.length - 1 
+          ? 'text-muted-foreground/50 cursor-not-allowed' 
+          : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+      }`}
+      aria-label="Go back in search history"
     >
       <FaArrowLeft size={22} />
     </button>
@@ -56,7 +62,13 @@ export const ForwardButton: FC<NavigationButtonProps> = ({
   return (
     <button
       onClick={handleForward}
-      className="transform bg-background rounded-full p-2 text-muted-foreground"
+      disabled={historyIndex <= 0}
+      className={`transform bg-background rounded-full p-2 transition-colors ${
+        historyIndex <= 0 
+          ? 'text-muted-foreground/50 cursor-not-allowed' 
+          : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+      }`}
+      aria-label="Go forward in search history"
     >
       <FaArrowRight size={22} />
     </button>

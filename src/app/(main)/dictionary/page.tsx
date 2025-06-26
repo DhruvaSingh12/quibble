@@ -12,12 +12,13 @@ export default function DictionaryPage() {
   const [word, setWord] = useState("");
   const [data, setData] = useState<DictionaryResponse | null>(null);
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState<"phonetics" | "meanings" | "synonyms" | "license">("meanings");
+  const [activeTab, setActiveTab] = useState<"meanings" | "synonyms">("meanings");
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
+  const [debounceTimeout, setDebounceTimeout] = useState<NodeJS.Timeout | null>(null);
   const inputRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -32,27 +33,48 @@ export default function DictionaryPage() {
     };
 
     document.addEventListener("mousedown", handleClickOutside);
+    
+    // Cleanup function
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      if (debounceTimeout) {
+        clearTimeout(debounceTimeout);
+      }
     };
-  }, []);
+  }, [debounceTimeout]);
 
   const fetchWord = async (searchWord: string, saveToHistory = true) => {
+    if (!searchWord.trim()) {
+      setError("Please enter a word to search.");
+      return;
+    }
+
     setError("");
     setData(null);
     setLoading(true);
 
     try {
-      const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${searchWord}`);
+      const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${searchWord.trim()}`);
+      
       if (!response.ok) {
-        throw new Error("Uh oh! Word not found.");
+        if (response.status === 404) {
+          throw new Error(`"${searchWord}" not found in dictionary. Please check the spelling.`);
+        } else {
+          throw new Error("Dictionary service unavailable. Please try again later.");
+        }
       }
+      
       const result = await response.json();
+      
+      if (!result || result.length === 0) {
+        throw new Error(`No definitions found for "${searchWord}".`);
+      }
+      
       setData(result[0]);
 
       if (saveToHistory) {
         setHistory((prevHistory) => {
-          const updatedHistory = [searchWord, ...prevHistory];
+          const updatedHistory = [searchWord, ...prevHistory.filter(word => word !== searchWord)].slice(0, 50); // Limit history
           localStorage.setItem("searchHistory", JSON.stringify(updatedHistory));
           return updatedHistory;
         });
@@ -60,9 +82,9 @@ export default function DictionaryPage() {
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setError(err.message || "An error occurred.");
+        setError(err.message);
       } else {
-        setError("An error occurred.");
+        setError("An unexpected error occurred. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -70,17 +92,19 @@ export default function DictionaryPage() {
   };
 
   const fetchSuggestions = useCallback(async (prefix: string) => {
-    if (prefix.trim() === "") {
+    if (prefix.trim() === "" || prefix.length < 2) {
       setSuggestions([]);
       return;
     }
 
     try {
       const response = await fetch(`https://api.datamuse.com/sug?s=${prefix}&max=5`);
+      if (!response.ok) throw new Error('Failed to fetch suggestions');
       const result = await response.json();
       setSuggestions(result.map((item: { word: string }) => item.word));
     } catch (err) {
       console.error("Error fetching suggestions:", err);
+      setSuggestions([]);
     }
   }, []);
 
@@ -88,7 +112,18 @@ export default function DictionaryPage() {
     const inputWord = e.target.value;
     setWord(inputWord);
     setSelectedSuggestionIndex(-1);
-    fetchSuggestions(inputWord);
+    
+    // Clear existing timeout
+    if (debounceTimeout) {
+      clearTimeout(debounceTimeout);
+    }
+    
+    // Set new timeout for debounced suggestions
+    const newTimeout = setTimeout(() => {
+      fetchSuggestions(inputWord);
+    }, 300);
+    
+    setDebounceTimeout(newTimeout);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -116,7 +151,7 @@ export default function DictionaryPage() {
     setSuggestions([]);
   };
 
-  const handleTabClick = (tab: "phonetics" | "meanings" | "synonyms" | "license") => {
+  const handleTabClick = (tab: "meanings" | "synonyms") => {
     setActiveTab(tab);
   };
 
@@ -130,78 +165,90 @@ export default function DictionaryPage() {
     setData(null);
     setError("");
     setSuggestions([]);
+    setSelectedSuggestionIndex(-1);
+    if (debounceTimeout) {
+      clearTimeout(debounceTimeout);
+    }
   };
 
   return (
-    <div className="flex w-full p-3 lg:p-5 mt-[3px] lg:mt-[8px] flex-col rounded-2xl items-center relative justify-center space-y-5 bg-accent">
-      <div className="w-full flex flex-row gap-2">
-        <div>
-          <BackButton
-            history={history}
-            historyIndex={historyIndex}
-            setHistoryIndex={setHistoryIndex}
-            setWord={setWord}
-            fetchWord={fetchWord}
-          />
-        </div>
-        <div>
-          <ForwardButton
-            history={history}
-            historyIndex={historyIndex}
-            setHistoryIndex={setHistoryIndex}
-            setWord={setWord}
-            fetchWord={fetchWord}
-          />
+    <div className="w-full min-h-screen bg-background p-3 sm:p-4 lg:p-6">
+      <div className="w-full max-w-none space-y-4 sm:space-y-6">
+        {/* Search Section */}
+        <div className="bg-card rounded-xl border p-3 sm:p-4">
+          <div className="flex gap-2 sm:gap-3 items-center">
+            <div className="flex gap-1 sm:gap-2 flex-shrink-0">
+              <BackButton
+                history={history}
+                historyIndex={historyIndex}
+                setHistoryIndex={setHistoryIndex}
+                setWord={setWord}
+                fetchWord={fetchWord}
+              />
+              <ForwardButton
+                history={history}
+                historyIndex={historyIndex}
+                setHistoryIndex={setHistoryIndex}
+                setWord={setWord}
+                fetchWord={fetchWord}
+              />
+            </div>
+
+            <div ref={inputRef} className="flex-1 relative min-w-0">
+              <Input
+                type="text"
+                value={word}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                placeholder="Search for a word..."
+                className="pr-16 sm:pr-20 text-sm sm:text-base"
+              />
+              <div className="absolute inset-y-0 right-0 flex items-center gap-1 pr-2 sm:pr-3">
+                <ClearButton onClick={handleClearSearch} />
+                <button
+                  type="submit"
+                  onClick={() => {
+                    fetchWord(word);
+                    setSuggestions([]);
+                  }}
+                  className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label="Search"
+                >
+                  <SearchIcon size={16} className="sm:w-[18px] sm:h-[18px]" />
+                </button>
+              </div>
+              
+              {suggestions.length > 0 && (
+                <ul className="absolute top-full left-0 w-full bg-card border rounded-lg mt-1 shadow-lg z-10 py-1 max-h-48 overflow-y-auto">
+                  {suggestions.map((suggestion, index) => (
+                    <li
+                      key={suggestion}
+                      onClick={() => handleSuggestionClick(suggestion)}
+                      className={`px-3 py-2 cursor-pointer text-sm transition-colors ${
+                        index === selectedSuggestionIndex 
+                          ? "bg-secondary text-secondary-foreground" 
+                          : "hover:bg-secondary/50"
+                      }`}
+                    >
+                      {suggestion}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
         </div>
 
-        <div ref={inputRef} className="w-full relative gap-2">
-          <Input
-            type="text"
-            value={word}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            placeholder="Enter a word"
-            className="bg-background text-foreground"
-          />
-          <button
-            type="submit"
-            onClick={() => {
-              fetchWord(word);
-              setSuggestions([]);
-            }}
-            className="absolute top-1/2 right-2 lg:right-4 transform -translate-y-1/2 text-muted-foreground"
-            aria-label="Search"
-          >
-            <SearchIcon />
-          </button>
-          <ClearButton
-            onClick={handleClearSearch}
-            className="absolute top-1/2 right-10 lg:right-12 transform -translate-y-1/2 text-muted-foreground"
-          />
-          {suggestions.length > 0 && (
-            <ul className="absolute top-full left-0 w-full overflow-y-auto bg-background rounded-lg mt-1.5 shadow-lg z-10">
-              {suggestions.map((suggestion, index) => (
-                <li
-                  key={suggestion}
-                  onClick={() => handleSuggestionClick(suggestion)}
-                  className={`px-3 py-1.5 cursor-pointer rounded-2xl ${index === selectedSuggestionIndex ? "bg-secondary" : "hover:bg-secondary"
-                    }`}
-                >
-                  {suggestion}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        {/* Results Section */}
+        <Main
+          data={data}
+          error={error}
+          loading={loading}
+          activeTab={activeTab}
+          handleTabClick={handleTabClick}
+          handleSynonymAntonymClick={handleSynonymAntonymClick}
+        />
       </div>
-      <Main
-        data={data}
-        error={error}
-        loading={loading}
-        activeTab={activeTab}
-        handleTabClick={handleTabClick}
-        handleSynonymAntonymClick={handleSynonymAntonymClick}
-      />
     </div>
   );
 }
