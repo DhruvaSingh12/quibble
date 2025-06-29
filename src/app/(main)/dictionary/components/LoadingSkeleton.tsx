@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 
 export default function DictionaryLoadingSkeleton() {
   return (
-    <div className="bg-card rounded-xl border w-full">
+    <div className="bg-card rounded-b-2xl w-full">
       {/* Header */}
       <div className="p-4 sm:p-6 border-b">
         <div className="flex items-center justify-between">

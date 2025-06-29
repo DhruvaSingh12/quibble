@@ -12,7 +12,7 @@ export default function DictionaryPage() {
   const [word, setWord] = useState("");
   const [data, setData] = useState<DictionaryResponse | null>(null);
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState<"meanings" | "synonyms">("meanings");
+
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -34,7 +34,6 @@ export default function DictionaryPage() {
 
     document.addEventListener("mousedown", handleClickOutside);
     
-    // Cleanup function
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       if (debounceTimeout) {
@@ -113,12 +112,10 @@ export default function DictionaryPage() {
     setWord(inputWord);
     setSelectedSuggestionIndex(-1);
     
-    // Clear existing timeout
     if (debounceTimeout) {
       clearTimeout(debounceTimeout);
     }
     
-    // Set new timeout for debounced suggestions
     const newTimeout = setTimeout(() => {
       fetchSuggestions(inputWord);
     }, 300);
@@ -151,10 +148,6 @@ export default function DictionaryPage() {
     setSuggestions([]);
   };
 
-  const handleTabClick = (tab: "meanings" | "synonyms") => {
-    setActiveTab(tab);
-  };
-
   const handleSynonymAntonymClick = (word: string) => {
     setWord(word);
     fetchWord(word);
@@ -172,10 +165,10 @@ export default function DictionaryPage() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-background p-3 sm:p-4 lg:p-6">
-      <div className="w-full max-w-none space-y-4 sm:space-y-6">
-        {/* Search Section */}
-        <div className="bg-card rounded-xl border p-3 sm:p-4">
+    <div className="w-full bg-background pt-2">
+      <div className="w-full max-w-none">
+
+        <div className="bg-card rounded-t-2xl p-3 sm:p-4">
           <div className="flex gap-2 sm:gap-3 items-center">
             <div className="flex gap-1 sm:gap-2 flex-shrink-0">
               <BackButton
@@ -200,7 +193,7 @@ export default function DictionaryPage() {
                 value={word}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
-                placeholder="Search for a word..."
+                placeholder="Search for a word"
                 className="pr-16 sm:pr-20 text-sm sm:text-base"
               />
               <div className="absolute inset-y-0 right-0 flex items-center gap-1 pr-2 sm:pr-3">
@@ -239,13 +232,10 @@ export default function DictionaryPage() {
           </div>
         </div>
 
-        {/* Results Section */}
         <Main
           data={data}
           error={error}
           loading={loading}
-          activeTab={activeTab}
-          handleTabClick={handleTabClick}
           handleSynonymAntonymClick={handleSynonymAntonymClick}
         />
       </div>
