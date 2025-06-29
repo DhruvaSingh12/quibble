@@ -53,7 +53,7 @@ export default function Post({ post }: PostProps) {
                         </div>
                     </div>
                     <div
-                        className={`ml-auto transition-opacity ${isDropdownOpen ? "opacity-100" : "opacity-0 group-hover/delete:opacity-100"
+                        className={`ml-auto transition-opacity ${isDropdownOpen ? "opacity-100" : "opacity-100 sm:opacity-0 sm:group-hover/delete:opacity-100"
                             }`}
                     >
                         <PostActions

@@ -1,13 +1,12 @@
 "use client";
 
+import { FaEnvelopeOpenText, FaLinkedin, FaWhatsapp } from "react-icons/fa";
 import {
-  FaEnvelopeOpenText,
-  FaLinkedin,
-  FaWhatsapp,
-  FaCopy,
-  FaCheck,
-} from "react-icons/fa";
-import { FaX, FaXTwitter } from "react-icons/fa6";
+  FaClipboard,
+  FaClipboardCheck,
+  FaX,
+  FaXTwitter,
+} from "react-icons/fa6";
 import { useState, useEffect } from "react";
 
 interface ShareModalProps {
@@ -40,25 +39,25 @@ const ShareModal: React.FC<ShareModalProps> = ({ pageLink, onClose }) => {
       id: "linkedin",
       name: "LinkedIn",
       icon: <FaLinkedin className="h-7 w-7" />,
-      color: "text-primary",
+      color: "text-foreground",
     },
     {
       id: "whatsapp",
       name: "WhatsApp",
       icon: <FaWhatsapp className="h-7 w-7" />,
-      color: "text-accent-foreground",
+      color: "text-foreground",
     },
     {
       id: "gmail",
       name: "Email",
       icon: <FaEnvelopeOpenText className="h-6 w-6" />,
-      color: "text-muted-foreground",
+      color: "text-foreground",
     },
     {
       id: "copy",
       name: "Copy link",
-      icon: <FaCopy className="h-5 w-5" />,
-      color: "text-card-foreground",
+      icon: <FaClipboard className="h-6 w-6" />,
+      color: "text-foreground",
     },
   ];
 
@@ -104,13 +103,6 @@ const ShareModal: React.FC<ShareModalProps> = ({ pageLink, onClose }) => {
     onClose();
   };
 
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      setIsVisible(false);
-      setTimeout(onClose, 200);
-    }
-  };
-
   const handleClose = () => {
     setIsVisible(false);
     setTimeout(onClose, 200);
@@ -119,20 +111,21 @@ const ShareModal: React.FC<ShareModalProps> = ({ pageLink, onClose }) => {
     <div
       className={`fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm transition-all duration-300 ${
         isVisible ? "opacity-100" : "opacity-0"
-      }`}
-      onClick={handleBackdropClick}
+      } `}
     >
       <div
-        className={`mx-0 w-full max-w-sm rounded-t-3xl bg-card shadow-2xl transition-all duration-300 ${
-          isVisible ? "translate-y-0" : "translate-y-full"
+        className={`mx-auto w-full max-w-sm rounded-t-3xl bg-card shadow-2xl transition-all duration-300 ${
+          isVisible ? "translate-y-0 scale-100" : "translate-y-8 scale-95"
         }`}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-6 pb-4">
-          <h2 className="text-lg pl-4 font-medium text-card-foreground">Share</h2>
+          <h2 className="pl-4 text-lg font-medium text-card-foreground">
+            Share
+          </h2>
           <button
             onClick={handleClose}
-            className="rounded-full hover:bg-muted p-2 text-muted-foreground"
+            className="rounded-full p-2 text-muted-foreground hover:bg-muted"
           >
             <FaX className="h-4 w-4" />
           </button>
@@ -145,14 +138,15 @@ const ShareModal: React.FC<ShareModalProps> = ({ pageLink, onClose }) => {
               <button
                 key={platform.id}
                 onClick={() => handleShareClick(platform.id)}
-                className={`flex flex-col hover:bg-muted items-center justify-center rounded-2xl p-3 transition-colors ${platform.color} relative`}
+                className={`flex flex-col items-center justify-center rounded-2xl p-3 transition-colors hover:bg-muted ${platform.color} relative`}
               >
-                <div className="flex-shrink-0">{platform.icon}</div>
-                {platform.id === "copy" && copied && (
-                  <div className="absolute right-2 top-2">
-                    <FaCheck className="h-3 w-3 text-primary" />
-                  </div>
-                )}
+                <div className="flex-shrink-0">
+                  {platform.id === "copy" && copied ? (
+                    <FaClipboardCheck className="h-6 w-6" />
+                  ) : (
+                    platform.icon
+                  )}
+                </div>
               </button>
             ))}
           </div>
