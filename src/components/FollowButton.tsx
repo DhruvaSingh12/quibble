@@ -44,7 +44,7 @@ export default function FollowButton({
 
       return { previousState };
     },
-    onError: (error, variables, context) => {
+    onError: (error, _variables, context) => {
       if (context?.previousState) {
         queryClient.setQueryData(queryKey, context.previousState);
       }

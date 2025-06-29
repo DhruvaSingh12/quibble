@@ -61,7 +61,18 @@ export interface FollowerInfo {
         avatarUrl: string | null;
         bio: string | null;
         joined: string;
+        isFollowedByUser?: boolean;
     }[];
+}
+
+export interface FollowerListItem {
+    id: string;
+    username: string;
+    displayName: string;
+    avatarUrl: string | null;
+    bio: string | null;
+    joined: string;
+    isFollowedByUser: boolean;
 }
 
 export interface Phonetic {

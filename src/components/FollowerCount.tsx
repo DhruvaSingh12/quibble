@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import FollowerModal from "./FollowerModal";
-import { FollowerInfo } from "@/lib/types";
+import { FollowerListItem } from "@/lib/types";
 import { formatNumber } from "@/lib/utils";
 
 interface FollowerCountProps {
@@ -12,7 +12,7 @@ interface FollowerCountProps {
 
 function FollowerCount({ userId, initialState }: FollowerCountProps) {
     const [data] = useState(initialState);
-    const [followerList, setFollowerList] = useState<FollowerInfo[]>([]);
+    const [followerList, setFollowerList] = useState<FollowerListItem[]>([]);
     const [showModal, setShowModal] = useState(false);
 
     const fetchFollowers = async () => {

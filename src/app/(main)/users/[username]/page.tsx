@@ -9,7 +9,7 @@ import { formatDate } from "date-fns";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
-import UserPosts from "./UserPosts";
+import UserPosts from "./components/UserPosts";
 import Linkify from "@/components/Linkify";
 import EditProfileButton from "./components/EditProfileButton";
 
@@ -33,8 +33,9 @@ const getUser = cache(async (username: string, loggedInUserId: string) => {
   return user;
 });
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  // params is a Promise, so await it
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { username } = await params;
 
   const { user: loggedInUser } = await validateRequest();
@@ -64,17 +65,9 @@ export default async function Page({ params }: PageProps) {
   const user = await getUser(username, loggedInUser.id);
 
   return (
-    <main className="w-full p-3 lg:p-5 mt-[3px] lg:mt-[8px] flex-col rounded-2xl items-center justify-center space-y-5 bg-accent">
+    <main className="mt-[3px] w-full flex-col items-center justify-center space-y-5 rounded-2xl lg:mt-[8px]">
       <div className="w-full min-w-0 space-y-5">
         <UserProfile user={user} loggedInUserId={loggedInUser.id} />
-        <div className="rounded-lg bg-card p-4 shadow-md text-card">
-          <div className="p-2 rounded-lg bg-muted-foreground">
-            <h2 className="text-center text-lg font-semibold">
-              {user.displayName}&apos;s Posts
-            </h2>
-          </div>
-        </div>
-
         <UserPosts userId={user.id} />
       </div>
     </main>
@@ -104,7 +97,7 @@ async function UserProfile({ user, loggedInUserId }: UserProfileProps) {
       <UserAvatar
         avatarUrl={user.avatarUrl}
         size={500}
-        className="size-full max-h-36 max-w-36 lg:max-h-48 lg:max-w-48 rounded-full"
+        className="size-full max-h-36 max-w-36 rounded-full lg:max-h-48 lg:max-w-48"
       />
       <div className="flex flex-wrap gap-3 sm:flex-nowrap">
         <div className="me-auto space-y-3">
@@ -113,7 +106,10 @@ async function UserProfile({ user, loggedInUserId }: UserProfileProps) {
             <div className="text-muted-foreground">@{user.username}</div>
           </div>
           <div className="flex flex-row gap-1.5">
-            Since: <p className="font-semibold">{formatDate(user.createdAt, "do MMM yyyy")}</p>
+            Since:{" "}
+            <p className="font-semibold">
+              {formatDate(user.createdAt, "do MMM yyyy")}
+            </p>
           </div>
           <div className="flex items-center gap-5">
             <span className="flex flex-row gap-1.5">

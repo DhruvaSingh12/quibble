@@ -2,12 +2,10 @@ import { NextResponse } from "next/server";
 import { validateRequest } from "@/auth";
 import prisma from "@/lib/prisma";
 
-// Context.params is a Promise per Next.js generated types
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ userId: string }> }
 ) {
-  // Await the params promise to extract userId
   const { userId } = await params;
   if (!userId || typeof userId !== "string") {
     return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });
@@ -31,6 +29,14 @@ export async function GET(
               avatarUrl: true,
               bio: true,
               createdAt: true,
+              followers: {
+                where: {
+                  followerId: loggedInUser.id,
+                },
+                select: {
+                  followerId: true,
+                },
+              },
             },
           },
         },
@@ -50,6 +56,7 @@ export async function GET(
     avatarUrl: f.follower.avatarUrl,
     bio: f.follower.bio,
     joined: f.follower.createdAt,
+    isFollowedByUser: f.follower.followers.length > 0,
   }));
 
   const data = {
