@@ -49,6 +49,12 @@ export default function Post({ post }: PostProps) {
                             </UserTooltip>
                             <p className="block text-[12px] text-muted-foreground">
                                 {formatRelativeDate(new Date(post.createdAt))}
+                                {/* Show edited indicator if post was modified (more than 1 minute after creation) */}
+                                {post.updatedAt && (new Date(post.updatedAt).getTime() - new Date(post.createdAt).getTime()) > 60000 && (
+                                    <span className="ml-1 text-xs text-muted-foreground/70">
+                                        • edited
+                                    </span>
+                                )}
                             </p>
                         </div>
                     </div>

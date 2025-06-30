@@ -3,6 +3,7 @@
 import { PostData } from "@/lib/types";
 import { useState } from "react";
 import DeletePostDialog from "./delete/DeletePostDialog";
+import EditPostDialog from "./edit/EditPostDialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/DropdownMenu";
 import { Button } from "@/components/ui/Button";
-import { MoreHorizontalIcon, Trash2 } from "lucide-react";
+import { MoreHorizontalIcon, Trash2, Edit } from "lucide-react";
 import { HiOutlineShare } from "react-icons/hi";
 import ShareModal from "./share/ShareModal";
 import { useSession } from "@/providers/SessionProvider";
@@ -27,6 +28,7 @@ export default function PostActions({
   onDropdownToggle,
 }: PostActionsProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
 
   const { user } = useSession();
@@ -51,15 +53,26 @@ export default function PostActions({
             </span>
           </DropdownMenuItem>
           {user?.id === post.user.id && (
-            <DropdownMenuItem
-              className="items-center hover:cursor-pointer justify-center hover:bg-muted-foreground"
-              onClick={() => setShowDeleteDialog(true)}
-            >
-              <span className="flex gap-3 text-destructive">
-                <Trash2 className="size-4" />
-                Delete
-              </span>
-            </DropdownMenuItem>
+            <>
+              <DropdownMenuItem
+                className="items-center hover:cursor-pointer justify-center hover:bg-muted-foreground"
+                onClick={() => setShowEditDialog(true)}
+              >
+                <span className="flex gap-3 text-primary">
+                  <Edit className="size-4" />
+                  Edit
+                </span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="items-center hover:cursor-pointer justify-center hover:bg-muted-foreground"
+                onClick={() => setShowDeleteDialog(true)}
+              >
+                <span className="flex gap-3 text-destructive">
+                  <Trash2 className="size-4" />
+                  Delete
+                </span>
+              </DropdownMenuItem>
+            </>
           )}
         </DropdownMenuContent>
       </DropdownMenu>
@@ -67,6 +80,11 @@ export default function PostActions({
         post={post}
         open={showDeleteDialog}
         onClose={() => setShowDeleteDialog(false)}
+      />
+      <EditPostDialog
+        post={post}
+        open={showEditDialog}
+        onClose={() => setShowEditDialog(false)}
       />
       {showShareModal && (
         <ShareModal
