@@ -32,9 +32,14 @@ export default function LoginForm() {
   async function onSubmit(values: LoginValues) {
     setError(undefined);
     startTransition(async () => {
-      const { error } = await login(values);
-      if (error) {
-        setError(error);
+      try {
+        const result = await login(values);
+        if (result?.error) {
+          setError(result.error);
+        }
+        // If no error and no result (successful redirect), the redirect will happen automatically
+      } catch (error) {
+        setError("Something went wrong. Please try again.");
       }
     });
   }
@@ -46,20 +51,26 @@ export default function LoginForm() {
         className="space-y-[13px] flex flex-col items-stretch w-full px-4"
         noValidate
       >
+        {error && (
+          <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+            {error}
+          </div>
+        )}
+        
         <FormField
           name="username"
           control={form.control}
           render={({ field }) => (
             <FormItem>
               <div className="flex flex-row items-start justify-between gap-10"> 
-                <FormLabel className="text-[16px] text-gray-800">Username</FormLabel>
+                <FormLabel className="text-[16px] text-foreground">Username</FormLabel>
                 <FormMessage />
               </div>
               <FormControl>
                 <Input
                   placeholder="Username"
                   {...field}
-                  className="shadow-md"
+                  className="border-border bg-card"
                 />
               </FormControl>
             </FormItem>
@@ -71,7 +82,7 @@ export default function LoginForm() {
           render={({ field }) => (
             <FormItem>
               <div className="flex flex-row items-start justify-between gap-10"> 
-                <FormLabel className="text-[16px] text-gray-800">Password</FormLabel>
+                <FormLabel className="text-[16px] text-foreground">Password</FormLabel>
                 <FormMessage />
               </div>
               <FormControl>
@@ -79,20 +90,17 @@ export default function LoginForm() {
                   type="password"
                   placeholder="Password"
                   {...field}
-                  className="shadow-md"
+                  className="border-border bg-card"
                 />
               </FormControl>
             </FormItem>
           )}
         />
-        {error && (
-          <p className="text-red-500 text-center text-sm">{error}</p>
-        )}
         <div className="flex flex-row items-center justify-center">
           <LoadingButton
             loading={isPending}
             type="submit"
-            className="px-20 rounded-[16px] bg-black py-3 mt-6 text-white text-[15px] transition-all hover:bg-white hover:text-black"
+            className="px-20 rounded-[16px] bg-primary text-primary-foreground py-3 mt-6 text-[15px] border-0"
           >
             Log In
           </LoadingButton>

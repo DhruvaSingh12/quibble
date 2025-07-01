@@ -39,7 +39,7 @@ export default function Page() {
           </div>
           <div className="w-full text-center">
             <div className="flex flex-row gap-2 justify-center mb-4 items-center text-lg text-black">
-              New here? Create an account. <Link href="/signup" className="text-purple-900 hover:underline">Sign up</Link>
+              New here? Create an account. <Link href="/signup" className="text-primary hover:underline">Sign up</Link>
             </div>
           </div>
         </div>

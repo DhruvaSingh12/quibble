@@ -30,7 +30,7 @@ export default function Page() {
           </div>
           <div className="w-full text-center">
             <div className="flex flex-row gap-2 justify-center mb-4 items-center text-lg text-black">
-              Already have an account? <Link href="/login" className="text-purple-900 hover:underline">Login</Link>
+              Already have an account? <Link href="/login" className="text-primary hover:underline">Login</Link>
             </div>
           </div>
         </div>

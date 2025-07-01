@@ -9,7 +9,7 @@ import { redirect } from "next/navigation";
 
 export async function login(
     credentials: LoginValues
-): Promise<{ error: string }> {
+): Promise<{ error?: string }> {
     try {
         const { username, password } = loginSchema.parse(credentials);
         const existingUser = await prisma?.user.findFirst({
@@ -22,6 +22,11 @@ export async function login(
         });
         if (!existingUser || !existingUser.passwordHash) {
             return { error: "Invalid credentials." };
+        }
+
+        // Check if email is verified
+        if (existingUser.email && !existingUser.emailVerified) {
+            return { error: "Please verify your email address before logging in." };
         }
 
         const validPassword = await verify(existingUser.passwordHash, password, {
@@ -42,11 +47,12 @@ export async function login(
             sessionCookie.attributes
         );
 
-        return redirect("/");
     } catch (error) {
         console.error(error);
         return {
             error: "Something went wrong. Please try again later.",
         };
     }
+
+    return redirect("/");
 }
