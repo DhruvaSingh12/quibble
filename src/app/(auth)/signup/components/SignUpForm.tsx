@@ -13,14 +13,22 @@ import {
 } from "@/components/ui/Form";
 import { Input } from "@/components/ui/Input";
 import LoadingButton from "@/components/LoadingButton";
-import { useState, useTransition } from "react";
-import { signUp } from "./actions";
+import { useState, useTransition, useCallback, useEffect } from "react";
+import { signUp, checkUsernameAvailability, checkEmailAvailability } from "./actions";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { useRouter } from "next/navigation";
 
 export default function SignUpForm() {
   const [error, setError] = useState<string>();
   const [isPending, startTransition] = useTransition();
+  const [usernameValidation, setUsernameValidation] = useState<{ 
+    status: 'idle' | 'checking' | 'available' | 'unavailable'; 
+    message?: string 
+  }>({ status: 'idle' });
+  const [emailValidation, setEmailValidation] = useState<{ 
+    status: 'idle' | 'checking' | 'available' | 'unavailable'; 
+    message?: string 
+  }>({ status: 'idle' });
   const router = useRouter();
 
   const form = useForm<SignUpValues>({
@@ -33,6 +41,81 @@ export default function SignUpForm() {
     },
   });
 
+  // Debounced validation functions
+  const checkUsername = useCallback(
+    async (username: string) => {
+      if (!username || username.length < 3) {
+        setUsernameValidation({ status: 'idle' });
+        return;
+      }
+
+      setUsernameValidation({ status: 'checking' });
+      
+      try {
+        const result = await checkUsernameAvailability(username);
+        if (result.available) {
+          setUsernameValidation({ status: 'available', message: 'Username is available!' });
+        } else {
+          setUsernameValidation({ status: 'unavailable', message: result.error });
+        }
+      } catch (error) {
+        setUsernameValidation({ status: 'unavailable', message: 'Unable to check username availability.' });
+      }
+    },
+    []
+  );
+
+  const checkEmail = useCallback(
+    async (email: string) => {
+      if (!email || !email.includes("@")) {
+        setEmailValidation({ status: 'idle' });
+        return;
+      }
+
+      setEmailValidation({ status: 'checking' });
+      
+      try {
+        const result = await checkEmailAvailability(email);
+        if (result.available) {
+          setEmailValidation({ status: 'available', message: 'Email is available!' });
+        } else {
+          setEmailValidation({ status: 'unavailable', message: result.error });
+        }
+      } catch (error) {
+        setEmailValidation({ status: 'unavailable', message: 'Unable to check email availability.' });
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    const username = form.watch("username");
+    if (!username || username.length < 3) {
+      setUsernameValidation({ status: 'idle' });
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      checkUsername(username);
+    }, 800); // 800ms debounce
+
+    return () => clearTimeout(timer);
+  }, [form.watch("username"), checkUsername]);
+
+  useEffect(() => {
+    const email = form.watch("email");
+    if (!email || !email.includes("@")) {
+      setEmailValidation({ status: 'idle' });
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      checkEmail(email);
+    }, 800); // 800ms debounce
+
+    return () => clearTimeout(timer);
+  }, [form.watch("email"), checkEmail]);
+
   async function onSubmit(values: SignUpValues) {
     setError(undefined);
     startTransition(async () => {
@@ -41,7 +124,6 @@ export default function SignUpForm() {
         if (result?.error) {
           setError(result.error);
         } else if (result?.requiresVerification && result?.email) {
-          // Redirect to email verification page
           router.push(`/verify-email?email=${encodeURIComponent(result.email)}`);
         }
       } catch (error) {
@@ -73,12 +155,44 @@ export default function SignUpForm() {
                 <FormMessage/>
               </div>
               <FormControl>
-                <Input
-                  placeholder="Username"
-                  {...field}
-                  className="border-border bg-card focus:ring-ring"
-                />
+                <div className="relative">
+                  <Input
+                    placeholder="Username"
+                    {...field}
+                    className={`border-border bg-card focus:ring-ring ${
+                      usernameValidation.status === 'available' ? 'border-primary' :
+                      usernameValidation.status === 'unavailable' ? 'border-destructive' : ''
+                    }`}
+                    onBlur={() => {
+                      if (field.value && field.value.length >= 3) {
+                        checkUsername(field.value);
+                      }
+                    }}
+                  />
+                  {usernameValidation.status === 'checking' && (
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  )}
+                  {usernameValidation.status === 'available' && (
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary">
+                      ✓
+                    </div>
+                  )}
+                  {usernameValidation.status === 'unavailable' && (
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-destructive">
+                      ✗
+                    </div>
+                  )}
+                </div>
               </FormControl>
+              {usernameValidation.message && (
+                <p className={`text-sm mt-1 ${
+                  usernameValidation.status === 'available' ? 'text-primary' : 'text-destructive'
+                }`}>
+                  {usernameValidation.message}
+                </p>
+              )}
             </FormItem>
           )}
         />
@@ -92,13 +206,45 @@ export default function SignUpForm() {
                 <FormMessage/>
               </div>
               <FormControl>
-                <Input
-                  type="email"
-                  placeholder="Email"
-                  {...field}
-                  className="border-border bg-card focus:ring-ring"
-                />
+                <div className="relative">
+                  <Input
+                    type="email"
+                    placeholder="Email"
+                    {...field}
+                    className={`border-border bg-card focus:ring-ring ${
+                      emailValidation.status === 'available' ? 'border-primary' :
+                      emailValidation.status === 'unavailable' ? 'border-destructive' : ''
+                    }`}
+                    onBlur={() => {
+                      if (field.value && field.value.includes("@")) {
+                        checkEmail(field.value);
+                      }
+                    }}
+                  />
+                  {emailValidation.status === 'checking' && (
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  )}
+                  {emailValidation.status === 'available' && (
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary">
+                      ✓
+                    </div>
+                  )}
+                  {emailValidation.status === 'unavailable' && (
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-destructive">
+                      ✗
+                    </div>
+                  )}
+                </div>
               </FormControl>
+              {emailValidation.message && (
+                <p className={`text-sm mt-1 ${
+                  emailValidation.status === 'available' ? 'text-primary' : 'text-destructive'
+                }`}>
+                  {emailValidation.message}
+                </p>
+              )}
             </FormItem>
           )}
         />
@@ -146,9 +292,16 @@ export default function SignUpForm() {
           <LoadingButton
             loading={isPending}
             type="submit"
-            className="px-20 rounded-[16px] bg-primary text-primary-foreground py-3 mt-6 text-[15px] border-0"
+            disabled={
+              isPending || 
+              usernameValidation.status === 'unavailable' || 
+              emailValidation.status === 'unavailable' ||
+              usernameValidation.status === 'checking' ||
+              emailValidation.status === 'checking'
+            }
+            className="px-20 rounded-[16px] bg-primary text-primary-foreground py-3 mt-6 text-[15px] border-0 disabled:opacity-50"
           >
-            Create Account
+            Send OTP
           </LoadingButton>
         </div>
         

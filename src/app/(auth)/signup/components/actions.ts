@@ -6,13 +6,12 @@ import { hash } from "@node-rs/argon2";
 import { generateIdFromEntropySize } from "lucia";
 import { sendOTPEmail, generateOTP } from "@/lib/email";
 
-export async function signUp(
-    credentials: SignUpValues
-): Promise<{ error?: string; requiresVerification?: boolean; email?: string }> {
+export async function checkUsernameAvailability(username: string): Promise<{ available: boolean; error?: string }> {
     try {
-        const { username, email, password } = signUpSchema.parse(credentials);
-        
-        // Check for existing username
+        if (!username || username.length < 3) {
+            return { available: false, error: "Username must be at least 3 characters long." };
+        }
+
         const existingUsername = await prisma.user.findFirst({
             where: {
                 username: {
@@ -21,13 +20,24 @@ export async function signUp(
                 },
             },
         });
+
         if (existingUsername) {
-            return {
-                error: "Username already exists.",
-            };
+            return { available: false, error: "Username already exists." };
         }
 
-        // Check for existing email
+        return { available: true };
+    } catch (error) {
+        console.error("Username check error:", error);
+        return { available: false, error: "Unable to check username availability." };
+    }
+}
+
+export async function checkEmailAvailability(email: string): Promise<{ available: boolean; error?: string }> {
+    try {
+        if (!email || !email.includes("@")) {
+            return { available: false, error: "Please enter a valid email address." };
+        }
+
         const existingEmail = await prisma.user.findFirst({
             where: {
                 email: {
@@ -36,13 +46,37 @@ export async function signUp(
                 },
             },
         });
+
         if (existingEmail) {
-            return {
-                error: "Email already exists.",
-            };
+            return { available: false, error: "Email already exists." };
         }
 
-        // Hash password
+        return { available: true };
+    } catch (error) {
+        console.error("Email check error:", error);
+        return { available: false, error: "Unable to check email availability." };
+    }
+}
+
+export async function signUp(
+    credentials: SignUpValues
+): Promise<{ error?: string; requiresVerification?: boolean; email?: string }> {
+    try {
+        const { username, email, password } = signUpSchema.parse(credentials);
+    
+        const [usernameCheck, emailCheck] = await Promise.all([
+            checkUsernameAvailability(username),
+            checkEmailAvailability(email)
+        ]);
+
+        if (!usernameCheck.available) {
+            return { error: usernameCheck.error || "Username already exists." };
+        }
+
+        if (!emailCheck.available) {
+            return { error: emailCheck.error || "Email already exists." };
+        }
+
         const passwordHash = await hash(password, {
             memoryCost: 19456,
             timeCost: 2,
@@ -52,7 +86,6 @@ export async function signUp(
 
         const userId = generateIdFromEntropySize(10);
 
-        // Create user but mark as unverified
         await prisma.user.create({
             data: {
                 id: userId,
@@ -64,7 +97,6 @@ export async function signUp(
             },
         });
 
-        // Generate and save OTP
         const otp = generateOTP();
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
@@ -77,10 +109,8 @@ export async function signUp(
             },
         });
 
-        // Send verification email
         const emailResult = await sendOTPEmail(email, otp, username);
         if (!emailResult.success) {
-            // Clean up the user and verification record if email fails
             await prisma.emailVerification.deleteMany({
                 where: { email, userId }
             });
