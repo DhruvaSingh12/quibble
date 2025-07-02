@@ -121,7 +121,7 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
                         <div className="border rounded-lg focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/50 transition-all">
                             <EditorContent 
                                 editor={editor}
-                                className="w-full px-4 py-3 min-h-[120px] max-h-[300px] overflow-y-auto prose prose-sm max-w-none focus-within:outline-none [&>div]:min-h-[120px] [&>div]:outline-none"
+                                className="w-full px-4 py-3 min-h-[120px] max-h-[300px] overflow-y-auto prose prose-sm max-w-none focus-within:outline-none cursor-text [&>div]:min-h-[120px] [&>div]:outline-none"
                             />
                         </div>
                         

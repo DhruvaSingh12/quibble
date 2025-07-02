@@ -90,7 +90,32 @@ export default function SignUpForm() {
 
   useEffect(() => {
     const username = form.watch("username");
-    if (!username || username.length < 3) {
+    if (!username) {
+      setUsernameValidation({ status: 'idle' });
+      return;
+    }
+
+    if (username.length > 20) {
+      setUsernameValidation({ status: 'unavailable', message: 'Username must not exceed 20 characters.' });
+      return;
+    }
+
+    if (/\s/.test(username)) {
+      setUsernameValidation({ status: 'unavailable', message: 'Username must not contain spaces.' });
+      return;
+    }
+
+    if (!/^[a-zA-Z_]/.test(username)) {
+      setUsernameValidation({ status: 'unavailable', message: 'Username must start with a letter or underscore.' });
+      return;
+    }
+
+    if (!/^[a-zA-Z_][a-zA-Z0-9_-]*$/.test(username)) {
+      setUsernameValidation({ status: 'unavailable', message: 'Username can only contain letters, numbers, underscores, and hyphens.' });
+      return;
+    }
+
+    if (username.length < 3) {
       setUsernameValidation({ status: 'idle' });
       return;
     }
@@ -136,7 +161,7 @@ export default function SignUpForm() {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-[13px] flex flex-col items-stretch w-full px-4"
+        className="space-y-[10px] flex flex-col items-stretch w-full px-4"
         noValidate
       >
         {error && (
@@ -150,7 +175,7 @@ export default function SignUpForm() {
           control={form.control}
           render={({ field }) => (
             <FormItem>
-              <div className="flex flex-row items-start justify-between gap-10"> 
+              <div className="flex flex-row items-start justify-between gap-8"> 
                 <FormLabel className="text-[16px] text-foreground">Username</FormLabel>
                 <FormMessage/>
               </div>
@@ -171,7 +196,7 @@ export default function SignUpForm() {
                   />
                   {usernameValidation.status === 'checking' && (
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                      <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
                     </div>
                   )}
                   {usernameValidation.status === 'available' && (
@@ -201,7 +226,7 @@ export default function SignUpForm() {
           control={form.control}
           render={({ field }) => (
             <FormItem>
-              <div className="flex flex-row items-start justify-between gap-10"> 
+              <div className="flex flex-row items-start justify-between gap-8"> 
                 <FormLabel className="text-[16px] text-foreground">Email</FormLabel>
                 <FormMessage/>
               </div>
@@ -223,7 +248,7 @@ export default function SignUpForm() {
                   />
                   {emailValidation.status === 'checking' && (
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                      <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"/>
                     </div>
                   )}
                   {emailValidation.status === 'available' && (
@@ -239,7 +264,7 @@ export default function SignUpForm() {
                 </div>
               </FormControl>
               {emailValidation.message && (
-                <p className={`text-sm mt-1 ${
+                <p className={`text-sm ${
                   emailValidation.status === 'available' ? 'text-primary' : 'text-destructive'
                 }`}>
                   {emailValidation.message}

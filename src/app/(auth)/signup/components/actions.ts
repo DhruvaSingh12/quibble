@@ -12,6 +12,22 @@ export async function checkUsernameAvailability(username: string): Promise<{ ava
             return { available: false, error: "Username must be at least 3 characters long." };
         }
 
+        if (username.length > 20) {
+            return { available: false, error: "Username must not exceed 20 characters." };
+        }
+
+        if (/\s/.test(username)) {
+            return { available: false, error: "Username must not contain spaces." };
+        }
+
+        if (!/^[a-zA-Z_]/.test(username)) {
+            return { available: false, error: "Username must start with a letter or underscore." };
+        }
+
+        if (!/^[a-zA-Z_][a-zA-Z0-9_-]*$/.test(username)) {
+            return { available: false, error: "Username can only contain letters, numbers, underscores, and hyphens." };
+        }
+
         const existingUsername = await prisma.user.findFirst({
             where: {
                 username: {

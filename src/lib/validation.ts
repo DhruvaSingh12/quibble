@@ -13,8 +13,8 @@ export const signUpSchema = z
 
     username: requiredString
       .regex(
-        /^[a-zA-Z0-9_-]+$/,
-        "Username can only contain letters, numbers, underscores, and hyphens."
+        /^[a-zA-Z_][a-zA-Z0-9_-]*$/,
+        "Username must start with a letter or underscore, and can only contain letters, numbers, underscores, and hyphens."
       )
       .min(3, "Username must be at least 3 characters long.")
       .max(20, "Username must not exceed 20 characters."),
