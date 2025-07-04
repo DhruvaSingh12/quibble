@@ -8,28 +8,14 @@ import { formatRelativeDate } from "@/lib/utils";
 import PostActions from "./PostActions"; 
 import Linkify from "../Linkify";
 import UserTooltip from "../UserTooltip";
+import RichTextRenderer from "./RichTextRenderer";
 
 interface PostProps {
     post: PostData;
 }
 
-const MAX_CONTENT_LENGTH = 800;
-
 export default function Post({ post }: PostProps) {
-    const [isExpanded, setIsExpanded] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-    const toggleExpanded = () => setIsExpanded(!isExpanded);
-    const needsTruncation = post.content.length > MAX_CONTENT_LENGTH;
-    const truncateAtWordBoundary = (text: string, limit: number): string => {
-        if (text.length <= limit) return text;
-        const truncated = text.slice(0, limit);
-        const lastWhitespaceIndex = truncated.lastIndexOf(" ");
-        return lastWhitespaceIndex > -1 ? truncated.slice(0, lastWhitespaceIndex) + " ...." : truncated + " ....";
-    };
-    const displayedContent = isExpanded || !needsTruncation
-        ? post.content
-        : truncateAtWordBoundary(post.content, MAX_CONTENT_LENGTH);
 
     return (
         <Link href={`/posts/${post.id}`} passHref>
@@ -77,21 +63,12 @@ export default function Post({ post }: PostProps) {
 
                     <div className="relative">
                         <Linkify>
-                            <div className="text-[16px] whitespace-pre-line break-words text-justify text-muted-foreground">
-                                {displayedContent}
-                            </div>
+                            <RichTextRenderer 
+                                content={post.content}
+                                maxLength={800}
+                                className="text-[16px] whitespace-pre-line break-words text-justify text-muted-foreground"
+                            />
                         </Linkify>
-                        {needsTruncation && (
-                            <button
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    toggleExpanded();
-                                }}
-                                className="text-primary hover:underline mt-2 block text-sm"
-                            >
-                                {isExpanded ? "Read less" : "Read more"}
-                            </button>
-                        )}
                     </div>
                 </div>
             </article>

@@ -1,11 +1,212 @@
-.tiptap p.is-editor-empty:first-child::before{
-    color: theme("colors.muted.foreground");
-    content: attr(data-placeholder);
-    float: left;
-    height: 0;
-    pointer-events: none;
+.tiptap p.is-editor-empty:first-child::before {
+  color: theme("colors.muted.foreground");
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
 }
 
 .tiptap.ProseMirror {
-    outline: none;
+  outline: none;
+}
+
+/* Enhanced rich text formatting styles with better paste handling */
+.tiptap strong,
+.tiptap .tiptap-bold {
+  font-weight: 700;
+}
+
+.tiptap em,
+.tiptap .tiptap-italic {
+  font-style: italic;
+}
+
+.tiptap s,
+.tiptap .tiptap-strike {
+  text-decoration: line-through;
+}
+
+.tiptap code,
+.tiptap .tiptap-code {
+  background-color: theme("colors.muted.DEFAULT");
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas,
+    "Liberation Mono", Menlo, monospace;
+  font-size: 0.875em;
+  color: theme("colors.foreground");
+}
+
+.tiptap blockquote,
+.tiptap .tiptap-blockquote {
+  border-left: 4px solid theme("colors.primary.DEFAULT");
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 1rem;
+  color: theme("colors.muted.foreground");
+  font-style: italic;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Better paragraph handling for pasted content */
+.tiptap p,
+.tiptap .tiptap-paragraph {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+.tiptap p:first-child,
+.tiptap .tiptap-paragraph:first-child {
+  margin-top: 0;
+}
+
+.tiptap p:last-child,
+.tiptap .tiptap-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+/* Hard break styling */
+.tiptap br.tiptap-hard-break {
+  display: block;
+  margin: 0.25rem 0;
+}
+
+/* Underline support for pasted content */
+.tiptap u {
+  text-decoration: underline;
+}
+
+.tiptap ul,
+.tiptap ol {
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+
+.tiptap ul li {
+  list-style-type: disc;
+}
+
+.tiptap ol li {
+  list-style-type: decimal;
+}
+
+.tiptap li {
+  margin: 0.25rem 0;
+}
+
+.tiptap a {
+  color: theme("colors.primary.DEFAULT");
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.tiptap a:hover {
+  text-decoration: underline;
+}
+
+.tiptap p,
+.tiptap .tiptap-paragraph {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+.tiptap p:first-child,
+.tiptap .tiptap-paragraph:first-child {
+  margin-top: 0;
+}
+
+.tiptap p:last-child,
+.tiptap .tiptap-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+/* Handle empty paragraphs better */
+.tiptap p:empty {
+  height: 1.2em;
+}
+
+/* Preserve whitespace and formatting - improved for pasted content */
+.tiptap {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    word-break: break-word;
+}
+
+/* Better handling of pasted content */
+.tiptap [data-paste] {
+    background-color: transparent;
+}
+
+/* Handle pasted content with specific formatting */
+.tiptap *[style*="font-weight:bold"],
+.tiptap *[style*="font-weight: bold"],
+.tiptap *[style*="font-weight:700"],
+.tiptap *[style*="font-weight: 700"] {
+    font-weight: 700 !important;
+}
+
+.tiptap *[style*="font-style:italic"],
+.tiptap *[style*="font-style: italic"] {
+    font-style: italic !important;
+}
+
+.tiptap *[style*="text-decoration:line-through"],
+.tiptap *[style*="text-decoration: line-through"] {
+    text-decoration: line-through !important;
+}
+
+.tiptap *[style*="text-decoration:underline"],
+.tiptap *[style*="text-decoration: underline"] {
+    text-decoration: underline !important;
+}
+
+/* Typography improvements */
+.tiptap .typography-quote {
+  quotes: '"' '"' "'" "'";
+}
+
+.tiptap .typography-quote:before {
+  content: open-quote;
+}
+
+.tiptap .typography-quote:after {
+  content: close-quote;
+}
+
+/* Focus styles */
+.tiptap:focus {
+  outline: none;
+}
+
+/* Placeholder styles for lists */
+.tiptap ul p.is-editor-empty:first-child::before,
+.tiptap ol p.is-editor-empty:first-child::before {
+  content: "";
+}
+
+/* Ensure proper line height and spacing */
+.tiptap {
+  line-height: 1.6;
+}
+
+/* Responsive improvements */
+@media (max-width: 640px) {
+  .tiptap ul,
+  .tiptap ol {
+    padding-left: 1rem;
+  }
+
+  .tiptap blockquote {
+    padding-left: 0.75rem;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+/* Better mobile editing experience */
+@media (max-width: 768px) {
+  .tiptap {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
 }

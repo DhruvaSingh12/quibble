@@ -27,6 +27,9 @@ export function useEditPostMutation() {
                 }
             );
 
+            // Force invalidate to ensure UI updates
+            queryClient.invalidateQueries({ queryKey: ["post-feed"] });
+
             toast({
                 title: "Success",
                 description: "Your post has been updated.",
