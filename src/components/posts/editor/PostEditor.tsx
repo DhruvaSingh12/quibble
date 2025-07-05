@@ -16,6 +16,14 @@ import "./styles.css";
 import { useSubmitPostMutation } from "./mutations";
 import LoadingButton from "@/components/LoadingButton";
 import { Button } from "@/components/ui/Button";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogFooter,
+    DialogTitle,
+    DialogDescription
+} from "@/components/ui/Dialog";
 import { useState, useEffect, useCallback } from "react";
 import { 
     FaBold, 
@@ -34,6 +42,7 @@ export default function PostEditor() {
     const mutation = useSubmitPostMutation();
     const [isOpen, setIsOpen] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
     const editor = useEditor({
         extensions: [
@@ -76,7 +85,7 @@ export default function PostEditor() {
                         class: 'tiptap-blockquote',
                     },
                 },
-                hardBreak: false, // We'll use the extension instead
+                hardBreak: false, 
             }),
             HardBreak.configure({
                 HTMLAttributes: {
@@ -165,7 +174,11 @@ export default function PostEditor() {
             
             if (e.key === 'Escape') {
                 e.preventDefault();
-                closeDialog();
+                if (editor?.getText().trim().length) {
+                    setShowConfirmDialog(true);
+                } else {
+                    closeDialog();
+                }
             }
         };
 
@@ -210,6 +223,32 @@ export default function PostEditor() {
 
     return (
         <>
+            {/* Confirmation Dialog */}
+            <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Discard post?</DialogTitle>
+                        <DialogDescription>
+                            You have unsaved changes. Are you sure you want to discard this post?
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>
+                            Cancel
+                        </Button>
+                        <Button 
+                            variant="destructive" 
+                            onClick={() => {
+                                setShowConfirmDialog(false);
+                                closeDialog();
+                            }}
+                        >
+                            Discard
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
             {/* Compact Post Trigger */}
             <div className="flex items-center gap-3 rounded-2xl bg-card p-3 lg:p-5 shadow-sm">
                 <UserAvatar avatarUrl={user.avatarUrl} size={40} className="lg:w-[50px] w-[40px]" />
@@ -308,7 +347,7 @@ export default function PostEditor() {
                             </div>
                             
                             {/* Character Count */}
-                            <div className="flex justify-between items-center text-xs text-muted-foreground bg-muted/20 px-3 py-2 rounded-lg mt-2">
+                            <div className="flex justify-between items-start text-xs text-muted-foreground bg-muted/20 px-3 py-2 rounded-lg mt-2">
                                 <span>
                                     {textLength > 0 ? (
                                         <span className={textLength > 2000 ? "text-destructive" : ""}>
@@ -317,9 +356,6 @@ export default function PostEditor() {
                                     ) : (
                                         "Start typing..."
                                     )}
-                                </span>
-                                <span className="text-muted-foreground/70">
-                                    Use rich formatting to enhance your post
                                 </span>
                             </div>
 

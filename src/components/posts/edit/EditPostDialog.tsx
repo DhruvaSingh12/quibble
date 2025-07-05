@@ -17,6 +17,14 @@ import { PasteExtension } from "../editor/PasteExtension";
 import { useEffect, useCallback, useState } from "react";
 import { useSession } from "@/providers/SessionProvider";
 import UserAvatar from "@/components/UserAvatar";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogFooter,
+    DialogTitle,
+    DialogDescription
+} from "@/components/ui/Dialog";
 import { 
     FaX, 
     FaBold, 
@@ -39,6 +47,7 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
     const { user } = useSession();
     const mutation = useEditPostMutation();
     const [isVisible, setIsVisible] = useState(false);
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
     const editor = useEditor({
         extensions: [
@@ -81,7 +90,7 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
                         class: 'tiptap-blockquote',
                     },
                 },
-                hardBreak: false, // We'll use the extension instead
+                hardBreak: false,
             }),
             HardBreak.configure({
                 HTMLAttributes: {
@@ -121,12 +130,10 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
                 class: 'tiptap focus:outline-none',
             },
             handlePaste(view, event, slice) {
-                // Optionally handle paste events here if needed
                 return false;
             },
         },
     });
-        // ...existing code...
 
     useEffect(() => {
         if (open && editor && post.content) {
@@ -144,8 +151,8 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
         const originalContent = post.content.trim();
         const hasChanges = currentContent !== originalContent;
         if (hasChanges && !mutation.isPending) {
-            const confirmClose = window.confirm("You have unsaved changes. Are you sure you want to close?");
-            if (!confirmClose) return;
+            setShowConfirmDialog(true);
+            return;
         }
         setIsVisible(false);
         setTimeout(onClose, 200);
@@ -226,11 +233,39 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
     if (!open) return null;
 
     return (
-        <div
-            className={`fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm transition-all duration-300 ${
-                isVisible ? "opacity-100" : "opacity-0"
-            }`}
-        >
+        <>
+            {/* Confirmation Dialog */}
+            <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Discard changes?</DialogTitle>
+                        <DialogDescription>
+                            You have unsaved changes. Are you sure you want to close this dialog?
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>
+                            Cancel
+                        </Button>
+                        <Button 
+                            variant="destructive" 
+                            onClick={() => {
+                                setShowConfirmDialog(false);
+                                setIsVisible(false);
+                                setTimeout(onClose, 200);
+                            }}
+                        >
+                            Discard
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <div
+                className={`fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm transition-all duration-300 ${
+                    isVisible ? "opacity-100" : "opacity-0"
+                }`}
+            >
             <div
                 className={`mx-auto w-full max-w-2xl rounded-t-3xl bg-card shadow-2xl transition-all duration-300 ${
                     isVisible ? "translate-y-0 scale-100" : "translate-y-8 scale-95"
@@ -346,5 +381,6 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
                 </div>
             </div>
         </div>
+        </>
     );
 }
