@@ -84,3 +84,44 @@ export const updateUserProfileSchema = z.object({
 });
 
 export type UpdateUserProfileValues = z.infer<typeof updateUserProfileSchema>;
+
+export const forgotPasswordSchema = z.object({
+  email: requiredString
+    .email("Invalid email address!")
+    .regex(
+      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+      "Invalid email format or domain!"
+    ),
+});
+
+export type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;
+
+export const resetPasswordSchema = z
+  .object({
+    password: requiredString
+      .min(8, "Password must have at least 8 characters.")
+      .max(128, "Password cannot exceed 128 characters.")
+      .regex(
+        /[A-Z]/,
+        "Password must contain at least one uppercase letter."
+      )
+      .regex(
+        /[a-z]/,
+        "Password must contain at least one lowercase letter."
+      )
+      .regex(
+        /\d/,
+        "Password must contain at least one number."
+      )
+      .regex(
+        /[@$!%*?&]/,
+        "Password must contain at least one special character (@, $, !, %, *, ?, &)."
+      ),
+    confirmPassword: requiredString,
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords do not match!",
+  });
+
+export type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;

@@ -1,6 +1,6 @@
 "use client";
 
-import { loginSchema, LoginValues } from "@/lib/validation";
+import { resetPasswordSchema, ResetPasswordValues } from "@/lib/validation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -11,38 +11,66 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/Form";
-import Link from "next/link";
-import { Input } from "@/components/ui/Input";
 import { useState, useTransition } from "react";
-import { login } from "./actions";
+import { resetPassword } from "./actions";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import LoadingButton from "@/components/LoadingButton";
+import Link from "next/link";
 
-export default function LoginForm() {
-  const [error, setError] = useState<string>();
+interface ResetPasswordFormProps {
+  token: string;
+}
+
+export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
+  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+  const [message, setMessage] = useState<string>("");
   const [isPending, startTransition] = useTransition();
 
-  const form = useForm<LoginValues>({
-    resolver: zodResolver(loginSchema),
+  const form = useForm<ResetPasswordValues>({
+    resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
-      username: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
-  async function onSubmit(values: LoginValues) {
-    setError(undefined);
+  async function onSubmit(values: ResetPasswordValues) {
+    setStatus("idle");
+    setMessage("");
+    
     startTransition(async () => {
       try {
-        const result = await login(values);
+        const result = await resetPassword({ ...values, token });
         if (result?.error) {
-          setError(result.error);
+          setStatus("error");
+          setMessage(result.error);
+        } else {
+          setStatus("success");
+          setMessage("Your password has been reset successfully. You can now log in with your new password.");
+          form.reset();
         }
-        // If no error and no result (successful redirect), the redirect will happen automatically
       } catch (error) {
-        setError("Something went wrong. Please try again.");
+        setStatus("error");
+        setMessage("Something went wrong. Please try again.");
       }
     });
+  }
+
+  if (status === "success") {
+    return (
+      <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-center">
+        <h2 className="text-xl font-semibold mb-2 text-emerald-600">Password Reset Successful</h2>
+        <p className="mb-4 text-muted-foreground">
+          {message}
+        </p>
+        <Link 
+          href="/login" 
+          className="px-6 py-2 rounded-[16px] bg-primary text-primary-foreground inline-block"
+        >
+          Go to Login
+        </Link>
+      </div>
+    );
   }
 
   return (
@@ -52,66 +80,63 @@ export default function LoginForm() {
         className="space-y-[13px] flex flex-col items-stretch w-full px-4"
         noValidate
       >
-        {error && (
+        {status === "error" && (
           <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
-            {error}
+            {message}
           </div>
         )}
         
-        <FormField
-          name="username"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <div className="flex flex-row items-start justify-between gap-10"> 
-                <FormLabel className="text-[16px] text-foreground">Username</FormLabel>
-                <FormMessage />
-              </div>
-              <FormControl>
-                <Input
-                  placeholder="Username"
-                  {...field}
-                  className="border-border bg-card"
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+        <div className="text-sm text-muted-foreground">
+          Create a new password for your account.
+        </div>
+        
         <FormField
           name="password"
           control={form.control}
           render={({ field }) => (
             <FormItem>
               <div className="flex flex-row items-start justify-between gap-10"> 
-                <FormLabel className="text-[16px] text-foreground">Password</FormLabel>
+                <FormLabel className="text-[16px] text-foreground">New Password</FormLabel>
                 <FormMessage />
               </div>
               <FormControl>
                 <PasswordInput
-                  type="password"
-                  placeholder="Password"
+                  placeholder="Enter new password"
                   {...field}
                   className="border-border bg-card"
                 />
               </FormControl>
-              <div className="flex justify-end mt-1">
-                <Link 
-                  href="/forgot-password" 
-                  className="text-sm text-primary hover:underline"
-                >
-                  Forgot password?
-                </Link>
-              </div>
             </FormItem>
           )}
         />
+        
+        <FormField
+          name="confirmPassword"
+          control={form.control}
+          render={({ field }) => (
+            <FormItem>
+              <div className="flex flex-row items-start justify-between gap-10"> 
+                <FormLabel className="text-[16px] text-foreground">Confirm Password</FormLabel>
+                <FormMessage />
+              </div>
+              <FormControl>
+                <PasswordInput
+                  placeholder="Confirm new password"
+                  {...field}
+                  className="border-border bg-card"
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        
         <div className="flex flex-row items-center justify-center">
           <LoadingButton
             loading={isPending}
             type="submit"
             className="px-20 rounded-[16px] bg-primary text-primary-foreground py-3 mt-6 text-[15px] border-0"
           >
-            Log In
+            Reset Password
           </LoadingButton>
         </div>
       </form>
@@ -119,4 +144,4 @@ export default function LoginForm() {
   );
 }
 
-export { LoginForm };
+export { ResetPasswordForm };

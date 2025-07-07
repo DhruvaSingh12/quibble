@@ -30,6 +30,7 @@ model User {
   following          Follow[]            @relation("Following")
   followers          Follow[]            @relation("Followers")
   emailVerifications EmailVerification[]
+  passwordResets     PasswordReset[]
 
   createdAt DateTime @default(now())
 
@@ -77,4 +78,15 @@ model EmailVerification {
   createdAt DateTime @default(now())
 
   @@map("email_verifications")
+}
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expires   DateTime
+  createdAt DateTime @default(now())
+
+  @@map("password_resets")
 }

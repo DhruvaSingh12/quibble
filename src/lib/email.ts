@@ -104,3 +104,94 @@ Security tip: Never share this verification code with anyone. Quibble will never
 export function generateOTP(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
+
+export async function sendPasswordResetEmail(email: string, token: string, username: string) {
+  try {
+    const transporter = createTransporter();
+    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${token}`;
+
+    const mailOptions = {
+      from: `"${process.env.SMTP_FROM_NAME || 'Quibble'}" <${process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER}>`,
+      to: email,
+      subject: 'Password Reset - Quibble',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Password Reset</title>
+        </head>
+        <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f9f9f9;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%); padding: 40px 20px; text-align: center;">
+              <h1 style="color: white; margin: 0; font-size: 28px; font-weight: bold;">Quibble</h1>
+              <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Password Reset</p>
+            </div>
+            
+            <!-- Content -->
+            <div style="padding: 40px 20px;">
+              <h2 style="color: #1f2937; margin: 0 0 20px 0; font-size: 24px;">Hello ${username}!</h2>
+              <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 30px 0;">
+                We received a request to reset your password. Click the button below to create a new password:
+              </p>
+              
+              <!-- Reset Button -->
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${resetUrl}" style="display: inline-block; background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%); color: white; text-decoration: none; padding: 15px 30px; border-radius: 6px; font-weight: bold; letter-spacing: 0.5px; font-size: 16px;">Reset Password</a>
+              </div>
+              
+              <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 30px 0;">
+                If you didn't request a password reset, you can safely ignore this email. Your account is secure.
+              </p>
+              
+              <p style="color: #4b5563; font-size: 14px; line-height: 1.6; margin: 30px 0 0 0;">
+                This link will expire in 1 hour.
+              </p>
+              
+              <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 30px 0; border-radius: 0 6px 6px 0;">
+                <p style="color: #92400e; margin: 0; font-size: 14px;">
+                  <strong>Security tip:</strong> Never share your password with anyone. Quibble will never ask for your password via phone or email.
+                </p>
+              </div>
+            </div>
+            
+            <!-- Footer -->
+            <div style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+              <p style="color: #6b7280; margin: 0; font-size: 14px;">
+                © 2025 Quibble. All rights reserved.
+              </p>
+              <p style="color: #9ca3af; margin: 10px 0 0 0; font-size: 12px;">
+                This is an automated message, please do not reply to this email.
+              </p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+      text: `
+Hello ${username}!
+
+We received a request to reset your password. Click the link below to create a new password:
+
+${resetUrl}
+
+If you didn't request a password reset, you can safely ignore this email. Your account is secure.
+
+This link will expire in 1 hour.
+
+Security tip: Never share your password with anyone. Quibble will never ask for your password via phone or email.
+
+© 2025 Quibble. All rights reserved.
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`Password reset email sent successfully to ${email}`);
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending password reset email:', error);
+    return { success: false, error: 'Failed to send password reset email' };
+  }
+}
