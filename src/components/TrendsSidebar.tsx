@@ -94,11 +94,28 @@ async function WhoToFollow() {
 
 const getTrendingTopics = unstable_cache(
     async () => {
+        // Using a more robust regex to extract hashtags from HTML content
+        // This will match hashtags in the text content, ignoring HTML tags
+        // Updated to handle TipTap HTML content better
         const result = await prisma.$queryRaw<{ hashtag: string; count: bigint }[]>`
-        SELECT LOWER(unnest(regexp_matches(content, '#[[:alnum:]_]+', 'g'))) AS hashtag, 
-        COUNT(*) as count FROM posts 
-        GROUP BY (hashtag) 
-        ORDER BY count DESC, hashtag ASC 
+        WITH extracted_hashtags AS (
+            SELECT 
+                LOWER(matches[1]) AS hashtag
+            FROM 
+                posts,
+                LATERAL regexp_matches(content, '#([[:alnum:]_]+)', 'g') AS matches
+            WHERE 
+                content ~ '#[[:alnum:]_]+'
+        )
+        SELECT 
+            hashtag,
+            COUNT(*) as count 
+        FROM 
+            extracted_hashtags
+        GROUP BY 
+            hashtag
+        ORDER BY 
+            count DESC, hashtag ASC
         LIMIT 5`;
 
         return result.map((row) => ({
@@ -119,11 +136,9 @@ async function TrendingTopics() {
             <h2 className="text-xl font-semibold mb-3">Trending Topics</h2>
             <div>
                 {trendingTopics.map(({ hashtag, count }) => {
-                    const title = hashtag.split("#")[1];
-
                     return (
-                        <Link key={title} href={'/hashtag/${title}'} className="flex flex-row justify-between">
-                            <p className="line-clamp-1 break-all font-semibold hover:underline" title={hashtag}>{hashtag}</p>
+                        <Link key={hashtag} href={`/hashtag/${hashtag}`} className="flex flex-row justify-between">
+                            <p className="line-clamp-1 break-all font-semibold hover:underline" title={`#${hashtag}`}>{`#${hashtag}`}</p>
                             <p className="line-clamp-1 break-all text-muted-foreground">{formatNumber(count)} {count === 1 ? "post" : "posts"}</p>
                         </Link>
                     )

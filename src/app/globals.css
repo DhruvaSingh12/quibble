@@ -95,3 +95,29 @@
 *::-webkit-scrollbar-track {
   background: transparent; 
 }
+
+.mention-highlight {
+  color: hsl(var(--primary));
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.mention-highlight:hover,
+.mention-highlight:focus {
+  text-decoration: underline;
+  outline: none;
+}
+
+.hashtag-highlight {
+  color: hsl(var(--primary));
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.hashtag-highlight:hover,
+.hashtag-highlight:focus {
+  text-decoration: underline;
+  outline: none;
+}
+
+/* Tooltip styles removed */

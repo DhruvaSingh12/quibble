@@ -14,7 +14,8 @@ import Dropcursor from "@tiptap/extension-dropcursor";
 import Gapcursor from "@tiptap/extension-gapcursor";
 import HardBreak from "@tiptap/extension-hard-break";
 import { PasteExtension } from "../editor/PasteExtension";
-import { useEffect, useCallback, useState } from "react";
+import { MentionsInputExtension } from "../editor/mention/MentionsInputExtension";
+import React, { useEffect, useCallback, useState } from "react";
 import { useSession } from "@/providers/SessionProvider";
 import UserAvatar from "@/components/UserAvatar";
 import {
@@ -36,6 +37,7 @@ import {
     FaCode
 } from "react-icons/fa6";
 import "../editor/styles.css";
+import { toast } from "@/components/ui/use-toast";
 
 interface EditPostDialogProps {
     post: PostData;
@@ -117,6 +119,7 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
             }),
             Gapcursor,
             PasteExtension,
+            MentionsInputExtension,
             Placeholder.configure({
                 placeholder: "What's on your mind?",
             })
@@ -136,9 +139,20 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
     });
 
     useEffect(() => {
-        if (open && editor && post.content) {
-            editor.commands.setContent(post.content);
-            setIsVisible(true);
+        if (open) {
+            // Set content and make visible
+            if (editor && post.content) {
+                editor.commands.setContent(post.content);
+                setIsVisible(true);
+            }
+            
+            // Disable body scrolling when dialog is open
+            document.body.style.overflow = 'hidden';
+            
+            // Re-enable scrolling when dialog closes
+            return () => {
+                document.body.style.overflow = '';
+            };
         }
     }, [open, editor, post]);
 
@@ -154,6 +168,11 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
             setShowConfirmDialog(true);
             return;
         }
+        toast({
+            title: "Edit canceled",
+            description: "Changes to your post were discarded.",
+            variant: "default"
+        });
         setIsVisible(false);
         setTimeout(onClose, 200);
     }, [input, post, mutation, onClose]);
@@ -192,12 +211,8 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
                     break;
             }
         }
-        // Handle escape key
-        if (e.key === 'Escape') {
-            e.preventDefault();
-            handleClose();
-        }
-    }, [open, editor, textLength, input, post, handleClose, onSubmit]);
+        // Remove Escape key handling as we now handle it in the Dialog component
+    }, [open, editor, textLength, input, post, onSubmit]);
 
     const ToolbarButton = ({ 
         onClick, 
@@ -232,6 +247,8 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
 
     if (!open) return null;
 
+    if (!open) return null;
+
     return (
         <>
             {/* Confirmation Dialog */}
@@ -240,17 +257,25 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
                     <DialogHeader>
                         <DialogTitle>Discard changes?</DialogTitle>
                         <DialogDescription>
-                            You have unsaved changes. Are you sure you want to close this dialog?
+                            You have unsaved changes. Are you sure you want to discard these changes?
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>
+                        <Button
+                            variant="outline"
+                            onClick={() => setShowConfirmDialog(false)}
+                        >
                             Cancel
                         </Button>
-                        <Button 
-                            variant="destructive" 
+                        <Button
+                            variant="destructive"
                             onClick={() => {
                                 setShowConfirmDialog(false);
+                                toast({
+                                    title: "Changes discarded",
+                                    description: "Your changes have been discarded.",
+                                    variant: "destructive"
+                                });
                                 setIsVisible(false);
                                 setTimeout(onClose, 200);
                             }}
@@ -262,115 +287,119 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
             </Dialog>
 
             <div
-                className={`fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm transition-all duration-300 ${
-                    isVisible ? "opacity-100" : "opacity-0"
-                }`}
+                className="fixed inset-0 z-50 flex items-end justify-center backdrop-blur-sm transition-opacity duration-300"
             >
-            <div
-                className={`mx-auto w-full max-w-2xl rounded-t-3xl bg-card shadow-2xl transition-all duration-300 ${
-                    isVisible ? "translate-y-0 scale-100" : "translate-y-8 scale-95"
-                }`}
-            >
-                <div className="flex items-center justify-between p-4 pb-4">
-                    <div className="flex items-center gap-3">
-                        <UserAvatar avatarUrl={user.avatarUrl} size={40} />
-                        <div>
-                            <h2 className="text-lg font-medium text-card-foreground">Edit post</h2>
-                            <p className="text-sm text-muted-foreground">@{user.username}</p>
+                <div
+                    className={`w-full max-w-2xl rounded-t-2xl bg-card shadow-2xl transition-all duration-300 ${
+                        isVisible ? "translate-y-0 scale-100" : "translate-y-8 scale-95"
+                    }`}
+                >
+                    {/* Header */}
+                    <div className="flex items-center justify-between border-b p-4">
+                        <div className="flex items-center gap-3">
+                            <UserAvatar avatarUrl={user.avatarUrl} size={40} />
+                            <div>
+                                <h2 className="text-lg font-medium text-card-foreground">
+                                    Edit post
+                                </h2>
+                                <p className="text-sm text-muted-foreground">
+                                    @{user.username}
+                                </p>
+                            </div>
                         </div>
+                        <button
+                            onClick={handleClose}
+                            className="rounded-full p-2 text-muted-foreground hover:bg-muted"
+                        >
+                            <FaX className="h-3 w-3" />
+                        </button>
                     </div>
-                    <button
-                        onClick={handleClose}
-                        className="rounded-full p-2 text-muted-foreground hover:bg-muted"
-                    >
-                        <FaX className="h-3 w-3" />
-                    </button>
-                </div>
 
-                {/* Toolbar */}
-                <div className="flex items-center gap-1 px-4 pb-3 border-b bg-muted/20">
-                    <ToolbarButton
-                        onClick={() => editor?.chain().focus().toggleBold().run()}
-                        isActive={editor?.isActive('bold')}
-                        icon={FaBold}
-                        title="Bold (Ctrl+B)"
-                    />
-                    <ToolbarButton
-                        onClick={() => editor?.chain().focus().toggleItalic().run()}
-                        isActive={editor?.isActive('italic')}
-                        icon={FaItalic}
-                        title="Italic (Ctrl+I)"
-                    />
-                    <ToolbarButton
-                        onClick={() => editor?.chain().focus().toggleStrike().run()}
-                        isActive={editor?.isActive('strike')}
-                        icon={FaStrikethrough}
-                        title="Strikethrough"
-                    />
-                    <div className="h-6 w-px bg-border mx-2" />
-                    <ToolbarButton
-                        onClick={() => editor?.chain().focus().toggleBulletList().run()}
-                        isActive={editor?.isActive('bulletList')}
-                        icon={FaListUl}
-                        title="Bullet List"
-                    />
-                    <ToolbarButton
-                        onClick={() => editor?.chain().focus().toggleOrderedList().run()}
-                        isActive={editor?.isActive('orderedList')}
-                        icon={FaListOl}
-                        title="Numbered List"
-                    />
-                    <div className="h-6 w-px bg-border mx-2" />
-                    <ToolbarButton
-                        onClick={() => editor?.chain().focus().toggleBlockquote().run()}
-                        isActive={editor?.isActive('blockquote')}
-                        icon={FaQuoteLeft}
-                        title="Quote"
-                    />
-                    <ToolbarButton
-                        onClick={() => editor?.chain().focus().toggleCode().run()}
-                        isActive={editor?.isActive('code')}
-                        icon={FaCode}
-                        title="Inline Code"
-                    />
-                </div>
+                    {/* Toolbar */}
+                    <div className="flex items-center gap-1 border-b bg-muted/20 p-3">
+                        <ToolbarButton
+                            onClick={() => editor?.chain().focus().toggleBold().run()}
+                            isActive={editor?.isActive("bold")}
+                            icon={FaBold}
+                            title="Bold"
+                        />
+                        <ToolbarButton
+                            onClick={() => editor?.chain().focus().toggleItalic().run()}
+                            isActive={editor?.isActive("italic")}
+                            icon={FaItalic}
+                            title="Italic"
+                        />
+                        <ToolbarButton
+                            onClick={() => editor?.chain().focus().toggleStrike().run()}
+                            isActive={editor?.isActive("strike")}
+                            icon={FaStrikethrough}
+                            title="Strikethrough"
+                        />
+                        <div className="mx-2 h-6 w-px bg-border" />
+                        <ToolbarButton
+                            onClick={() => editor?.chain().focus().toggleBulletList().run()}
+                            isActive={editor?.isActive("bulletList")}
+                            icon={FaListUl}
+                            title="Bullet List"
+                        />
+                        <ToolbarButton
+                            onClick={() => editor?.chain().focus().toggleOrderedList().run()}
+                            isActive={editor?.isActive("orderedList")}
+                            icon={FaListOl}
+                            title="Numbered List"
+                        />
+                        <div className="mx-2 h-6 w-px bg-border" />
+                        <ToolbarButton
+                            onClick={() => editor?.chain().focus().toggleBlockquote().run()}
+                            isActive={editor?.isActive("blockquote")}
+                            icon={FaQuoteLeft}
+                            title="Quote"
+                        />
+                        <ToolbarButton
+                            onClick={() => editor?.chain().focus().toggleCode().run()}
+                            isActive={editor?.isActive("code")}
+                            icon={FaCode}
+                            title="Inline Code"
+                        />
+                    </div>
 
-                <div className="px-6 pb-6">
-                    <div className="space-y-4">
-                        <div className="border rounded-lg focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/50 transition-all">
-                            <EditorContent 
+                    {/* Editor Content */}
+                    <div className="p-4">
+                        <div className="rounded-lg border transition-all focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20">
+                            <EditorContent
                                 editor={editor}
-                                className="w-full px-4 py-3 min-h-[120px] max-h-[300px] overflow-y-auto prose prose-sm max-w-none focus-within:outline-none cursor-text [&>div]:min-h-[120px] [&>div]:outline-none"
+                                className="prose prose-sm max-h-[400px] min-h-[200px] w-full max-w-none cursor-text overflow-y-auto px-4 py-3 focus-within:outline-none [&>div]:min-h-[200px] [&>div]:outline-none"
                             />
                         </div>
-                        
-                        <div className="flex justify-between items-center text-xs text-muted-foreground bg-muted/20 px-3 py-2 rounded-lg">
+
+                        {/* Character Count */}
+                        <div className="mt-2 flex items-start justify-between rounded-lg bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
                             <span>
                                 {textLength > 0 ? (
-                                    <span className={textLength > 1000 ? "text-destructive" : ""}>
+                                    <span
+                                        className={textLength > 2000 ? "text-destructive" : ""}
+                                    >
                                         {textLength} characters
                                     </span>
                                 ) : (
                                     "Start typing..."
                                 )}
                             </span>
-                            <span className="text-muted-foreground/70">
-                                Use rich formatting • Ctrl+B for bold • Ctrl+I for italic
-                            </span>
                         </div>
 
-                        <div className="flex justify-center gap-2 pt-2">
-                            <Button 
-                                variant="outline" 
+                        {/* Action Buttons */}
+                        <div className="flex justify-center gap-2 pt-4">
+                            <Button
+                                variant="outline"
                                 onClick={handleClose}
                                 disabled={mutation.isPending}
                                 className="min-w-[100px]"
                             >
                                 Cancel
                             </Button>
-                            <LoadingButton 
+                            <LoadingButton
                                 loading={mutation.isPending}
-                                onClick={onSubmit} 
+                                onClick={onSubmit}
                                 disabled={!textLength || input.trim() === post.content.trim()}
                                 className="min-w-[120px]"
                             >
@@ -380,7 +409,6 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
                     </div>
                 </div>
             </div>
-        </div>
         </>
     );
 }
