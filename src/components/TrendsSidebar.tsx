@@ -6,7 +6,7 @@ import { Suspense } from "react";
 import UserAvatar from "./UserAvatar";
 import { unstable_cache } from "next/cache";
 import { formatNumber } from "@/lib/utils";
-import FollowButton from "./FollowButton";
+import FollowButton from "./follow/FollowButton";
 import { getUserDataSelect } from "@/lib/types";
 import UserTooltip from "./UserTooltip";
 

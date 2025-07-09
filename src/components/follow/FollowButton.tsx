@@ -3,8 +3,8 @@
 import useFollowerInfo from "@/hooks/useFollowerInfo";
 import kyInstance from "@/lib/ky";
 import { QueryKey, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useToast } from "./ui/use-toast";
-import { Button } from "./ui/Button";
+import { useToast } from "../ui/use-toast";
+import { Button } from "../ui/Button";
 import { UserMinus, UserPlus2Icon } from "lucide-react";
 import { FollowerInfo } from "@/lib/types";
 

@@ -1,6 +1,6 @@
 import { validateRequest } from "@/auth";
-import FollowButton from "@/components/FollowButton";
-import FollowerCount from "@/components/FollowerCount";
+import FollowButton from "@/components/follow/FollowButton";
+import FollowerCount from "@/components/follow/FollowerCount";
 import UserAvatar from "@/components/UserAvatar";
 import prisma from "@/lib/prisma";
 import { FollowerInfo, getUserDataSelect, UserData } from "@/lib/types";
@@ -12,6 +12,7 @@ import { cache } from "react";
 import UserPosts from "./components/UserPosts";
 import Linkify from "@/components/Linkify";
 import EditProfileButton from "./components/EditProfileButton";
+import FollowingCount from "@/components/follow/FollowingCount";
 
 interface PageProps {
   params: Promise<{ username: string }>;
@@ -80,7 +81,7 @@ interface UserProfileProps {
 }
 
 async function UserProfile({ user, loggedInUserId }: UserProfileProps) {
-  const followerInfo: FollowerInfo = {
+  const userInfo: FollowerInfo = {
     id: user.id,
     username: user.username,
     displayName: user.displayName,
@@ -90,6 +91,16 @@ async function UserProfile({ user, loggedInUserId }: UserProfileProps) {
       ({ followerId }) => followerId === loggedInUserId,
     ),
     bio: user.bio,
+  };
+
+  const followerInfo = {
+    ...userInfo,
+    followers: user._count.followers,
+  };
+
+  const followingInfo = {
+    ...userInfo,
+    followers: user._count.following,
   };
 
   return (
@@ -119,6 +130,7 @@ async function UserProfile({ user, loggedInUserId }: UserProfileProps) {
               <p>{user._count.posts > 1 ? "Posts" : "Post"}</p>
             </span>
             <FollowerCount userId={user.id} initialState={followerInfo} />
+            <FollowingCount userId={user.id} initialState={{ following: user._count.following }} />
           </div>
         </div>
         {user.id === loggedInUserId ? (

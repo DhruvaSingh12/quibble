@@ -7,7 +7,7 @@ import Link from "next/link";
 import UserAvatar from "./UserAvatar";
 import Linkify from "./Linkify";
 import { useSession } from "@/providers/SessionProvider";
-import FollowButton from "./FollowButton";
+import FollowButton from "./follow/FollowButton";
 
 interface UserTooltipProps extends PropsWithChildren {
   user: UserData;

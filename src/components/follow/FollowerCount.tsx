@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import FollowerModal from "./FollowerModal";
 import { FollowerListItem } from "@/lib/types";
 import { formatNumber } from "@/lib/utils";
+import { Button } from "@/components/ui/Button";
 
 interface FollowerCountProps {
     userId: string;
@@ -37,13 +38,17 @@ function FollowerCount({ userId, initialState }: FollowerCountProps) {
 
     return (
         <div>
-            <span
-                className="flex flex-row gap-1.5 hover:underline cursor-pointer"
+            <Button
                 onClick={openModal}
+                variant="ghost"
+                size="sm"
+                className="gap-2 group hover:bg-muted border"
             >
-                <p className="font-semibold">{formatNumber(data.followers)}</p>
-                {data.followers === 1 ? "Follower" : "Followers"}
-            </span>
+                <span className="font-semibold">{formatNumber(data.followers)}</span>
+                <span className="group-hover:text-foreground transition-colors">
+                    {data.followers === 1 ? "Follower" : "Followers"}
+                </span>
+            </Button>
             {showModal && (
                 <FollowerModal
                     followers={followerList}
