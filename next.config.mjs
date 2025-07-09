@@ -21,6 +21,46 @@ const nextConfig = {
           hostname: "utfs.io",
           pathname: `/a/${process.env.NEXT_PUBLIC_UPLOADTHING_APP_ID}/`
         },
+        {
+          protocol: "https",
+          hostname: "i.ytimg.com",
+        },
+        {
+          protocol: "https",
+          hostname: "**.youtube.com",
+        },
+        {
+          protocol: "https",
+          hostname: "**.vimeo.com",
+        },
+        {
+          protocol: "https",
+          hostname: "**.giphy.com",
+        },
+        {
+          protocol: "https",
+          hostname: "**.spotify.com",
+        },
+        {
+          protocol: "https",
+          hostname: "i.scdn.co",
+        },
+        {
+          protocol: "https",
+          hostname: "**.twimg.com",
+        },
+        {
+          protocol: "https",
+          hostname: "**.googleusercontent.com",
+        },
+        {
+          protocol: "https",
+          hostname: "images.unsplash.com",
+        },
+        {
+          protocol: "https",
+          hostname: "**.cdninstagram.com",
+        }
       ],
     },
   };

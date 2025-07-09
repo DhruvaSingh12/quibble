@@ -13,6 +13,7 @@ import CharacterCount from "@tiptap/extension-character-count";
 import Dropcursor from "@tiptap/extension-dropcursor";
 import Gapcursor from "@tiptap/extension-gapcursor";
 import HardBreak from "@tiptap/extension-hard-break";
+import Link from "@tiptap/extension-link";
 import React, { useEffect, useCallback, useState } from "react";
 import { useSession } from "@/providers/SessionProvider";
 import UserAvatar from "@/components/UserAvatar";
@@ -62,6 +63,14 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
             }),
             CharacterCount.configure({limit: 3000}),
             Dropcursor.configure({color: '#3b82f6', width: 2}),
+            Link.configure({
+                HTMLAttributes: {
+                    class: 'text-primary hover:underline',
+                },
+                autolink: true, // Automatically detects and converts URLs to links
+                openOnClick: false, // Don't open links while editing
+                linkOnPaste: true, // Automatically convert pasted URLs to links
+            }),
             Gapcursor,
             PasteExtension,
             MentionsInputExtension,

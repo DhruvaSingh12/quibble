@@ -9,6 +9,7 @@ import CharacterCount from "@tiptap/extension-character-count";
 import Dropcursor from "@tiptap/extension-dropcursor";
 import Gapcursor from "@tiptap/extension-gapcursor";
 import HardBreak from "@tiptap/extension-hard-break";
+import Link from "@tiptap/extension-link";
 import { useSession } from "@/providers/SessionProvider";
 import UserAvatar from "@/components/UserAvatar";
 import "../common/editor.css";
@@ -62,6 +63,14 @@ export default function PostEditor() {
         width: 2,
       }),
       Gapcursor,
+      Link.configure({
+        HTMLAttributes: {
+          class: 'text-primary hover:underline',
+        },
+        autolink: true, // Automatically detects and converts URLs to links
+        openOnClick: false, // Don't open links while editing
+        linkOnPaste: true, // Automatically convert pasted URLs to links
+      }),
       PasteExtension,
       MentionsInputExtension,
       Placeholder.configure({

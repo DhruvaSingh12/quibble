@@ -5,27 +5,32 @@ import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import TextStyle from "@tiptap/extension-text-style";
 import Typography from "@tiptap/extension-typography";
+import Link from "@tiptap/extension-link";
 import "./editor.css";
 import { useRouter } from "next/navigation";
 import { MentionsHighlightExtension } from "./mention/MentionsHashtagsExtension";
+import LinkPreview from "./LinkPreview";
 
 interface RichTextRendererProps {
     content: string;
     maxLength?: number;
     className?: string;
+    showLinkPreviews?: boolean;
 }
 
 export default function RichTextRenderer({ 
     content, 
     maxLength = 800, 
-    className = "" 
+    className = "",
+    showLinkPreviews = true
 }: RichTextRendererProps) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [needsTruncation, setNeedsTruncation] = useState(false);
+    const [links, setLinks] = useState<string[]>([]);
     const router = useRouter();
     const contentRef = useRef<HTMLDivElement>(null);
 
-    // Handle clicks on mentions and hashtags
+    // Handle clicks on mentions, hashtags, and links
     const handleEditorClick = useCallback((event: React.MouseEvent) => {
         const target = event.target as HTMLElement;
         
@@ -46,6 +51,16 @@ export default function RichTextRenderer({
             const username = target.getAttribute('data-username');
             if (username) {
                 router.push(`/users/${username}`);
+            }
+        }
+
+        // Handle links - open in new tab
+        if (target.tagName === 'A' && target.hasAttribute('href')) {
+            event.preventDefault();
+            event.stopPropagation();
+            const href = target.getAttribute('href');
+            if (href) {
+                window.open(href, '_blank', 'noopener,noreferrer');
             }
         }
     }, [router]);
@@ -97,6 +112,28 @@ export default function RichTextRenderer({
                 }
             });
         });
+
+        // Make links accessible
+        const linkElements = contentRef.current.querySelectorAll('a[href]');
+        linkElements.forEach(el => {
+            const href = el.getAttribute('href');
+            if (!href) return;
+            
+            // Make focusable (already is for <a> tags)
+            el.setAttribute('target', '_blank');
+            el.setAttribute('rel', 'noopener noreferrer');
+            el.setAttribute('aria-label', `Open link to ${href} in new tab`);
+            
+            // Add keyboard handler
+            el.addEventListener('keydown', (e: Event) => {
+                const keyEvent = e as KeyboardEvent;
+                if (keyEvent.key === 'Enter' || keyEvent.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.open(href, '_blank', 'noopener,noreferrer');
+                }
+            });
+        });
     }, [content, router]);
 
     const editor = useEditor({
@@ -114,11 +151,16 @@ export default function RichTextRenderer({
             TextStyle,
             Typography,
             MentionsHighlightExtension,
+            Link.configure({
+                HTMLAttributes: {
+                    class: 'text-primary hover:underline',
+                }
+            }),
         ],
         content: content,
         editable: false,
         immediatelyRender: false,
-    }, [content]); // Add content as dependency to recreate editor when content changes
+    }, [content]); 
 
     useEffect(() => {
         if (!editor) return;
@@ -141,6 +183,23 @@ export default function RichTextRenderer({
             
             // Set truncated content
             editor.commands.setContent(`<p>${finalText}</p>`);
+        }
+
+        // Extract links from content when expanded or not truncated
+        if (isExpanded || !shouldTruncate) {
+            const doc = editor.getHTML();
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = doc;
+            
+            const linkElements = tempDiv.getElementsByTagName('a');
+            const newLinks = Array.from(linkElements)
+                .map(a => a.getAttribute('href'))
+                .filter((href): href is string => !!href)
+                .slice(0, 3); // Limit to 3 previews maximum
+            
+            setLinks(newLinks);
+        } else {
+            setLinks([]);
         }
     }, [editor, content, maxLength, isExpanded]);
     
@@ -166,6 +225,9 @@ export default function RichTextRenderer({
                     {isExpanded ? "Read less" : "Read more"}
                 </button>
             )}
+            {showLinkPreviews && links.map((url, index) => (
+                <LinkPreview key={`${url}-${index}`} url={url} />
+            ))}
         </div>
     );
 }

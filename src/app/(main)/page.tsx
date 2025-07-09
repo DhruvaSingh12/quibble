@@ -8,7 +8,7 @@ import PostEditor from '@/components/posts/create/CreatePostDialog';
 export default function Home() {
 
   return (
-    <div className="w-full mt-[3px] lg:mt-[8px] flex-col rounded-2xl items-center justify-center space-y-5">
+    <div className="w-full mt-[3px] lg:mt-[8px] flex-col rounded-2xl items-center justify-center space-y-3">
       <PostEditor />
       <Tabs defaultValue='for-you'>
         <TabsList>
