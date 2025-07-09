@@ -73,6 +73,7 @@ export interface FollowerListItem {
     avatarUrl: string | null;
     bio: string | null;
     joined: string;
+    followers: number;
     isFollowedByUser: boolean;
     isFollowedByViewer?: boolean;
 }

@@ -11,7 +11,10 @@ export default function useFollowerInfo(
     queryFn: () =>
       kyInstance.get(`/api/users/${userId}/followers`).json<FollowerInfo>(),
     initialData: initialState,
-    staleTime: Infinity,
+    // Set a shorter staleTime to ensure data is refreshed more frequently
+    staleTime: 1000 * 60, // 1 minute
+    // Add refetchOnMount to ensure fresh data when component mounts
+    refetchOnMount: true,
   });
 
   return query;

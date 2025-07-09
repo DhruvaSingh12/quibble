@@ -37,6 +37,11 @@ export async function GET(
                   followerId: true,
                 },
               },
+              _count: {
+                select: {
+                  followers: true,
+                },
+              },
             },
           },
         },
@@ -57,6 +62,7 @@ export async function GET(
     bio: f.follower.bio,
     joined: f.follower.createdAt,
     isFollowedByUser: f.follower.followers.length > 0,
+    followers: f.follower._count.followers,
   }));
 
   const data = {

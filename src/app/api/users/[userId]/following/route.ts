@@ -33,6 +33,11 @@ export async function GET(
                                 followerId: true,
                             },
                         },
+                        _count: {
+                            select: {
+                                followers: true,
+                            },
+                        },
                     },
                 },
             },
@@ -46,6 +51,7 @@ export async function GET(
             username: item.following.username,
             displayName: item.following.displayName,
             avatarUrl: item.following.avatarUrl,
+            followers: item.following._count.followers,
             isFollowedByViewer: item.following.followers.length > 0
         }));
 

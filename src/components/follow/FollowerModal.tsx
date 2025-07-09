@@ -99,7 +99,7 @@ function FollowerModal({ followers, onClose }: FollowerModalProps) {
                               displayName: follower.displayName,
                               avatarUrl: follower.avatarUrl,
                               bio: follower.bio,
-                              followers: 0,
+                              followers: follower.followers, 
                               isFollowedByUser: follower.isFollowedByUser,
                             }}
                           />

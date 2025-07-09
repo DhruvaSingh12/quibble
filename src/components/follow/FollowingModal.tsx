@@ -100,7 +100,7 @@ function FollowingModal({ following, onClose }: FollowingModalProps) {
                               displayName: followedUser.displayName || followedUser.username,
                               avatarUrl: followedUser.avatarUrl,
                               bio: followedUser.bio,
-                              followers: 0,
+                              followers: followedUser.followers,
                               isFollowedByUser: followedUser.isFollowedByUser,
                             }}
                           />
