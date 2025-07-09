@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { PostData } from "../../lib/types";
-import UserAvatar from "../UserAvatar";
+import UserTooltip from "@/components/UserTooltip";
+import UserAvatar from "@/components/UserAvatar";
 import { formatRelativeDate } from "@/lib/utils";
 import PostActions from "./PostActions";
-import UserTooltip from "../UserTooltip";
-import RichTextRenderer from "./RichTextRenderer";
+import RichTextRenderer from "./common/RichTextRenderer";
+import { PostData } from "@/lib/types";
 
 interface PostProps {
   post: PostData;

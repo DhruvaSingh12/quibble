@@ -1,9 +1,9 @@
 import React from 'react';
-import PostEditor from "@/components/posts/editor/PostEditor";
 import ForYouFeed from './components/ForYouFeed';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import FollowingFeed from './components/FollowingFeed';
 import MyPosts from './components/MyPosts';
+import PostEditor from '@/components/posts/create/CreatePostDialog';
 
 export default function Home() {
 

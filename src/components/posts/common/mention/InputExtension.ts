@@ -2,8 +2,8 @@
 
 import { Extension } from "@tiptap/core";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
-import { createMentionHashtagDecorations } from "./MentionDecorations";
-import { MentionSuggestionManager } from "./MentionSuggestionManager";
+import { createMentionHashtagDecorations } from "./Decorations";
+import { MentionSuggestionService } from "./MentionSuggestionService";
 
 export const MentionsInputExtension = Extension.create({
   name: "mentionsInput",
@@ -23,7 +23,7 @@ export const MentionsInputExtension = Extension.create({
 
       new Plugin({
         key: mentionSuggestionsKey,
-        view: () => new MentionSuggestionManager(),
+        view: () => new MentionSuggestionService(),
       }),
     ];
   },

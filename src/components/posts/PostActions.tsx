@@ -2,8 +2,6 @@
 
 import { PostData } from "@/lib/types";
 import { useState } from "react";
-import DeletePostDialog from "./delete/DeletePostDialog";
-import EditPostDialog from "./edit/EditPostDialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,8 +11,10 @@ import {
 import { Button } from "@/components/ui/Button";
 import { MoreHorizontalIcon, Trash2, Edit } from "lucide-react";
 import { HiOutlineShare } from "react-icons/hi";
-import ShareModal from "./share/ShareModal";
 import { useSession } from "@/providers/SessionProvider";
+import DeletePostDialog from "./delete/DeletePostDialog";
+import EditPostDialog from "./edit/EditPostDialog";
+import ShareModal from "./share/ShareModal";
 
 interface PostActionsProps {
   post: PostData;

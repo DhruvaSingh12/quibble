@@ -9,10 +9,9 @@ import CharacterCount from "@tiptap/extension-character-count";
 import Dropcursor from "@tiptap/extension-dropcursor";
 import Gapcursor from "@tiptap/extension-gapcursor";
 import HardBreak from "@tiptap/extension-hard-break";
-import { PasteExtension } from "./PasteExtension";
 import { useSession } from "@/providers/SessionProvider";
 import UserAvatar from "@/components/UserAvatar";
-import "./styles.css";
+import "../common/editor.css";
 import { useSubmitPostMutation } from "./mutations";
 import LoadingButton from "@/components/LoadingButton";
 import { Button } from "@/components/ui/Button";
@@ -20,7 +19,8 @@ import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogD
 import { useState, useEffect, useCallback } from "react";
 import { FaBold, FaItalic, FaStrikethrough, FaListUl, FaListOl, FaQuoteLeft, FaCode, FaX, FaPlus } from "react-icons/fa6";
 import { toast } from "@/components/ui/use-toast";
-import { MentionsInputExtension } from "./mention/MentionsInputExtension";
+import { PasteExtension } from "../common/PasteExtension";
+import { MentionsInputExtension } from "../common/mention/InputExtension";
 
 export default function PostEditor() {
   const { user } = useSession();

@@ -5,9 +5,9 @@ import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import TextStyle from "@tiptap/extension-text-style";
 import Typography from "@tiptap/extension-typography";
-import "./editor/styles.css";
+import "./editor.css";
 import { useRouter } from "next/navigation";
-import { MentionsHighlightExtension } from "./MentionsHashtagsExtension";
+import { MentionsHighlightExtension } from "./mention/MentionsHashtagsExtension";
 
 interface RichTextRendererProps {
     content: string;

@@ -8,21 +8,13 @@ export class SuggestionPopupUI {
   constructor(private options = { debugMode: false }) {}
 
   create() {
-    console.log('Creating popup container');
-    
     this.remove();
     
     this.container = document.createElement('div');
-    this.container.className = 'mentions-suggestions-popup';
+    this.container.className = 'mentions-suggestions-popup bg-card border border-border rounded-lg shadow-lg';
     this.container.setAttribute('data-testid', 'mentions-suggestions');
     
-    if (this.options.debugMode) {
-      this.container.style.border = '2px solid red';
-      this.container.style.backgroundColor = 'white';
-    }
-    
     document.body.appendChild(this.container);
-    console.log('Popup container created:', this.container);
     return this.container;
   }
 
@@ -72,8 +64,8 @@ export class SuggestionPopupUI {
     suggestions.forEach((user, index) => {
       const item = document.createElement('button');
       item.type = 'button';
-      item.className = `flex items-center gap-2 px-3 py-2 w-full text-left hover:bg-primary-foreground transition-colors ${
-        selectedIndex === index ? 'bg-primary text-primary-foreground' : ''
+      item.className = `flex items-center gap-2 px-3 py-2 w-full text-left hover:bg-muted transition-colors ${
+        selectedIndex === index ? 'bg-input text-primary' : 'text-card-foreground'
       }`;
       
       item.onclick = () => onSelect(user);

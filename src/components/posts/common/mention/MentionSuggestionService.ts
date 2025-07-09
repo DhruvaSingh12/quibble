@@ -1,8 +1,8 @@
 "use client";
 
-import { getFollowingSuggestions } from "../actions";
 import { MentionRange, UserSuggestion } from "./types";
 import { SuggestionPopupUI } from "./SuggestionPopupUI";
+import { getFollowingSuggestions } from "../../create/actions";
 
 export class MentionSuggestionService {
   private view: any;

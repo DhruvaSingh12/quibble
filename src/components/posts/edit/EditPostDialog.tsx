@@ -13,15 +13,16 @@ import CharacterCount from "@tiptap/extension-character-count";
 import Dropcursor from "@tiptap/extension-dropcursor";
 import Gapcursor from "@tiptap/extension-gapcursor";
 import HardBreak from "@tiptap/extension-hard-break";
-import { PasteExtension } from "../editor/PasteExtension";
-import { MentionsInputExtension } from "../editor/mention/MentionsInputExtension";
 import React, { useEffect, useCallback, useState } from "react";
 import { useSession } from "@/providers/SessionProvider";
 import UserAvatar from "@/components/UserAvatar";
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription} from "@/components/ui/Dialog";
 import { FaX, FaBold, FaItalic,  FaStrikethrough, FaListUl, FaListOl, FaQuoteLeft, FaCode } from "react-icons/fa6";
-import "../editor/styles.css";
+import "../common/editor.css";
 import { toast } from "@/components/ui/use-toast";
+import { PasteExtension } from "../common/PasteExtension";
+import { MentionsInputExtension } from "../common/mention/InputExtension";
+
 
 interface EditPostDialogProps {
     post: PostData;
