@@ -94,9 +94,6 @@ async function WhoToFollow() {
 
 const getTrendingTopics = unstable_cache(
     async () => {
-        // Using a more robust regex to extract hashtags from HTML content
-        // This will match hashtags in the text content, ignoring HTML tags
-        // Updated to handle TipTap HTML content better
         const result = await prisma.$queryRaw<{ hashtag: string; count: bigint }[]>`
         WITH extracted_hashtags AS (
             SELECT 
