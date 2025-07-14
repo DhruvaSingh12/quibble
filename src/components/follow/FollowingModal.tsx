@@ -124,7 +124,7 @@ function FollowingModal({ following, onClose }: FollowingModalProps) {
         {following.length > 0 && (
           <div className="border-t border-border bg-muted/30 p-2 text-center">
             <p className="text-sm text-muted-foreground">
-              {following.length}{" "}following
+              {following.length}{" "}following.
             </p>
           </div>
         )}
