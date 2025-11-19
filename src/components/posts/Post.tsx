@@ -36,14 +36,13 @@ export default function Post({ post }: PostProps) {
               <div>
                 <UserTooltip user={post.user}>
                   <div onClick={(e) => e.preventDefault()}>
-                    <Link
-                      href={`/users/${post.user.username}`}
-                      className="block text-[16px] hover:underline"
-                    >
+                    <Link href={`/users/${post.user.username}`} 
+                      className="block text-[16px] hover:underline">
                       {post.user.displayName}
                     </Link>
                   </div>
                 </UserTooltip>
+                
                 <p className="block text-[12px] text-muted-foreground">
                   {formatRelativeDate(new Date(post.createdAt))}
                   {/* Show edited indicator if post was modified (more than 1 minute after creation) */}

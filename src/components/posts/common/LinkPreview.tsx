@@ -41,7 +41,7 @@ export default function LinkPreview({ url }: LinkPreviewProps) {
                 setIsLoading(true);
                 setError(null);
                 
-                const data = await kyInstance.get('api/link-preview', {
+                const data = await kyInstance.get('/api/link-preview', {
                     searchParams: { url },
                     timeout: 5000, // 5 second timeout
                     retry: 1, // Only retry once
@@ -86,6 +86,7 @@ export default function LinkPreview({ url }: LinkPreviewProps) {
             target="_blank"
             rel="noopener noreferrer"
             className="mt-2 block overflow-hidden rounded-lg border border-border bg-card transition-colors hover:bg-accent/10"
+            onClick={(e) => e.stopPropagation()}
         >
             <div className="flex gap-3 p-3">
                 {previewData.image && (
