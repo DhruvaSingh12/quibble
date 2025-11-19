@@ -6,6 +6,7 @@ import StarterKit from "@tiptap/starter-kit";
 import TextStyle from "@tiptap/extension-text-style";
 import Typography from "@tiptap/extension-typography";
 import Link from "@tiptap/extension-link";
+import TiptapImage from "@tiptap/extension-image";
 import "./editor.css";
 import { useRouter } from "next/navigation";
 import { MentionsHighlightExtension } from "./mention/MentionsHashtagsExtension";
@@ -27,6 +28,7 @@ export default function RichTextRenderer({
     const [isExpanded, setIsExpanded] = useState(false);
     const [needsTruncation, setNeedsTruncation] = useState(false);
     const [links, setLinks] = useState<string[]>([]);
+    const [gifUrls, setGifUrls] = useState<string[]>([]);
     const router = useRouter();
     const contentRef = useRef<HTMLDivElement>(null);
 
@@ -156,6 +158,12 @@ export default function RichTextRenderer({
                     class: 'text-primary hover:underline',
                 }
             }),
+            TiptapImage.configure({
+                allowBase64: true,
+                HTMLAttributes: {
+                    class: 'rounded-lg max-h-[300px] object-contain my-2',
+                },
+            }),
         ],
         content: content,
         editable: false,
@@ -165,8 +173,18 @@ export default function RichTextRenderer({
     useEffect(() => {
         if (!editor) return;
 
-        // Always set the latest content first
-        editor.commands.setContent(content);
+        // Extract GIF/image URLs from content
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = content;
+        const imgElements = tempDiv.getElementsByTagName('img');
+        const imageUrls = Array.from(imgElements).map(img => img.src);
+        setGifUrls(imageUrls);
+
+        // Remove images from the HTML content for text display
+        const contentWithoutImages = content.replace(/<img[^>]*>/g, '');
+
+        // Always set the content without images
+        editor.commands.setContent(contentWithoutImages);
 
         // Check if content needs truncation by text length
         const textContent = editor.getText();
@@ -208,11 +226,36 @@ export default function RichTextRenderer({
     if (!editor) return null;
     
     return (
-        <div className={className} onClick={handleEditorClick} ref={contentRef}>
-            <EditorContent
-                editor={editor}
-                className="prose prose-sm max-w-none [&>.ProseMirror]:outline-none [&>.ProseMirror]:p-0 [&>.ProseMirror]:m-0"
-            />
+        <div className={className}>
+            {/* GIF Grid Display */}
+            {gifUrls.length > 0 && (
+                <div className="mb-3">
+                    <div className={`grid gap-2 ${gifUrls.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                        {gifUrls.map((url, index) => (
+                            <div key={index} className="relative overflow-hidden bg-card rounded-lg">
+                                <img
+                                    src={url}
+                                    alt={`GIF ${index + 1}`}
+                                    className="w-full h-auto max-h-[400px] object-contain"
+                                    loading="lazy"
+                                />
+                                <div className="absolute bottom-2 right-2 bg-foreground text-card text-xs font-semibold px-2 py-1 rounded">
+                                    GIF
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+            
+            {/* Text Content */}
+            <div onClick={handleEditorClick} ref={contentRef}>
+                <EditorContent
+                    editor={editor}
+                    className="prose prose-sm max-w-none [&>.ProseMirror]:outline-none [&>.ProseMirror]:p-0 [&>.ProseMirror]:m-0"
+                />
+            </div>
+            
             {needsTruncation && (
                 <button
                     onClick={(e) => {

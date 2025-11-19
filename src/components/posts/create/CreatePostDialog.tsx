@@ -10,6 +10,7 @@ import Dropcursor from "@tiptap/extension-dropcursor";
 import Gapcursor from "@tiptap/extension-gapcursor";
 import HardBreak from "@tiptap/extension-hard-break";
 import Link from "@tiptap/extension-link";
+import TiptapImage from "@tiptap/extension-image";
 import { useSession } from "@/providers/SessionProvider";
 import UserAvatar from "@/components/UserAvatar";
 import "../common/editor.css";
@@ -18,10 +19,12 @@ import LoadingButton from "@/components/LoadingButton";
 import { Button } from "@/components/ui/Button";
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "@/components/ui/Dialog";
 import { useState, useEffect, useCallback } from "react";
-import { FaBold, FaItalic, FaStrikethrough, FaListUl, FaListOl, FaQuoteLeft, FaCode, FaX, FaPlus } from "react-icons/fa6";
+import { FaBold, FaItalic, FaStrikethrough, FaListUl, FaListOl, FaQuoteLeft, FaCode, FaX, FaPlus, FaRegImage } from "react-icons/fa6";
 import { toast } from "@/components/ui/use-toast";
 import { PasteExtension } from "../common/PasteExtension";
 import { MentionsInputExtension } from "../common/mention/InputExtension";
+import GifPicker from "../common/GifPicker";
+import { Tabs } from "@/components/ui/Tabs";
 
 export default function PostEditor() {
   const { user } = useSession();
@@ -29,6 +32,9 @@ export default function PostEditor() {
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showGifPicker, setShowGifPicker] = useState(false);
+  const [selectedGif, setSelectedGif] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'text' | 'gif'>('text');
 
   const editor = useEditor({
     extensions: [ StarterKit.configure({
@@ -71,6 +77,12 @@ export default function PostEditor() {
         openOnClick: false, // Don't open links while editing
         linkOnPaste: true, // Automatically convert pasted URLs to links
       }),
+      TiptapImage.configure({
+        allowBase64: true,
+        HTMLAttributes: {
+          class: 'rounded-lg max-h-[300px] object-contain',
+        },
+      }),
       PasteExtension,
       MentionsInputExtension,
       Placeholder.configure({
@@ -100,6 +112,9 @@ export default function PostEditor() {
     setIsVisible(false);
     setTimeout(() => {
       setIsOpen(false);
+      setShowGifPicker(false);
+      setSelectedGif(null);
+      setActiveTab('text');
       editor?.commands.clearContent();
     }, 300);
   }, [editor]);
@@ -143,8 +158,6 @@ export default function PostEditor() {
             break;
         }
       }
-
-      // Remove Escape key handling as we now handle it in the Dialog component
     };
 
     document.addEventListener("keydown", handleKeyDown);
@@ -152,16 +165,38 @@ export default function PostEditor() {
   }, [isOpen, editor, textLength, onSubmit]);
 
   function onSubmit() {
-    mutation.mutate(input, {
+    // Combine GIF and text content
+    let finalContent = input;
+    if (selectedGif) {
+      finalContent = `<img src="${selectedGif}" class="rounded-lg max-h-[150px] object-contain" />${input}`;
+    }
+    
+    mutation.mutate(finalContent, {
       onSuccess: () => {
         editor?.commands.clearContent();
+        setSelectedGif(null);
         closeDialog();
       },
     });
   }
   
-  function handleCancel() {
-    if (editor?.getText().trim().length) {
+  const handleGifSelect = (url: string) => {
+    if (selectedGif) {
+      toast({
+        title: "One GIF per post",
+        description: "You can only add one GIF per post.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setSelectedGif(url);
+    setShowGifPicker(false);
+    setActiveTab('gif');
+  };
+
+  const handleCancel = () => {
+    if (editor?.getText().trim().length || selectedGif) {
       setShowConfirmDialog(true);
     } else {
       toast({
@@ -331,16 +366,87 @@ export default function PostEditor() {
                 icon={FaCode}
                 title="Inline Code"
               />
+              <div className="mx-2 h-6 w-px bg-border" />
+              <ToolbarButton
+                onClick={() => {
+                  if (selectedGif) {
+                    toast({
+                      title: "One GIF per post",
+                      description: "You can only add one GIF per post. Remove the existing GIF first.",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+                  setShowGifPicker(!showGifPicker);
+                }}
+                isActive={showGifPicker}
+                icon={FaRegImage}
+                title="GIF"
+              />
             </div>
+
+            {/* Tab Navigation */}
+            {!showGifPicker && (
+              <Tabs className="flex border-b">
+                <button
+                  onClick={() => setActiveTab('text')}
+                  className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                    activeTab === 'text'
+                      ? 'border-b-2 border-primary text-primary'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Text
+                </button>
+                <button
+                  onClick={() => setActiveTab('gif')}
+                  className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                    activeTab === 'gif'
+                      ? 'border-b-2 border-primary text-primary'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                  disabled={!selectedGif}
+                >
+                  Media
+                </button>
+              </Tabs>
+            )}
 
             {/* Editor Content */}
             <div className="p-4">
-              <div className="rounded-lg border transition-all focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20">
-                <EditorContent
-                  editor={editor}
-                  className="prose prose-sm max-h-[400px] min-h-[200px] w-full max-w-none cursor-text overflow-y-auto px-4 py-3 focus-within:outline-none [&>div]:min-h-[200px] [&>div]:outline-none"
-                />
-              </div>
+              {showGifPicker ? (
+                <div className="h-[450px] overflow-hidden rounded-xl border">
+                  <GifPicker onSelect={handleGifSelect} onClose={() => setShowGifPicker(false)} />
+                </div>
+              ) : activeTab === 'gif' && selectedGif ? (
+                <div className="space-y-3">
+                  {/* GIF Preview */}
+                  <div className="relative rounded-2xl overflow-hidden bg-card border">
+                    <img
+                      src={selectedGif}
+                      alt="Selected GIF"
+                      className="w-full h-auto max-h-[250px] object-contain"
+                    />
+                    <button
+                      onClick={() => {
+                        setSelectedGif(null);
+                        setActiveTab('text');
+                      }}
+                      className="absolute top-2 right-2 p-2 rounded-full hover:bg-muted transition-colors"
+                      title="Remove GIF"
+                    >
+                      <FaX className="text-foreground h-3 w-3" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-lg border transition-all focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20">
+                  <EditorContent
+                    editor={editor}
+                    className="prose prose-sm max-h-[350px] min-h-[250px] w-full max-w-none cursor-text overflow-y-auto px-4 py-3 focus-within:outline-none [&>div]:min-h-[200px] [&>div]:outline-none"
+                  />
+                </div>
+              )}
 
               {/* Character Count */}
               <div className="mt-2 flex items-start justify-between rounded-lg bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
