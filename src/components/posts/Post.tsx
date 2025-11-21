@@ -19,42 +19,37 @@ export default function Post({ post }: PostProps) {
   const router = useRouter();
 
   const handlePostClick = (e: React.MouseEvent) => {
-    if (
-      (e.target as HTMLElement).closest('a, button, [role="button"]')
-    ) {
+    const target = e.target as HTMLElement;
+    if (target.closest('a') || target.closest('button') || target.closest('[role="button"]')) {
       return;
     }
     router.push(`/posts/${post.id}`);
   };
 
   return (
-    <article 
+    <div 
       onClick={handlePostClick}
       className="group/delete mb-5 cursor-pointer space-y-3 rounded-2xl bg-card p-3 shadow-sm transition-shadow hover:shadow-md lg:p-5"
     >
-        <div className="flex flex-col justify-between gap-3">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
+      <div className="flex flex-col justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <UserTooltip user={post.user}>
+              <Link href={`/users/${post.user.username}`}>
+                <UserAvatar
+                  size={500}
+                  className="w-[50px]"
+                  avatarUrl={post.user.avatarUrl}
+                />
+              </Link>
+            </UserTooltip>
+            <div>
               <UserTooltip user={post.user}>
-                <div onClick={(e) => e.preventDefault()}>
-                  <Link href={`/users/${post.user.username}`} passHref>
-                    <UserAvatar
-                      size={500}
-                      className="w-[50px]"
-                      avatarUrl={post.user.avatarUrl}
-                    />
-                  </Link>
-                </div>
+                <Link href={`/users/${post.user.username}`} 
+                  className="block text-[16px] hover:underline">
+                  {post.user.displayName}
+                </Link>
               </UserTooltip>
-              <div>
-                <UserTooltip user={post.user}>
-                  <div onClick={(e) => e.preventDefault()}>
-                    <Link href={`/users/${post.user.username}`} 
-                      className="block text-[16px] hover:underline">
-                      {post.user.displayName}
-                    </Link>
-                  </div>
-                </UserTooltip>
                 
                 <p className="block text-[12px] text-muted-foreground">
                   {formatRelativeDate(new Date(post.createdAt))}
@@ -76,7 +71,7 @@ export default function Post({ post }: PostProps) {
                   ? "opacity-100"
                   : "opacity-100 sm:opacity-0 sm:group-hover/delete:opacity-100"
               }`}
-              onClick={(e) => e.preventDefault()}
+              onClick={(e) => e.stopPropagation()}
             >
               <PostActions post={post} onDropdownToggle={setIsDropdownOpen} />
             </div>
@@ -90,6 +85,6 @@ export default function Post({ post }: PostProps) {
             />
           </div>
         </div>
-      </article>
+    </div>
   );
 }
