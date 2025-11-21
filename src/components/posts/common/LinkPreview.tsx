@@ -89,7 +89,7 @@ export default function LinkPreview({ url }: LinkPreviewProps) {
             onClick={(e) => e.stopPropagation()}
         >
             <div className="flex gap-3 p-3">
-                {previewData.image && (
+                {previewData.image && previewData.image.startsWith('http') && (
                     <div className="relative h-[80px] w-[80px] shrink-0 overflow-hidden rounded-md bg-accent/10">
                         <Image
                             src={previewData.image}

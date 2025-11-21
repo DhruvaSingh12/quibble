@@ -46,9 +46,37 @@ export async function GET(request: Request) {
             root.querySelector('meta[property="og:description"]')?.getAttribute('content') ||
             root.querySelector('meta[name="description"]')?.getAttribute('content') || '';
 
-        const image = 
+        const imageContent = 
             root.querySelector('meta[property="og:image"]')?.getAttribute('content') ||
             root.querySelector('meta[property="twitter:image"]')?.getAttribute('content') || '';
+
+        // Validate image URL - ensure it's a valid http/https URL
+        let image = '';
+        if (imageContent) {
+            try {
+                // Check for obvious invalid patterns first
+                if (imageContent.includes('@') || imageContent.includes('com.') && imageContent.includes('.entities.')) {
+                    console.warn(`Skipping malformed image URL: ${imageContent}`);
+                } else {
+                    const imageUrl = new URL(imageContent, url); // Resolve relative URLs
+                    if (['http:', 'https:'].includes(imageUrl.protocol)) {
+                        // Additional check: URL path should look like an image or be reasonable
+                        const pathname = imageUrl.pathname.toLowerCase();
+                        const hasImageExtension = /\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i.test(pathname);
+                        const hasReasonablePath = !pathname.includes('com.') && !pathname.includes('@');
+                        
+                        if (hasImageExtension || hasReasonablePath) {
+                            image = imageUrl.href;
+                        } else {
+                            console.warn(`Skipping suspicious image URL: ${imageUrl.href}`);
+                        }
+                    }
+                }
+            } catch {
+                // Invalid image URL, leave it empty
+                console.warn(`Invalid image URL: ${imageContent}`);
+            }
+        }
 
         const siteName = 
             root.querySelector('meta[property="og:site_name"]')?.getAttribute('content') ||
