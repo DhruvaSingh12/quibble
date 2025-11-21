@@ -1,10 +1,9 @@
 "use server";
 
-import { lucia } from "@/auth";
+import { createSession, setSessionCookie } from "@/auth";
 import prisma from "@/lib/prisma";
 import { loginSchema, LoginValues } from "@/lib/validation";
 import { verify } from "@node-rs/argon2";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 export async function login(
@@ -39,13 +38,8 @@ export async function login(
             return { error: "Invalid credentials." };
         }
 
-        const session = await lucia.createSession(existingUser.id, {});
-        const sessionCookie = lucia.createSessionCookie(session.id);
-        (await cookies()).set(
-            sessionCookie.name,
-            sessionCookie.value,
-            sessionCookie.attributes
-        );
+        const session = await createSession(existingUser.id);
+        await setSessionCookie(session.id, session.expiresAt);
 
     } catch (error) {
         console.error(error);

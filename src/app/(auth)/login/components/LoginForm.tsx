@@ -39,7 +39,7 @@ export default function LoginForm() {
           setError(result.error);
         }
         // If no error and no result (successful redirect), the redirect will happen automatically
-      } catch (error) {
+      } catch {
         setError("Something went wrong. Please try again.");
       }
     });

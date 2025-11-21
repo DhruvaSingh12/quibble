@@ -37,7 +37,7 @@ function FollowerModal({ followers, onClose }: FollowerModalProps) {
                 No followers yet
               </h3>
               <p className="text-center text-sm text-muted-foreground">
-                When people follow this account, you'll see them here.
+                When people follow this account, you&apos;ll see them here.
               </p>
             </div>
           ) : (

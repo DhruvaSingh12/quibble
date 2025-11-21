@@ -161,7 +161,7 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
     }: { 
         onClick: () => void; 
         isActive?: boolean; 
-        icon: any; 
+        icon: React.ComponentType<{ className?: string }>; 
         title: string; 
     }) => (
         <button

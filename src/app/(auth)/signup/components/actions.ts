@@ -3,8 +3,33 @@
 import prisma from "@/lib/prisma";
 import { signUpSchema, SignUpValues } from "@/lib/validation";
 import { hash } from "@node-rs/argon2";
-import { generateIdFromEntropySize } from "lucia";
 import { sendOTPEmail, generateOTP } from "@/lib/email";
+
+function generateUserId(): string {
+    const bytes = new Uint8Array(15); // 15 bytes = 120 bits
+    crypto.getRandomValues(bytes);
+    // Convert to base32 (lowercase, no padding)
+    const alphabet = "abcdefghijklmnopqrstuvwxyz234567";
+    let bits = 0;
+    let value = 0;
+    let output = "";
+
+    for (let i = 0; i < bytes.length; i++) {
+        value = (value << 8) | bytes[i];
+        bits += 8;
+
+        while (bits >= 5) {
+            output += alphabet[(value >>> (bits - 5)) & 31];
+            bits -= 5;
+        }
+    }
+
+    if (bits > 0) {
+        output += alphabet[(value << (5 - bits)) & 31];
+    }
+
+    return output;
+}
 
 export async function checkUsernameAvailability(username: string): Promise<{ available: boolean; error?: string }> {
     try {
@@ -100,7 +125,7 @@ export async function signUp(
             parallelism: 1,
         });
 
-        const userId = generateIdFromEntropySize(10);
+        const userId = generateUserId();
 
         await prisma.user.create({
             data: {

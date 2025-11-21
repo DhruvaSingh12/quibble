@@ -5,10 +5,10 @@ import { NextRequest } from "next/server";
 
 export async function GET(
   req: NextRequest,
-  context: { params: { userId: string } }
+  context: { params: Promise<{ userId: string }> }
 ) {
   try {
-    const { params } = context;
+    const params = await context.params;
     const userId = params.userId;
 
     const cursor = req.nextUrl.searchParams.get("cursor") || undefined;

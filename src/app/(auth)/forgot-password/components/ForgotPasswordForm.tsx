@@ -43,7 +43,7 @@ export default function ForgotPasswordForm() {
           setMessage("If an account exists with this email, we've sent a password reset link. Please check your inbox.");
           form.reset();
         }
-      } catch (error) {
+      } catch {
         setStatus("error");
         setMessage("Something went wrong. Please try again.");
       }
@@ -70,7 +70,7 @@ export default function ForgotPasswordForm() {
         )}
         
         <div className="text-sm text-muted-foreground">
-          Enter your email address and we'll send you a link to reset your password.
+          Enter your email address and we&apos;ll send you a link to reset your password.
         </div>
         
         <FormField

@@ -2,6 +2,7 @@
 
 import { DecorationSet, Decoration } from "@tiptap/pm/view";
 import { EditorState } from "@tiptap/pm/state";
+import { Node as ProseMirrorNode } from "@tiptap/pm/model";
 
 /**
  * Creates decorations for mentions and hashtags in the document
@@ -11,12 +12,14 @@ import { EditorState } from "@tiptap/pm/state";
 export function createMentionHashtagDecorations(
   state: EditorState,
 ): DecorationSet {
-  const decorations: any[] = [];
+  const decorations: Decoration[] = [];
   const mentionRegex = /@([a-zA-Z0-9_-]+)\b/g;
   const hashtagRegex = /#([a-zA-Z0-9_-]+)\b/g;
 
   // Function to process a text node for mentions and hashtags
-  const processTextNode = (node: any, pos: number) => {
+  const processTextNode = (node: ProseMirrorNode, pos: number) => {
+    if (!node.text) return;
+    
     // Process @mentions
     const mentionMatches = Array.from(
       node.text.matchAll(mentionRegex) as IterableIterator<RegExpMatchArray>,
@@ -47,7 +50,7 @@ export function createMentionHashtagDecorations(
   };
 
   // Traverse the document to find text nodes
-  state.doc.descendants((node: any, pos: number) => {
+  state.doc.descendants((node: ProseMirrorNode, pos: number) => {
     if (node.isText) {
       processTextNode(node, pos);
     }

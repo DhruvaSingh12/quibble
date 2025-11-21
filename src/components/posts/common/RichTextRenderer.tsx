@@ -7,6 +7,7 @@ import TextStyle from "@tiptap/extension-text-style";
 import Typography from "@tiptap/extension-typography";
 import Link from "@tiptap/extension-link";
 import TiptapImage from "@tiptap/extension-image";
+import Image from "next/image";
 import "./editor.css";
 import { useRouter } from "next/navigation";
 import { MentionsHighlightExtension } from "./mention/MentionsHashtagsExtension";
@@ -233,11 +234,13 @@ export default function RichTextRenderer({
                     <div className={`grid gap-2 ${gifUrls.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
                         {gifUrls.map((url, index) => (
                             <div key={index} className="relative overflow-hidden bg-card rounded-lg">
-                                <img
+                                <Image
                                     src={url}
                                     alt={`GIF ${index + 1}`}
+                                    width={500}
+                                    height={400}
                                     className="w-full h-auto max-h-[400px] object-contain"
-                                    loading="lazy"
+                                    unoptimized
                                 />
                                 <div className="absolute bottom-2 right-2 bg-foreground text-card text-xs font-semibold px-2 py-1 rounded">
                                     GIF

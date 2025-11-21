@@ -98,11 +98,6 @@ async function UserProfile({ user, loggedInUserId }: UserProfileProps) {
     followers: user._count.followers,
   };
 
-  const followingInfo = {
-    ...userInfo,
-    followers: user._count.following,
-  };
-
   return (
     <div className="h-fit w-full space-y-5 rounded-2xl bg-card p-5 shadow-sm">
       <UserAvatar

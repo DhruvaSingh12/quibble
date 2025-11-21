@@ -3,9 +3,10 @@
 import { MentionRange, UserSuggestion } from "./types";
 import { SuggestionPopupUI } from "./SuggestionPopupUI";
 import { getFollowingSuggestions } from "../../create/actions";
+import { EditorView } from "@tiptap/pm/view";
 
 export class MentionSuggestionService {
-  private view: any;
+  private view: EditorView | null = null;
   private searching = false;
   private searchQuery = '';
   private range: MentionRange | null = null;
@@ -78,7 +79,7 @@ export class MentionSuggestionService {
     this.popup.remove();
   }
 
-  update(updatedView: any) {
+  update(updatedView: EditorView) {
     this.view = updatedView;
     
     const { state } = updatedView;
@@ -135,7 +136,7 @@ export class MentionSuggestionService {
     this.clearSuggestions();
   }
 
-  handleKeyDown(view: any, event: KeyboardEvent): boolean {
+  handleKeyDown(view: EditorView, event: KeyboardEvent): boolean {
     if (event.key === 'Escape' && this.popup.isVisible) {
       event.preventDefault();
       this.clearSuggestions();

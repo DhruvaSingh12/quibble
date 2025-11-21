@@ -1,11 +1,26 @@
 import { PrismaClient } from "@prisma/client";
+import { Pool, neonConfig } from "@neondatabase/serverless";
+import { PrismaPg } from "@prisma/adapter-pg";
+import pg from "pg";
 
 // Singleton pattern to ensure only one PrismaClient instance during development
-const prismaClientSingleton = () => new PrismaClient();
+const prismaClientSingleton = () => {
+  const connectionString = process.env.DATABASE_URL;
+  
+  if (!connectionString) {
+    throw new Error("DATABASE_URL environment variable is not set");
+  }
+  
+  // Use pg Pool for better compatibility
+  const pool = new pg.Pool({ connectionString });
+  const adapter = new PrismaPg(pool);
+  
+  return new PrismaClient({ adapter });
+};
 
 // Extend globalThis to hold our singleton without using `var`
 type PrismaGlobal = typeof globalThis & {
-  prismaGlobal?: PrismaClient;
+  prismaGlobal?: ReturnType<typeof prismaClientSingleton>;
 };
 const globalWithPrisma = globalThis as PrismaGlobal;
 

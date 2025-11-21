@@ -49,7 +49,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           setMessage("Your password has been reset successfully. You can now log in with your new password.");
           form.reset();
         }
-      } catch (error) {
+      } catch {
         setStatus("error");
         setMessage("Something went wrong. Please try again.");
       }

@@ -7,12 +7,12 @@ export const metadata: Metadata = {
   title: "Reset Password",
 };
 
-export default function Page({
+export default async function Page({
   searchParams,
 }: {
-  searchParams: { token?: string };
+  searchParams: Promise<{ token?: string }>;
 }) {
-  const { token } = searchParams;
+  const { token } = await searchParams;
 
   return (
     <main className="h-screen flex items-center justify-center p-4 bg-[url('/auth-back.jpg')] bg-cover bg-center bg-background text-foreground">

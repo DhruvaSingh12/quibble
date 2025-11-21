@@ -8,6 +8,8 @@ import Typography from "@tiptap/extension-typography";
 import CharacterCount from "@tiptap/extension-character-count";
 import Dropcursor from "@tiptap/extension-dropcursor";
 import Gapcursor from "@tiptap/extension-gapcursor";
+import Image from "next/image";
+import { useCallback, useEffect, useState } from "react";
 import HardBreak from "@tiptap/extension-hard-break";
 import Link from "@tiptap/extension-link";
 import TiptapImage from "@tiptap/extension-image";
@@ -18,7 +20,6 @@ import { useSubmitPostMutation } from "./mutations";
 import LoadingButton from "@/components/LoadingButton";
 import { Button } from "@/components/ui/Button";
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "@/components/ui/Dialog";
-import { useState, useEffect, useCallback } from "react";
 import { FaBold, FaItalic, FaStrikethrough, FaListUl, FaListOl, FaQuoteLeft, FaCode, FaX, FaPlus, FaRegImage } from "react-icons/fa6";
 import { toast } from "@/components/ui/use-toast";
 import { PasteExtension } from "../common/PasteExtension";
@@ -162,9 +163,10 @@ export default function PostEditor() {
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, editor, textLength, onSubmit]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, editor, textLength]);
 
-  function onSubmit() {
+  const onSubmit = useCallback(() => {
     // Combine GIF and text content
     let finalContent = input;
     if (selectedGif) {
@@ -178,7 +180,7 @@ export default function PostEditor() {
         closeDialog();
       },
     });
-  }
+  }, [editor, input, mutation, selectedGif, closeDialog]);
   
   const handleGifSelect = (url: string) => {
     if (selectedGif) {
@@ -216,7 +218,7 @@ export default function PostEditor() {
   }: {
     onClick: () => void;
     isActive?: boolean;
-    icon: any;
+    icon: React.ComponentType<{ className?: string }>;
     title: string;
   }) => (
     <button
@@ -282,7 +284,7 @@ export default function PostEditor() {
           onClick={openDialog}
           className="flex flex-1 items-center justify-between rounded-2xl border bg-background px-4 py-3 text-left text-muted-foreground transition-colors hover:bg-muted"
         >
-          <span>What's on your mind?</span>
+          <span>What&apos;s on your mind?</span>
           <FaPlus className="ml-2 h-4 w-4" />
         </button>
       </div>
@@ -422,10 +424,13 @@ export default function PostEditor() {
                 <div className="space-y-3">
                   {/* GIF Preview */}
                   <div className="relative rounded-2xl overflow-hidden bg-card border">
-                    <img
+                    <Image
                       src={selectedGif}
                       alt="Selected GIF"
+                      width={500}
+                      height={250}
                       className="w-full h-auto max-h-[250px] object-contain"
+                      unoptimized
                     />
                     <button
                       onClick={() => {

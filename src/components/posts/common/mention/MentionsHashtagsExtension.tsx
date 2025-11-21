@@ -2,7 +2,8 @@
 
 import { Extension } from "@tiptap/core";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
-import { DecorationSet, Decoration } from "@tiptap/pm/view";
+import { Decoration, DecorationSet } from "@tiptap/pm/view";
+import { Node as ProseMirrorNode } from "@tiptap/pm/model";
 
 export const MentionsHighlightExtension = Extension.create({
   name: "mentionsHighlight",
@@ -17,9 +18,11 @@ export const MentionsHighlightExtension = Extension.create({
         props: {
           decorations(state) {
             const { doc } = state;
-            const decorations: any[] = [];
+            const decorations: Decoration[] = [];
 
-            const processTextNode = (node: any, pos: number) => {
+            const processTextNode = (node: ProseMirrorNode, pos: number) => {
+              if (!node.text) return;
+
               const mentionMatches = Array.from(
                 node.text.matchAll(
                   mentionRegex,

@@ -6,9 +6,10 @@ import { NextResponse } from "next/server";
 
 export async function GET(
     request: Request,
-    { params }: { params: { userId: string } }
+    { params }: { params: Promise<{ userId: string }> }
 ) {
     try {
+        const { userId } = await params;
         const { user: loggedInUser } = await validateRequest();
         if (!loggedInUser) {
             return new NextResponse("Unauthorized", { status: 401 });
@@ -16,7 +17,7 @@ export async function GET(
 
         const followingList = await prisma.follow.findMany({
             where: {
-                followerId: params.userId,
+                followerId: userId,
             },
             select: {
                 following: {

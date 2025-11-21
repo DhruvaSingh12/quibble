@@ -82,7 +82,7 @@ export default function VerifyEmailForm({ email }: VerifyEmailFormProps) {
             router.push("/");
           }, 1500);
         }
-      } catch (error) {
+      } catch {
         setError("Something went wrong. Please try again.");
       }
     });
@@ -102,7 +102,7 @@ export default function VerifyEmailForm({ email }: VerifyEmailFormProps) {
           setOtp(["", "", "", "", "", ""]);
           inputRefs.current[0]?.focus();
         }
-      } catch (error) {
+      } catch {
         setError("Failed to resend verification email.");
       }
     });
@@ -161,7 +161,7 @@ export default function VerifyEmailForm({ email }: VerifyEmailFormProps) {
 
         <div className="text-center mt-4">
           <p className="text-base text-foreground mb-2">
-            Didn't receive the code?
+            Didn&apos;t receive the code?
           </p>
           <Button
             type="button"

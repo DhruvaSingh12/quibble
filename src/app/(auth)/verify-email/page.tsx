@@ -8,11 +8,11 @@ export const metadata: Metadata = {
 };
 
 interface VerifyEmailPageProps {
-  searchParams: { email?: string };
+  searchParams: Promise<{ email?: string }>;
 }
 
-export default function VerifyEmailPage({ searchParams }: VerifyEmailPageProps) {
-  const { email } = searchParams;
+export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageProps) {
+  const { email } = await searchParams;
 
   if (!email) {
     return (
@@ -74,7 +74,7 @@ export default function VerifyEmailPage({ searchParams }: VerifyEmailPageProps) 
             <p className="text-3xl text-foreground">Verify Your Email</p>
             <div className="text-center mt-2">
               <p className="text-lg text-foreground">
-                Please enter the verification code we've sent to
+                Please enter the verification code we&apos;ve sent to
               </p>
               <p className="text-lg font-medium text-primary">{email}</p>
             </div>

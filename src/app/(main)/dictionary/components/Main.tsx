@@ -179,7 +179,7 @@ export default function Main({
                         </p>
                         {definition.example && (
                           <p className="text-xs sm:text-sm text-muted-foreground italic mt-1 pl-3 sm:pl-4 border-l-2 border-muted">
-                            "{definition.example}"
+                            &quot;{definition.example}&quot;
                           </p>
                         )}
                       </div>

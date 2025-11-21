@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import UserTooltip from "@/components/UserTooltip";
 import UserAvatar from "@/components/UserAvatar";
 import { formatRelativeDate } from "@/lib/utils";
@@ -15,10 +16,22 @@ interface PostProps {
 
 export default function Post({ post }: PostProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const router = useRouter();
+
+  const handlePostClick = (e: React.MouseEvent) => {
+    if (
+      (e.target as HTMLElement).closest('a, button, [role="button"]')
+    ) {
+      return;
+    }
+    router.push(`/posts/${post.id}`);
+  };
 
   return (
-    <Link href={`/posts/${post.id}`} passHref>
-      <article className="group/delete mb-5 cursor-pointer space-y-3 rounded-2xl bg-card p-3 shadow-sm transition-shadow hover:shadow-md lg:p-5">
+    <article 
+      onClick={handlePostClick}
+      className="group/delete mb-5 cursor-pointer space-y-3 rounded-2xl bg-card p-3 shadow-sm transition-shadow hover:shadow-md lg:p-5"
+    >
         <div className="flex flex-col justify-between gap-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
@@ -78,6 +91,5 @@ export default function Post({ post }: PostProps) {
           </div>
         </div>
       </article>
-    </Link>
   );
 }

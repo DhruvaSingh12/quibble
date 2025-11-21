@@ -37,7 +37,7 @@ function FollowingModal({ following, onClose }: FollowingModalProps) {
                 Not following anyone yet
               </h3>
               <p className="text-center text-sm text-muted-foreground">
-                When this account follows others, you'll see them here.
+                When this account follows others, you&apos;ll see them here.
               </p>
             </div>
           ) : (

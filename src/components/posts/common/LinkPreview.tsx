@@ -6,7 +6,11 @@ import Image from "next/image";
 import kyInstance from "@/lib/ky";
 
 // Simple in-memory cache for link previews
-const previewCache = new Map<string, { data: any; timestamp: number }>();
+interface CachedPreview {
+  data: { success: boolean; metadata: LinkPreviewData };
+  timestamp: number;
+}
+const previewCache = new Map<string, CachedPreview>();
 const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
 import Link from "next/link";
 

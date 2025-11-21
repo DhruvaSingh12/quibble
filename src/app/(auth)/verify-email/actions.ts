@@ -1,9 +1,7 @@
 "use server";
 
-import { lucia } from "@/auth";
+import { createSession, setSessionCookie } from "@/auth";
 import prisma from "@/lib/prisma";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { sendOTPEmail, generateOTP } from "@/lib/email";
 
 export async function verifyEmail(
@@ -45,13 +43,8 @@ export async function verifyEmail(
             where: { email },
         });
 
-        const session = await lucia.createSession(verification.user.id, {});
-        const sessionCookie = lucia.createSessionCookie(session.id);
-        (await cookies()).set(
-            sessionCookie.name,
-            sessionCookie.value,
-            sessionCookie.attributes
-        );
+        const session = await createSession(verification.user.id);
+        await setSessionCookie(session.id, session.expiresAt);
 
         return { success: true };
     } catch (error) {

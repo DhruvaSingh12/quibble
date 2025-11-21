@@ -106,7 +106,7 @@ export const PasteExtension = Extension.create({
             new Plugin({
                 key: new PluginKey('pasteExtension'),
                 props: {
-                    handlePaste: (view, event, slice) => {
+                    handlePaste: (view, event) => {
                         // Get clipboard data
                         const clipboardData = event.clipboardData;
                         if (!clipboardData) return false;

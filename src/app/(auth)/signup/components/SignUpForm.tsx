@@ -3,14 +3,7 @@
 import { signUpSchema, SignUpValues } from "@/lib/validation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/Form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/Form";
 import { Input } from "@/components/ui/Input";
 import LoadingButton from "@/components/LoadingButton";
 import { useState, useTransition, useCallback, useEffect } from "react";
@@ -58,7 +51,7 @@ export default function SignUpForm() {
         } else {
           setUsernameValidation({ status: 'unavailable', message: result.error });
         }
-      } catch (error) {
+      } catch {
         setUsernameValidation({ status: 'unavailable', message: 'Unable to check username availability.' });
       }
     },
@@ -81,7 +74,7 @@ export default function SignUpForm() {
         } else {
           setEmailValidation({ status: 'unavailable', message: result.error });
         }
-      } catch (error) {
+      } catch {
         setEmailValidation({ status: 'unavailable', message: 'Unable to check email availability.' });
       }
     },
@@ -125,7 +118,8 @@ export default function SignUpForm() {
     }, 800); // 800ms debounce
 
     return () => clearTimeout(timer);
-  }, [form.watch("username"), checkUsername]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.watch("username")]);
 
   useEffect(() => {
     const email = form.watch("email");
@@ -139,7 +133,8 @@ export default function SignUpForm() {
     }, 800); // 800ms debounce
 
     return () => clearTimeout(timer);
-  }, [form.watch("email"), checkEmail]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.watch("email")]);
 
   async function onSubmit(values: SignUpValues) {
     setError(undefined);
@@ -151,7 +146,7 @@ export default function SignUpForm() {
         } else if (result?.requiresVerification && result?.email) {
           router.push(`/verify-email?email=${encodeURIComponent(result.email)}`);
         }
-      } catch (error) {
+      } catch {
         setError("Something went wrong. Please try again.");
       }
     });
