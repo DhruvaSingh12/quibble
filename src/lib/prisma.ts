@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-import { Pool, neonConfig } from "@neondatabase/serverless";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 
