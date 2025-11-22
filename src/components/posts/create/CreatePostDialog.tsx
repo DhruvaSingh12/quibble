@@ -20,7 +20,8 @@ import { useSubmitPostMutation } from "./mutations";
 import LoadingButton from "@/components/LoadingButton";
 import { Button } from "@/components/ui/Button";
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "@/components/ui/Dialog";
-import { FaBold, FaItalic, FaStrikethrough, FaListUl, FaListOl, FaQuoteLeft, FaCode, FaX, FaPlus, FaRegImage } from "react-icons/fa6";
+import { FaBold, FaItalic, FaStrikethrough, FaListUl, FaListOl, FaQuoteLeft, FaCode, FaX, FaPlus } from "react-icons/fa6";
+import { HiMiniGif } from "react-icons/hi2";
 import { toast } from "@/components/ui/use-toast";
 import { PasteExtension } from "../common/PasteExtension";
 import { MentionsInputExtension } from "../common/mention/InputExtension";
@@ -173,7 +174,7 @@ export default function PostEditor() {
       finalContent = `<img src="${selectedGif}" class="rounded-lg max-h-[150px] object-contain" />${input}`;
     }
     
-    mutation.mutate(finalContent, {
+    mutation.mutate({ content: finalContent, mediaIds: [] }, {
       onSuccess: () => {
         editor?.commands.clearContent();
         setSelectedGif(null);
@@ -382,7 +383,7 @@ export default function PostEditor() {
                   setShowGifPicker(!showGifPicker);
                 }}
                 isActive={showGifPicker}
-                icon={FaRegImage}
+                icon={HiMiniGif}
                 title="GIF"
               />
             </div>
@@ -417,7 +418,7 @@ export default function PostEditor() {
             {/* Editor Content */}
             <div className="p-4">
               {showGifPicker ? (
-                <div className="h-[450px] overflow-hidden rounded-xl border">
+                <div className="h-[400px] overflow-hidden rounded-xl border">
                   <GifPicker onSelect={handleGifSelect} onClose={() => setShowGifPicker(false)} />
                 </div>
               ) : activeTab === 'gif' && selectedGif ? (
@@ -481,7 +482,7 @@ export default function PostEditor() {
                 <LoadingButton
                   loading={mutation.isPending}
                   onClick={onSubmit}
-                  disabled={!textLength || textLength === 0}
+                  disabled={(!textLength || textLength === 0) && !selectedGif}
                   className="min-w-[120px]"
                 >
                   {mutation.isPending ? "Posting..." : "Post"}

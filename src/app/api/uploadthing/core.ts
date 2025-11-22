@@ -50,6 +50,27 @@ export const fileRouter = {
         throw error;
       }
     }),
+
+  attachment: f({
+    image: { maxFileSize: "4MB", maxFileCount: 5 },
+    video: { maxFileSize: "64MB", maxFileCount: 2 },
+  })
+    .middleware(async () => {
+      const { user } = await validateRequest();
+
+      if (!user) throw new UploadThingError("Unauthorized");
+      return {};
+    })
+    .onUploadComplete(async ({ file }) => {
+      const media = await prisma.media.create({
+        data: {
+          url: file.ufsUrl,
+          type: file.type.startsWith("image/") ? "IMAGE" : "VIDEO",
+        },
+      });
+
+      return { mediaId: media.id };
+    }),
 } satisfies FileRouter;
 
 export type AppFileRouter = typeof fileRouter;

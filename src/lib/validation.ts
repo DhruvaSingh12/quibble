@@ -76,6 +76,7 @@ export type LoginValues = z.infer<typeof loginSchema>;
 
 export const createPostSchema = z.object({
   content: requiredString.min(1, "Content is required!"),
+  mediaIds : z.array(z.string()).max(5, "You can only attach up to 5 images and 2 videos."),
 });
 
 export const updateUserProfileSchema = z.object({
