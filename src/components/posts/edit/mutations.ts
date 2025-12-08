@@ -10,7 +10,7 @@ export function useEditPostMutation() {
     const mutation = useMutation({
         mutationFn: ({ id, content }: { id: string; content: string }) => editPost(id, content),
         onSuccess: async (updatedPost) => {
-            const queryFilter: QueryFilters<InfiniteData<PostsPage, string | null>, Error, InfiniteData<PostsPage, string | null>, QueryKey> = { queryKey: ["post-feed"] };
+            const queryFilter: QueryFilters<QueryKey> = { queryKey: ["post-feed"] };
             await queryClient.cancelQueries(queryFilter);
             
             queryClient.setQueriesData<InfiniteData<PostsPage, string | null>>(
