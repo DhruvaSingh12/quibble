@@ -6,7 +6,7 @@ import PostsLoadingSkeleton from "@/components/posts/PostLoadingSkeleton";
 import kyInstance from "@/lib/ky";
 import { PostsPage } from "@/lib/types";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { Loader2, UserX } from "lucide-react";
 
 export default function FollowingFeed() {
   const {
@@ -37,9 +37,11 @@ export default function FollowingFeed() {
 
   if (status === "success" && !posts.length && !hasNextPage) {
     return (
-      <p className="text-center text-muted-foreground">
-        No posts found. Start following people to see their posts here.
-      </p>
+      <div className="flex flex-col items-center justify-center py-10 text-center">
+        <UserX className="h-16 w-16 text-muted-foreground/40 mb-4" />
+        <h3 className="text-xl font-semibold text-foreground mb-2">No following posts</h3>
+        <p className="text-muted-foreground">Start following people to see their posts here.</p>
+      </div>
     );
   }
 
@@ -53,7 +55,7 @@ export default function FollowingFeed() {
 
   return (
     <InfiniteScrollContainer
-      className="space-y-5"
+      className="space-y-0"
       onButtonReached={() => hasNextPage && !isFetching && fetchNextPage()}
     >
       {posts.map((post) => (

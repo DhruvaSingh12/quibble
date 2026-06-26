@@ -6,8 +6,7 @@ import Placeholder from "@tiptap/extension-placeholder";
 import TextStyle from "@tiptap/extension-text-style";
 import Typography from "@tiptap/extension-typography";
 import CharacterCount from "@tiptap/extension-character-count";
-import Dropcursor from "@tiptap/extension-dropcursor";
-import Gapcursor from "@tiptap/extension-gapcursor";
+
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import HardBreak from "@tiptap/extension-hard-break";
@@ -49,6 +48,7 @@ export default function PostEditor() {
         code: { HTMLAttributes: { class: "tiptap-code" }},
         blockquote: { HTMLAttributes: { class: "tiptap-blockquote" }},
         hardBreak: false,
+        dropcursor: { color: "#3b82f6", width: 2 },
       }),
       HardBreak.configure({ 
         HTMLAttributes: { class: "tiptap-hard-break" }}),
@@ -66,11 +66,7 @@ export default function PostEditor() {
       CharacterCount.configure({
         limit: 3000,
       }),
-      Dropcursor.configure({
-        color: "#3b82f6",
-        width: 2,
-      }),
-      Gapcursor,
+
       Link.configure({
         HTMLAttributes: {
           class: 'text-primary hover:underline',
@@ -275,7 +271,7 @@ export default function PostEditor() {
       </Dialog>
 
       {/* Compact Post Trigger */}
-      <div className="flex items-center gap-3 rounded-2xl bg-card p-3 shadow-sm lg:p-5">
+      <div className="flex items-center gap-3 py-2 pb-4 border-b border-border w-full">
         <UserAvatar
           avatarUrl={user.avatarUrl}
           size={40}
@@ -283,7 +279,7 @@ export default function PostEditor() {
         />
         <button
           onClick={openDialog}
-          className="flex flex-1 items-center justify-between rounded-2xl border bg-background px-4 py-3 text-left text-muted-foreground transition-colors hover:bg-muted"
+          className="flex flex-1 items-center justify-between rounded-lg bg-muted/50 px-4 py-3 text-left text-muted-foreground transition-colors hover:bg-muted"
         >
           <span>What&apos;s on your mind?</span>
           <FaPlus className="ml-2 h-4 w-4" />
@@ -296,7 +292,7 @@ export default function PostEditor() {
           className="fixed inset-0 z-50 flex items-end justify-center backdrop-blur-sm transition-opacity duration-300"
         >
           <div
-            className={`w-full max-w-2xl rounded-t-2xl bg-card shadow-2xl transition-all duration-300 ${
+            className={`w-full max-w-2xl rounded-t-lg bg-card shadow-2xl transition-all duration-300 ${
               isVisible ? "translate-y-0 scale-100" : "translate-y-8 scale-95"
             }`}
           >
@@ -418,13 +414,13 @@ export default function PostEditor() {
             {/* Editor Content */}
             <div className="p-4">
               {showGifPicker ? (
-                <div className="h-[400px] overflow-hidden rounded-xl border">
+                <div className="h-[400px] overflow-hidden rounded-lg border">
                   <GifPicker onSelect={handleGifSelect} onClose={() => setShowGifPicker(false)} />
                 </div>
               ) : activeTab === 'gif' && selectedGif ? (
                 <div className="space-y-3">
                   {/* GIF Preview */}
-                  <div className="relative rounded-2xl overflow-hidden bg-card border">
+                  <div className="relative rounded-lg overflow-hidden bg-card border">
                     <Image
                       src={selectedGif}
                       alt="Selected GIF"

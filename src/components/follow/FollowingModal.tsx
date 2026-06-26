@@ -16,7 +16,7 @@ function FollowingModal({ following, onClose }: FollowingModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="relative max-h-[85vh] w-full max-w-md overflow-hidden rounded-2xl bg-card shadow-2xl">
+      <div className="relative max-h-[85vh] w-full max-w-md overflow-hidden rounded-lg bg-card shadow-2xl">
         <div className="sticky top-0 z-10 flex items-center justify-between bg-card p-4">
           <h2 className="text-xl font-semibold text-card-foreground">
             Following

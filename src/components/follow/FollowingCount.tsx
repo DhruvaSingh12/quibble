@@ -5,6 +5,8 @@ import FollowingModal from "./FollowingModal";
 import { FollowerListItem } from "@/lib/types";
 import { formatNumber } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
+import { useQuery } from "@tanstack/react-query";
+import kyInstance from "@/lib/ky";
 
 interface FollowingCountProps {
     userId: string;
@@ -12,25 +14,21 @@ interface FollowingCountProps {
 }
 
 function FollowingCount({ userId, initialState }: FollowingCountProps) {
-    const [data] = useState(initialState);
-    const [followingList, setFollowingList] = useState<FollowerListItem[]>([]);
     const [showModal, setShowModal] = useState(false);
 
-    const fetchFollowing = async () => {
-        try {
-            const response = await fetch(`/api/users/${userId}/following`);
-            if (!response.ok) {
-                throw new Error("Failed to fetch following users");
-            }
-            const result = await response.json();
-            setFollowingList(result.followingList || []);
-        } catch (error) {
-            console.error("Error fetching following:", error);
-        }
-    };
+    const { data: followingList, refetch, isFetching } = useQuery({
+        queryKey: ["following", userId],
+        queryFn: async () => {
+            const result = await kyInstance.get(`/api/users/${userId}/following`).json<{ followingList: FollowerListItem[] }>();
+            return result.followingList || [];
+        },
+        enabled: false, // Only fetch when manually triggered
+        staleTime: 1000 * 60 * 2, // 2 minutes
+        refetchOnWindowFocus: false,
+    });
 
     const openModal = async () => {
-        await fetchFollowing();
+        await refetch();
         setShowModal(true);
     };
 
@@ -43,15 +41,16 @@ function FollowingCount({ userId, initialState }: FollowingCountProps) {
                 variant="ghost"
                 size="sm"
                 className="gap-2 group hover:bg-muted border"
+                disabled={isFetching}
             >
-                <span className="font-semibold">{formatNumber(data.following)}</span>
+                <span className="font-semibold">{formatNumber(initialState.following)}</span>
                 <span className="group-hover:text-foreground transition-colors">
                     Following
                 </span>
             </Button>
             {showModal && (
                 <FollowingModal
-                    following={followingList}
+                    following={followingList || []}
                     onClose={closeModal}
                 />
             )}

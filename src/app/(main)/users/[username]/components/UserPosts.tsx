@@ -57,7 +57,7 @@ export default function UserPosts({ userId }: UserPostsProps) {
 
   return (
     <InfiniteScrollContainer
-      className="space-y-5"
+      className="space-y-0"
       onButtonReached={() => hasNextPage && !isFetching && fetchNextPage()}
     >
       {posts.map((post) => (

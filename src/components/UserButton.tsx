@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "@/providers/SessionProvider";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/DropdownMenu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuLabel } from "./ui/DropdownMenu";
 import UserAvatar from "./UserAvatar";
 import Link from "next/link";
 import { logout } from "@/app/(auth)/actions";
@@ -25,26 +25,24 @@ export default function UserButton({ className }: UserButtonProps) {
           <UserAvatar avatarUrl={user?.avatarUrl} size={500} className="w-[40px] lg:w-[48px]" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <DropdownMenuItem className="items-center justify-center">@{user?.username}</DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <Link href={'/users/' + user?.username} passHref>
-          <DropdownMenuItem>
-            <UserAvatar avatarUrl={user?.avatarUrl} size={500} className="w-[24px] mr-2" />
-            Profile
+      <DropdownMenuContent align="end" alignOffset={-12}>
+        <Link href={`/users/${user?.username}`} passHref>
+          <DropdownMenuItem className="cursor-pointer gap-2 font-medium">
+            @{user?.username}
           </DropdownMenuItem>
         </Link>
+        <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <div className="flex items-center justify-between w-full cursor-pointer">
             <span>Theme</span>
             <ThemeToggleButton />
           </div>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => {
+        <DropdownMenuItem className="cursor-pointer gap-2 text-destructive focus:text-destructive focus:bg-destructive/10" onClick={() => {
           queryClient.clear();
           logout();
         }}>
-          <LogOutIcon size={24} className="mr-2 text-muted-foreground" />
+          <LogOutIcon className="h-4 w-4" />
           Log out
         </DropdownMenuItem>
       </DropdownMenuContent>

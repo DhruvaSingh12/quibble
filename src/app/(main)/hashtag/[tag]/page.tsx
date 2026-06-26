@@ -1,82 +1,83 @@
 "use client";
 
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { getPostsByHashtag } from "./actions";
 import Post from "@/components/posts/Post";
-import { PostData } from "@/lib/types";
-import { Skeleton } from "@/components/ui/Skeleton";
 import InfiniteScrollContainer from "@/components/InfiniteScrollContainer";
+import PostsLoadingSkeleton from "@/components/posts/PostLoadingSkeleton";
+import { Loader2, SearchX } from "lucide-react";
 
 export default function HashtagPage() {
     const params = useParams();
     const hashtag = params.tag as string;
-    const [page, setPage] = useState(1);
 
-    const { data, isLoading, isError, error, isFetching } = 
-        useQuery({
-            queryKey: ["hashtagPosts", hashtag, page],
-            queryFn: async () => {
-                const response = await getPostsByHashtag(hashtag, page);
-                if (!response) {
-                    throw new Error("No posts found");
-                }
-                return response;
-            },
-            staleTime: 1000 * 60, // 1 minute
-            retry: false,
-            refetchOnMount: true,
-            refetchOnWindowFocus: false
-        });
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isFetching,
+        isFetchingNextPage,
+        status
+    } = useInfiniteQuery({
+        queryKey: ["hashtagPosts", hashtag],
+        queryFn: async ({ pageParam }) => {
+            const response = await getPostsByHashtag(hashtag, pageParam);
+            if (!response) throw new Error("No posts found");
+            return response;
+        },
+        initialPageParam: 1,
+        getNextPageParam: (lastPage) => lastPage.hasNextPage ? lastPage.currentPage + 1 : undefined,
+        staleTime: 1000 * 60, // 1 minute
+        retry: false,
+        refetchOnMount: true,
+        refetchOnWindowFocus: false
+    });
 
-    const loadMorePosts = () => {
-        if (!isFetching && data?.hasNextPage) {
-            setPage(prev => prev + 1);
-        }
-    };
+    const posts = data?.pages.flatMap(page => page.posts) || [];
 
     return (
-        <div className="w-full max-w-3xl mx-auto min-h-screen py-[9px]">
-            <div className="w-full bg-card rounded-2xl mb-4 p-6 shadow-sm">
+        <div className="w-full mt-[3px] lg:mt-[8px] flex flex-col rounded-lg bg-card border border-border shadow-sm p-4 items-center justify-center space-y-4">
+            <div className="w-full border-b border-border pb-4">
                 <h1 className="text-3xl font-bold">#{hashtag}</h1>
                 <p className="text-muted-foreground mt-2">
-                    {data ? `${data.posts.length} posts found` : 'Loading...'}
+                    {posts.length > 0 ? `${posts.length} posts found` : 'Loading...'}
                 </p>
             </div>
 
-            {isLoading ? (
-                <div className="space-y-6 w-full">
-                    {[...Array(5)].map((_, i) => (
-                        <Skeleton key={i} className="w-full h-40 rounded-2xl" />
-                    ))}
-                </div>
-            ) : isError ? (
-                <div className="bg-card rounded-2xl p-6 text-center shadow-sm">
+            {status === "pending" ? (
+                <PostsLoadingSkeleton />
+            ) : status === "error" ? (
+                <div className="p-6 text-center w-full">
                     <p className="text-red-500">Error loading posts</p>
                     <p className="text-muted-foreground mt-2">
-                        {(error as Error)?.message || "Something went wrong"}
+                        Something went wrong
                     </p>
                 </div>
-            ) : data?.posts.length === 0 ? (
-                <div className="bg-card rounded-2xl p-6 text-center shadow-sm">
-                    <p className="text-xl">No posts found with #{hashtag}</p>
+            ) : posts.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-10 text-center w-full">
+                    <SearchX className="h-16 w-16 text-muted-foreground/40 mb-4" />
+                    <h3 className="text-xl font-semibold text-foreground mb-2">No posts found</h3>
+                    <p className="text-muted-foreground">No posts found with #{hashtag}</p>
                 </div>
             ) : (
-                <InfiniteScrollContainer
-                    onButtonReached={loadMorePosts}
-                >
-                    <div className="space-y-4">
-                        {data?.posts.map((post: PostData) => (
-                            <Post key={post.id} post={post} />
-                        ))}
-                        {isFetching && (
-                            <div className="py-4">
-                                <Skeleton className="h-32" />
-                            </div>
-                        )}
-                    </div>
-                </InfiniteScrollContainer>
+                <div className="w-full">
+                    <InfiniteScrollContainer
+                        onButtonReached={() => hasNextPage && !isFetching && fetchNextPage()}
+                        className="space-y-0"
+                    >
+                        <div className="w-full">
+                            {posts.map(post => (
+                                <Post key={post.id} post={post} />
+                            ))}
+                            {isFetchingNextPage && (
+                                <div className="py-4 flex justify-center">
+                                    <Loader2 className="animate-spin" />
+                                </div>
+                            )}
+                        </div>
+                    </InfiniteScrollContainer>
+                </div>
             )}
         </div>
     );

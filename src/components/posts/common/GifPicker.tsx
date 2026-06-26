@@ -110,13 +110,14 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
           {gifs.map((gif) => (
             <button
               key={gif.id}
-              className="relative aspect-video w-full overflow-hidden rounded-md bg-muted transition-opacity hover:opacity-80"
+              className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted transition-opacity hover:opacity-80"
               onClick={() => onSelect(gif.media_formats.gif.url)}
             >
               <Image
                 src={gif.media_formats.tinygif.url}
                 alt={gif.content_description}
                 fill
+                sizes="(max-width: 768px) 50vw, 33vw"
                 className="object-cover"
                 unoptimized
               />

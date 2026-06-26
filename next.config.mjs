@@ -1,19 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    experimental: {
-      staleTimes: {
-        dynamic: 30,
-      },
-    },
-    webpack: (config, { isServer }) => {
-      if (isServer) {
-        config.externals = [
-          ...config.externals,
-          "@node-rs/argon2",
-        ];
-      }
-      return config;
-    },
+    serverExternalPackages: ['@node-rs/argon2'],
     images: {
       remotePatterns: [
         {
@@ -74,6 +61,15 @@ const nextConfig = {
           hostname: "**",
         }
       ],
+    },
+    webpack: (config, { webpack }) => {
+      config.plugins.push(
+        new webpack.IgnorePlugin({
+          resourceRegExp: /(\.d\.cts$|README\.md$)/,
+          contextRegExp: /@uploadthing/
+        })
+      );
+      return config;
     },
   };
   

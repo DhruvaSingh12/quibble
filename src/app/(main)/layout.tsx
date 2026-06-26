@@ -15,14 +15,26 @@ export default async function Layout({
 
   return (
     <SessionProvider value={session}>
-      <div suppressHydrationWarning={true} className="flex min-h-screen flex-col">
-        <Navbar />
-        <div className="mx-auto flex w-full max-w-7xl grow gap-5 px-3 py-5">
-          <MenuBar className="sticky top-[95px] hidden h-fit flex-none space-y-3 rounded-2xl bg-card px-2 py-5 shadow-sm sm:block lg:px-5" />
-          {children}
-          <TrendsSidebar className="sticky top-[95px] hidden h-fit flex-none space-y-3 w-[220px] md:w-[250px] lg:w-[300px] lg:block"/>
+      <div suppressHydrationWarning={true} className="flex w-full h-full fixed inset-0">
+        {/* Sidebar */}
+        <div className="hidden md:flex flex-col w-[200px] lg:w-[300px] bg-background pl-2 py-2 h-full">
+          <MenuBar />
         </div>
-        <MenuBar className="sticky bottom-3 mx-3 flex justify-between rounded-2xl border-t bg-card p-3 shadow-sm sm:hidden" />
+
+        {/* Main content */}
+        <div className="flex-1 w-full h-full overflow-hidden flex flex-col py-2 px-2 bg-background">
+          <div className="flex-none pb-2">
+            <Navbar />
+          </div>
+          <div className="flex-1 overflow-hidden flex gap-2">
+            <div className="flex-1 min-w-0 h-full overflow-y-auto scrollbar-hide bg-card rounded-lg border border-border shadow-sm">
+              {children}
+            </div>
+            <div className="hidden lg:block w-[200px] lg:w-[300px] flex-none h-full overflow-y-auto scrollbar-hide">
+              <TrendsSidebar className="space-y-2 pb-2" />
+            </div>
+          </div>
+        </div>
       </div>
     </SessionProvider>
   );

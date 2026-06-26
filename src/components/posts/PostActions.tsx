@@ -42,35 +42,29 @@ export default function PostActions({
             <MoreHorizontalIcon className="size-5 text-muted-foreground" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent>
+        <DropdownMenuContent align="end" className="w-24">
           <DropdownMenuItem
-            className="items-center hover:cursor-pointer justify-center hover:bg-muted-foreground"
+            className="cursor-pointer gap-2"
             onClick={() => setShowShareModal(true)}
           >
-            <span className="flex gap-3 text-primary">
-              <HiOutlineShare className="size-4" />
-              Share
-            </span>
+            <HiOutlineShare className="size-4" />
+            Share
           </DropdownMenuItem>
           {user?.id === post.user.id && (
             <>
               <DropdownMenuItem
-                className="items-center hover:cursor-pointer justify-center hover:bg-muted-foreground"
+                className="cursor-pointer gap-2"
                 onClick={() => setShowEditDialog(true)}
               >
-                <span className="flex gap-3 text-primary">
-                  <Edit className="size-4" />
-                  Edit
-                </span>
+                <Edit className="size-4" />
+                Edit
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="items-center hover:cursor-pointer justify-center hover:bg-muted-foreground"
+                className="cursor-pointer gap-2 text-destructive focus:text-destructive focus:bg-destructive/10"
                 onClick={() => setShowDeleteDialog(true)}
               >
-                <span className="flex gap-3 text-destructive">
-                  <Trash2 className="size-4" />
-                  Delete
-                </span>
+                <Trash2 className="size-4" />
+                Delete
               </DropdownMenuItem>
             </>
           )}

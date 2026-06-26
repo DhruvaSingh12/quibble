@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 
 export default function DictionaryLoadingSkeleton() {
   return (
-    <div className="bg-card rounded-b-2xl w-full">
+    <div className="bg-card rounded-b-lg w-full">
       {/* Header */}
       <div className="p-4 sm:p-6 border-b">
         <div className="flex items-center justify-between">
@@ -18,8 +18,8 @@ export default function DictionaryLoadingSkeleton() {
       <div className="p-4 sm:p-6">
         {/* Tabs */}
         <div className="flex bg-muted/30 rounded-lg mb-4 sm:mb-6">
-          <Skeleton className="h-8 flex-1 rounded-md m-1" />
-          <Skeleton className="h-8 flex-1 rounded-md m-1" />
+          <Skeleton className="h-8 flex-1 rounded-lg m-1" />
+          <Skeleton className="h-8 flex-1 rounded-lg m-1" />
         </div>
 
         {/* Content sections */}

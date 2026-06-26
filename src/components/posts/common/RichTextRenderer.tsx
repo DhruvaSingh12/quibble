@@ -20,9 +20,9 @@ interface RichTextRendererProps {
     showLinkPreviews?: boolean;
 }
 
-export default function RichTextRenderer({ 
-    content, 
-    maxLength = 800, 
+export default function RichTextRenderer({
+    content,
+    maxLength = 800,
     className = "",
     showLinkPreviews = true
 }: RichTextRendererProps) {
@@ -36,7 +36,7 @@ export default function RichTextRenderer({
     // Handle clicks on mentions, hashtags, and links
     const handleEditorClick = useCallback((event: React.MouseEvent) => {
         const target = event.target as HTMLElement;
-        
+
         // Handle hashtags - direct navigation
         if (target.hasAttribute('data-tag')) {
             event.preventDefault();
@@ -46,7 +46,7 @@ export default function RichTextRenderer({
                 router.push(`/hashtag/${hashtag}`);
             }
         }
-        
+
         // Handle mentions - direct navigation
         if (target.hasAttribute('data-mention')) {
             event.preventDefault();
@@ -67,22 +67,22 @@ export default function RichTextRenderer({
             }
         }
     }, [router]);
-    
+
     // Make interactive elements accessible
     useEffect(() => {
         if (!contentRef.current) return;
-        
+
         // Make hashtags accessible
         const hashtagElements = contentRef.current.querySelectorAll('[data-tag="true"]');
         hashtagElements.forEach(el => {
             const hashtag = el.getAttribute('data-hashtag');
             if (!hashtag) return;
-            
+
             // Make focusable
             el.setAttribute('tabindex', '0');
             el.setAttribute('role', 'link');
             el.setAttribute('aria-label', `View posts with hashtag ${hashtag}`);
-            
+
             // Add keyboard handler
             el.addEventListener('keydown', (e: Event) => {
                 const keyEvent = e as KeyboardEvent;
@@ -93,18 +93,18 @@ export default function RichTextRenderer({
                 }
             });
         });
-        
+
         // Make mentions accessible
         const mentionElements = contentRef.current.querySelectorAll('[data-mention="true"]');
         mentionElements.forEach(el => {
             const username = el.getAttribute('data-username');
             if (!username) return;
-            
+
             // Make focusable
             el.setAttribute('tabindex', '0');
             el.setAttribute('role', 'link');
             el.setAttribute('aria-label', `View profile of ${username}`);
-            
+
             // Add keyboard handler
             el.addEventListener('keydown', (e: Event) => {
                 const keyEvent = e as KeyboardEvent;
@@ -121,12 +121,12 @@ export default function RichTextRenderer({
         linkElements.forEach(el => {
             const href = el.getAttribute('href');
             if (!href) return;
-            
+
             // Make focusable (already is for <a> tags)
             el.setAttribute('target', '_blank');
             el.setAttribute('rel', 'noopener noreferrer');
             el.setAttribute('aria-label', `Open link to ${href} in new tab`);
-            
+
             // Add keyboard handler
             el.addEventListener('keydown', (e: Event) => {
                 const keyEvent = e as KeyboardEvent;
@@ -169,7 +169,7 @@ export default function RichTextRenderer({
         content: content,
         editable: false,
         immediatelyRender: false,
-    }, [content]); 
+    }, [content]);
 
     useEffect(() => {
         if (!editor) return;
@@ -196,10 +196,10 @@ export default function RichTextRenderer({
             // Create truncated version
             const truncatedText = textContent.slice(0, maxLength);
             const lastSpaceIndex = truncatedText.lastIndexOf(" ");
-            const finalText = lastSpaceIndex > -1 
+            const finalText = lastSpaceIndex > -1
                 ? truncatedText.slice(0, lastSpaceIndex) + "..."
                 : truncatedText + "...";
-            
+
             // Set truncated content
             editor.commands.setContent(`<p>${finalText}</p>`);
         }
@@ -209,23 +209,23 @@ export default function RichTextRenderer({
             const doc = editor.getHTML();
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = doc;
-            
+
             const linkElements = tempDiv.getElementsByTagName('a');
             const newLinks = Array.from(linkElements)
                 .map(a => a.getAttribute('href'))
                 .filter((href): href is string => !!href)
                 .slice(0, 3); // Limit to 3 previews maximum
-            
+
             setLinks(newLinks);
         } else {
             setLinks([]);
         }
     }, [editor, content, maxLength, isExpanded]);
-    
+
     const toggleExpanded = () => setIsExpanded(!isExpanded);
-    
+
     if (!editor) return null;
-    
+
     return (
         <div className={className}>
             {/* GIF Grid Display */}
@@ -242,7 +242,7 @@ export default function RichTextRenderer({
                                     className="w-full h-auto max-h-[400px] object-contain"
                                     unoptimized
                                 />
-                                <div className="absolute bottom-2 right-2 bg-foreground text-card text-xs font-semibold px-2 py-1 rounded">
+                                <div className="absolute bottom-2 right-2 bg-foreground text-card text-[8px] font-semibold px-2 py-1 rounded">
                                     GIF
                                 </div>
                             </div>
@@ -250,7 +250,7 @@ export default function RichTextRenderer({
                     </div>
                 </div>
             )}
-            
+
             {/* Text Content */}
             <div onClick={handleEditorClick} ref={contentRef}>
                 <EditorContent
@@ -258,7 +258,7 @@ export default function RichTextRenderer({
                     className="prose prose-sm max-w-none [&>.ProseMirror]:outline-none [&>.ProseMirror]:p-0 [&>.ProseMirror]:m-0"
                 />
             </div>
-            
+
             {needsTruncation && (
                 <button
                     onClick={(e) => {

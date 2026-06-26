@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Logo from "@/components/Logo";
 
 function NotFound() {
   const router = useRouter();
@@ -14,15 +15,8 @@ function NotFound() {
   return (
     <div className="h-full w-full bg-black text-white">
       <div className="flex flex-col items-center justify-center gap-4 bg-black">
-        <div className="mt-4 flex flex-col items-center justify-center rounded-3xl bg-white p-4">
-          <Image
-            src="/quibble.png"
-            alt="Quibble logo"
-            width={180}
-            height={40}
-            className="object-contain"
-            priority
-          />
+        <div className="mt-4 flex flex-col items-center justify-center rounded-lg bg-white p-4">
+          <Logo className="text-4xl sm:text-5xl text-black" />
         </div>
         <div className="relative flex items-center justify-center">
           <Image width={400} height={400} src="/404.png" alt="404 Not Found" />

@@ -10,8 +10,7 @@ import Placeholder from "@tiptap/extension-placeholder";
 import TextStyle from "@tiptap/extension-text-style";
 import Typography from "@tiptap/extension-typography";
 import CharacterCount from "@tiptap/extension-character-count";
-import Dropcursor from "@tiptap/extension-dropcursor";
-import Gapcursor from "@tiptap/extension-gapcursor";
+
 import HardBreak from "@tiptap/extension-hard-break";
 import Link from "@tiptap/extension-link";
 import React, { useEffect, useCallback, useState } from "react";
@@ -48,6 +47,7 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
                 code: { HTMLAttributes: { class: 'tiptap-code'}},
                 blockquote: { HTMLAttributes: { class: 'tiptap-blockquote' }},
                 hardBreak: false,
+                dropcursor: { color: '#3b82f6', width: 2 },
             }),
             HardBreak.configure({ HTMLAttributes: {class: 'tiptap-hard-break'}}),
             TextStyle,
@@ -62,7 +62,6 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
                 rightArrow: '→',
             }),
             CharacterCount.configure({limit: 3000}),
-            Dropcursor.configure({color: '#3b82f6', width: 2}),
             Link.configure({
                 HTMLAttributes: {
                     class: 'text-primary hover:underline',
@@ -71,7 +70,6 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
                 openOnClick: false, // Don't open links while editing
                 linkOnPaste: true, // Automatically convert pasted URLs to links
             }),
-            Gapcursor,
             PasteExtension,
             MentionsInputExtension,
             Placeholder.configure({ placeholder: "What's on your mind?" })
@@ -226,7 +224,7 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
 
       <div className="fixed inset-0 z-50 flex items-end justify-center backdrop-blur-sm transition-opacity duration-300">
         <div
-          className={`w-full max-w-2xl rounded-t-2xl bg-card shadow-2xl transition-all duration-300 ${
+          className={`w-full max-w-2xl rounded-t-lg bg-card shadow-2xl transition-all duration-300 ${
             isVisible ? "translate-y-0 scale-100" : "translate-y-8 scale-95"
           }`}
         >

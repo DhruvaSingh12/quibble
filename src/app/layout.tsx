@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Figtree } from "next/font/google";
+import { Figtree, League_Spartan } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
 import { Analytics } from "@vercel/analytics/react"
@@ -11,7 +11,8 @@ import { NextSSRPlugin} from "@uploadthing/react/next-ssr-plugin";
 import { fileRouter } from "./api/uploadthing/core";
 import { extractRouterConfig } from "uploadthing/server";
 
-const font = Figtree({ subsets: ["latin"] });
+const font = Figtree({ subsets: ["latin"], variable: "--figtree" });
+const leagueSpartan = League_Spartan({ subsets: ["latin"], weight: ["900"], variable: "--league-spartan" });
 
 export const metadata: Metadata = {
   title: {
@@ -29,13 +30,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning={true}>
-      <body className={`${font.className} w-full h-full`}>
+    <html lang="en" suppressHydrationWarning={true} className="dark">
+      <body className={`${font.className} ${leagueSpartan.variable} w-full h-full`}>
         <NextSSRPlugin routerConfig={extractRouterConfig(fileRouter)} />
         <ReactQueryProvider>
           <ThemeProvider
             attribute="class"
-            defaultTheme="system"
+            defaultTheme="dark"
             enableSystem={true}
             disableTransitionOnChange
           >

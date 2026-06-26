@@ -5,6 +5,8 @@ import FollowerModal from "./FollowerModal";
 import { FollowerListItem } from "@/lib/types";
 import { formatNumber } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
+import { useQuery } from "@tanstack/react-query";
+import kyInstance from "@/lib/ky";
 
 interface FollowerCountProps {
     userId: string;
@@ -12,25 +14,21 @@ interface FollowerCountProps {
 }
 
 function FollowerCount({ userId, initialState }: FollowerCountProps) {
-    const [data] = useState(initialState);
-    const [followerList, setFollowerList] = useState<FollowerListItem[]>([]);
     const [showModal, setShowModal] = useState(false);
 
-    const fetchFollowers = async () => {
-        try {
-            const response = await fetch(`/api/users/${userId}/followers`);
-            if (!response.ok) {
-                throw new Error("Failed to fetch followers");
-            }
-            const result = await response.json();
-            setFollowerList(result.followerList || []);
-        } catch (error) {
-            console.error("Error fetching followers:", error);
-        }
-    };
+    const { data: followerList, refetch, isFetching } = useQuery({
+        queryKey: ["followers", userId],
+        queryFn: async () => {
+            const result = await kyInstance.get(`/api/users/${userId}/followers`).json<{ followerList: FollowerListItem[] }>();
+            return result.followerList || [];
+        },
+        enabled: false, // Only fetch when manually triggered
+        staleTime: 1000 * 60 * 2, // 2 minutes
+        refetchOnWindowFocus: false,
+    });
 
     const openModal = async () => {
-        await fetchFollowers();
+        await refetch();
         setShowModal(true);
     };
 
@@ -43,15 +41,16 @@ function FollowerCount({ userId, initialState }: FollowerCountProps) {
                 variant="ghost"
                 size="sm"
                 className="gap-2 group hover:bg-muted border"
+                disabled={isFetching}
             >
-                <span className="font-semibold">{formatNumber(data.followers)}</span>
+                <span className="font-semibold">{formatNumber(initialState.followers)}</span>
                 <span className="group-hover:text-foreground transition-colors">
-                    {data.followers === 1 ? "Follower" : "Followers"}
+                    {initialState.followers === 1 ? "Follower" : "Followers"}
                 </span>
             </Button>
             {showModal && (
                 <FollowerModal
-                    followers={followerList}
+                    followers={followerList || []}
                     onClose={closeModal}
                 />
             )}

@@ -38,15 +38,15 @@ export async function GET(request: Request) {
         const html = await response.text();
         const root = parse(html);
 
-        const title = 
+        const title =
             root.querySelector('meta[property="og:title"]')?.getAttribute('content') ||
             root.querySelector('title')?.text || '';
 
-        const description = 
+        const description =
             root.querySelector('meta[property="og:description"]')?.getAttribute('content') ||
             root.querySelector('meta[name="description"]')?.getAttribute('content') || '';
 
-        const imageContent = 
+        const imageContent =
             root.querySelector('meta[property="og:image"]')?.getAttribute('content') ||
             root.querySelector('meta[property="twitter:image"]')?.getAttribute('content') || '';
 
@@ -64,7 +64,7 @@ export async function GET(request: Request) {
                         const pathname = imageUrl.pathname.toLowerCase();
                         const hasImageExtension = /\.(jpg|jpeg|png|gif|webp|svg|bmp|ico)$/i.test(pathname);
                         const hasReasonablePath = !pathname.includes('com.') && !pathname.includes('@');
-                        
+
                         if (hasImageExtension || hasReasonablePath) {
                             image = imageUrl.href;
                         } else {
@@ -78,7 +78,7 @@ export async function GET(request: Request) {
             }
         }
 
-        const siteName = 
+        const siteName =
             root.querySelector('meta[property="og:site_name"]')?.getAttribute('content') ||
             new URL(url).hostname;
 
@@ -93,10 +93,9 @@ export async function GET(request: Request) {
             }
         });
     } catch (error) {
-        console.error("Error fetching link preview:", error);
         return NextResponse.json(
-            { error: "Failed to fetch link preview" },
-            { status: 500 }
+            { success: false, error: "Failed to fetch link preview" },
+            { status: 200 }
         );
     }
 }

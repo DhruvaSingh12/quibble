@@ -17,6 +17,7 @@ const config = {
       center: true,
       padding: "2rem",
       screens: {
+        "xs": "400px",
         "2xl": "1400px",
       },
     },
@@ -70,10 +71,26 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "equalizer": {
+          "0%, 100%": { height: "20%" },
+          "50%": { height: "100%" },
+        },
+        "marquee": {
+          from: { transform: "translateX(0%)" },
+          to: { transform: "translateX(-100%)" },
+        },
+        "indeterminate": {
+          "0%": { transform: "translateX(-100%)" },
+          "50%": { transform: "translateX(100%)" },
+          "100%": { transform: "translateX(-100%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "equalizer": "equalizer 0.8s ease-in-out infinite",
+        "marquee": "marquee 15s linear infinite",
+        "indeterminate": "indeterminate 2s linear infinite",
       },
     },
   },

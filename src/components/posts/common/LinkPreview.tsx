@@ -1,17 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/Skeleton";
 import Image from "next/image";
 import kyInstance from "@/lib/ky";
-
-// Simple in-memory cache for link previews
-interface CachedPreview {
-  data: { success: boolean; metadata: LinkPreviewData };
-  timestamp: number;
-}
-const previewCache = new Map<string, CachedPreview>();
-const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
 import Link from "next/link";
 
 interface LinkPreviewData {
@@ -27,47 +19,28 @@ interface LinkPreviewProps {
 }
 
 export default function LinkPreview({ url }: LinkPreviewProps) {
-    const [previewData, setPreviewData] = useState<LinkPreviewData | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const { data: previewData, isLoading, isError } = useQuery({
+        queryKey: ["link-preview", url],
+        queryFn: async () => {
+            const data = await kyInstance.get('/api/link-preview', {
+                searchParams: { url },
+                timeout: 8000,
+                retry: 1,
+            }).json<{ success: boolean; metadata: LinkPreviewData }>();
 
-    useEffect(() => {
-        const fetchPreview = async () => {
-            try {
-                // Check cache first
-                const cached = previewCache.get(url);
-                if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-                    setPreviewData(cached.data.metadata);
-                    setIsLoading(false);
-                    return;
-                }
-
-                setIsLoading(true);
-                setError(null);
-                
-                const data = await kyInstance.get('/api/link-preview', {
-                    searchParams: { url },
-                    timeout: 5000, // 5 second timeout
-                    retry: 1, // Only retry once
-                }).json<{ success: boolean; metadata: LinkPreviewData }>();
-                
-                if (data.success && data.metadata) {
-                    // Cache the result
-                    previewCache.set(url, { data, timestamp: Date.now() });
-                    setPreviewData(data.metadata);
-                }
-            } catch (err) {
-                console.error("Error fetching link preview:", err);
-                setError("Failed to load preview");
-            } finally {
-                setIsLoading(false);
+            if (data.success && data.metadata) {
+                return data.metadata;
             }
-        };
+            return null;
+        },
+        staleTime: 1000 * 60 * 60, // 1 hour cache
+        gcTime: 1000 * 60 * 60 * 2, // 2 hour garbage collection
+        retry: false,
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,
+    });
 
-        fetchPreview();
-    }, [url]);
-
-    if (error) return null;
+    if (isError) return null;
     if (isLoading) {
         return (
             <div className="mt-2 overflow-hidden rounded-lg border border-border bg-card">
@@ -94,11 +67,13 @@ export default function LinkPreview({ url }: LinkPreviewProps) {
         >
             <div className="flex gap-3 p-3">
                 {previewData.image && previewData.image.startsWith('http') && (
-                    <div className="relative h-[80px] w-[80px] shrink-0 overflow-hidden rounded-md bg-accent/10">
+                    <div className="relative h-[80px] w-[80px] shrink-0 overflow-hidden rounded-lg bg-accent/10">
                         <Image
                             src={previewData.image}
                             alt={previewData.title || "Link preview image"}
                             fill
+                            sizes="80px"
+                            unoptimized
                             className="object-cover"
                             onError={(e) => {
                                 const target = e.target as HTMLImageElement;
@@ -107,7 +82,7 @@ export default function LinkPreview({ url }: LinkPreviewProps) {
                         />
                     </div>
                 )}
-                <div className="flex-grow  overflow-hidden">
+                <div className="flex-grow overflow-hidden">
                     <h3 className="line-clamp-1 font-semibold">
                         {previewData.title || previewData.siteName}
                     </h3>

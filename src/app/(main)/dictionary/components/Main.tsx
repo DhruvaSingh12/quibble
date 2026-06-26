@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { DictionaryResponse } from "@/lib/types";
+import { useQuery } from "@tanstack/react-query";
 import ErrorMessage from "./ErrorMessage";
 import DictionaryLoadingSkeleton from "./LoadingSkeleton";
 import { Volume2, VolumeX } from "lucide-react";
+import kyInstance from "@/lib/ky";
 
 interface MainProps {
   data: DictionaryResponse | null;
@@ -19,19 +21,15 @@ export default function Main({
   loading,
   handleSynonymAntonymClick,
 }: MainProps) {
-  const [relatedWords, setRelatedWords] = useState<string[]>([]);
-  const [visibleWords, setVisibleWords] = useState<string[]>([]);
-  const [relatedLoading, setRelatedLoading] = useState(false);
-  const [relatedError, setRelatedError] = useState("");
   const [, setShowMoreState] = useState<"show-more" | "show-less">("show-more");
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
 
   const combinedSynonymsAntonyms = useMemo(() => {
     if (!data) return { synonyms: [], antonyms: [] };
-    
+
     const allSynonyms = new Set<string>();
     const allAntonyms = new Set<string>();
-    
+
     data.meanings.forEach(meaning => {
       meaning.synonyms.forEach(syn => allSynonyms.add(syn));
       meaning.antonyms.forEach(ant => allAntonyms.add(ant));
@@ -40,54 +38,44 @@ export default function Main({
         def.antonyms.forEach(ant => allAntonyms.add(ant));
       });
     });
-    
+
     return {
       synonyms: Array.from(allSynonyms),
       antonyms: Array.from(allAntonyms)
     };
   }, [data]);
 
-  useEffect(() => {
-    if (data?.word && relatedWords.length === 0) {
-      fetchRelatedWords(data.word);
-    }
-  }, [data, relatedWords.length]);
-
-  const fetchRelatedWords = async (word: string) => {
-    setRelatedError("");
-    setRelatedLoading(true);
-    setRelatedWords([]);
-    setVisibleWords([]);
-    setShowMoreState("show-more");
-
-    try {
-      const response = await fetch(`https://api.datamuse.com/words?ml=${word}&max=30`);
-      if (!response.ok) {
-        throw new Error("Unable to fetch related words at this time.");
-      }
-      const result = await response.json();
-      const words = result.map((item: { word: string }) => item.word).filter((w: string) => w !== word);
-
+  // Query for related words
+  const { 
+    data: relatedWordsData, 
+    isFetching: relatedLoading, 
+    error: relatedErrorObj 
+  } = useQuery({
+    queryKey: ["related-words", data?.word],
+    queryFn: async () => {
+      if (!data?.word) return [];
+      const response = await kyInstance.get(`https://api.datamuse.com/words?ml=${data.word}&max=30`).json<{ word: string }[]>();
+      const words = response.map(item => item.word).filter(w => w !== data.word);
       if (words.length === 0) {
-        setRelatedError("No related words found.");
-        return;
+        throw new Error("No related words found.");
       }
+      return words;
+    },
+    enabled: !!data?.word,
+    staleTime: 1000 * 60 * 60, // 1 hour cache
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
 
-      setRelatedWords(words);
-      setVisibleWords(words.slice(0, 15));
-      if (words.length > 15) {
-        setShowMoreState("show-more");
-      }
-    } catch (err) {
-      if (err instanceof Error) {
-        setRelatedError(err.message);
-      } else {
-        setRelatedError("Failed to load related words.");
-      }
-    } finally {
-      setRelatedLoading(false);
+  const visibleWords = useMemo(() => {
+    if (!relatedWordsData) return [];
+    if (relatedWordsData.length > 15) {
+      setShowMoreState("show-more");
     }
-  };
+    return relatedWordsData.slice(0, 15);
+  }, [relatedWordsData]);
+
+  const relatedError = relatedErrorObj ? relatedErrorObj.message : "";
 
   const playPhonetic = (audioUrl: string) => {
     if (playingAudio === audioUrl) {
@@ -105,14 +93,14 @@ export default function Main({
         audio.pause();
         audio.currentTime = 0;
       });
-      
+
       setPlayingAudio(audioUrl);
       const audio = new Audio(audioUrl);
       audio.play().catch(err => {
         console.error('Error playing audio:', err);
         setPlayingAudio(null);
       });
-      
+
       audio.onended = () => {
         setPlayingAudio(null);
       };
@@ -125,17 +113,17 @@ export default function Main({
       {loading && <DictionaryLoadingSkeleton />}
 
       {data && (
-        <div className="bg-card rounded-b-2xl w-full">
-          <div className="p-4 border-b">
+        <div className="w-full">
+          <div className="p-4 border-b border-border">
             <div className="flex items-center justify-between">
               <div className="min-w-0 flex-1">
                 <h1 className="text-xl sm:text-2xl font-semibold text-foreground truncate">{data.word}</h1>
                 {(() => {
                   const phoneticWithAudio = data.phonetics.find(p => p.text && p.audio);
                   const phoneticTextOnly = data.phonetics.find(p => p.text);
-                  
+
                   const selectedPhonetic = phoneticWithAudio || phoneticTextOnly;
-                  
+
                   if (selectedPhonetic) {
                     return (
                       <div className="flex items-center gap-3 mt-1">
@@ -230,7 +218,7 @@ export default function Main({
                   {relatedLoading && (
                     <div className="flex gap-1.5 sm:gap-2 flex-wrap">
                       {[...Array(8)].map((_, i) => (
-                        <div key={i} className="h-6 w-12 sm:w-16 bg-muted animate-pulse rounded-md" />
+                        <div key={i} className="h-6 w-12 sm:w-16 bg-muted animate-pulse rounded-lg" />
                       ))}
                     </div>
                   )}

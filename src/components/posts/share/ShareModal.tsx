@@ -114,7 +114,7 @@ const ShareModal: React.FC<ShareModalProps> = ({ pageLink, onClose }) => {
       } `}
     >
       <div
-        className={`mx-auto w-full max-w-sm rounded-t-3xl bg-card shadow-2xl transition-all duration-300 ${
+        className={`mx-auto w-full max-w-sm rounded-t-lg bg-card shadow-2xl transition-all duration-300 ${
           isVisible ? "translate-y-0 scale-100" : "translate-y-8 scale-95"
         }`}
       >
@@ -138,7 +138,7 @@ const ShareModal: React.FC<ShareModalProps> = ({ pageLink, onClose }) => {
               <button
                 key={platform.id}
                 onClick={() => handleShareClick(platform.id)}
-                className={`flex flex-col items-center justify-center rounded-2xl p-3 transition-colors hover:bg-muted ${platform.color} relative`}
+                className={`flex flex-col items-center justify-center rounded-lg p-3 transition-colors hover:bg-muted ${platform.color} relative`}
               >
                 <div className="flex-shrink-0">
                   {platform.id === "copy" && copied ? (
