@@ -9,7 +9,12 @@ import { formatRelativeDate } from "@/lib/utils";
 import PostActions from "./PostActions";
 import RichTextRenderer from "./common/RichTextRenderer";
 import MediaGrid from "./common/MediaGrid";
+import LikeButton from "./reactions/LikeButton";
+import DislikeButton from "./reactions/DislikeButton";
+import ShareModal from "./share/ShareModal";
 import { PostData } from "@/lib/types";
+import { MessageSquare } from "lucide-react";
+import { HiOutlineShare } from "react-icons/hi";
 
 interface PostProps {
   post: PostData;
@@ -17,7 +22,9 @@ interface PostProps {
 
 export default function Post({ post }: PostProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const router = useRouter();
+  const pageLink = typeof window !== "undefined" ? `${window.location.origin}/posts/${post.id}` : "";
 
   const handlePostClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
@@ -90,7 +97,36 @@ export default function Post({ post }: PostProps) {
             className="whitespace-pre-line break-words text-justify text-[16px] text-muted-foreground"
           />
         </div>
+
+        {/* Reaction bar */}
+        <div
+          className="flex items-center gap-4 pt-2 border-t border-border/50 mt-1"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <LikeButton post={post} />
+          <DislikeButton post={post} />
+          <button
+            onClick={() => router.push(`/posts/${post.id}`)}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <MessageSquare className="size-[18px]" />
+            <span className="tabular-nums text-[13px]">{post._count.comments}</span>
+          </button>
+          <button
+            onClick={() => setShowShareModal(true)}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <HiOutlineShare className="size-[18px]" />
+          </button>
+        </div>
       </div>
+
+      {showShareModal && (
+        <ShareModal
+          pageLink={pageLink}
+          onClose={() => setShowShareModal(false)}
+        />
+      )}
     </div>
   );
 }

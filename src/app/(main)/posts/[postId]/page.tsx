@@ -1,5 +1,6 @@
 import { validateRequest } from "@/auth";
 import Post from "@/components/posts/Post";
+import CommentSection from "@/components/comments/CommentSection";
 import prisma from "@/lib/prisma";
 import { getPostDataInclude } from "@/lib/types";
 import { notFound } from "next/navigation";
@@ -41,7 +42,7 @@ export default async function Page({ params }: PageProps) {
     if (!loggedInUser) {
         return (
             <p className="text-destructive">
-                You're not authorized to view this page.
+                You&apos;re not authorized to view this page.
             </p>
         );
     }
@@ -52,7 +53,9 @@ export default async function Page({ params }: PageProps) {
         <main className="w-full mt-[3px] lg:mt-[8px] flex flex-col rounded-lg items-center justify-center">
             <div className="w-full flex-col min-w-0">
                 <Post post={post} />
+                <CommentSection postId={postId} postAuthorId={post.userId} />
             </div>
         </main>
     );
 }
+

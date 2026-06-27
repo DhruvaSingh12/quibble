@@ -5,8 +5,8 @@ import { useParams } from "next/navigation";
 import { getPostsByHashtag } from "./actions";
 import Post from "@/components/posts/Post";
 import InfiniteScrollContainer from "@/components/InfiniteScrollContainer";
-import PostsLoadingSkeleton from "@/components/posts/PostLoadingSkeleton";
-import { Loader2, SearchX } from "lucide-react";
+import PostsLoadingSkeleton, { PostLoadingSkeleton } from "@/components/posts/PostLoadingSkeleton";
+import { SearchX } from "lucide-react";
 
 export default function HashtagPage() {
     const params = useParams();
@@ -20,7 +20,7 @@ export default function HashtagPage() {
         isFetchingNextPage,
         status
     } = useInfiniteQuery({
-        queryKey: ["hashtagPosts", hashtag],
+        queryKey: ["post-feed", "hashtag", hashtag],
         queryFn: async ({ pageParam }) => {
             const response = await getPostsByHashtag(hashtag, pageParam);
             if (!response) throw new Error("No posts found");
@@ -37,7 +37,7 @@ export default function HashtagPage() {
     const posts = data?.pages.flatMap(page => page.posts) || [];
 
     return (
-        <div className="w-full mt-[3px] lg:mt-[8px] flex flex-col rounded-lg bg-card border border-border shadow-sm p-4 items-center justify-center space-y-4">
+        <div className="w-full mt-[3px] lg:mt-[8px] flex flex-col rounded-lg p-4 items-center justify-center space-y-4">
             <div className="w-full border-b border-border pb-4">
                 <h1 className="text-3xl font-bold">#{hashtag}</h1>
                 <p className="text-muted-foreground mt-2">
@@ -70,11 +70,7 @@ export default function HashtagPage() {
                             {posts.map(post => (
                                 <Post key={post.id} post={post} />
                             ))}
-                            {isFetchingNextPage && (
-                                <div className="py-4 flex justify-center">
-                                    <Loader2 className="animate-spin" />
-                                </div>
-                            )}
+                            {isFetchingNextPage && <PostLoadingSkeleton />}
                         </div>
                     </InfiniteScrollContainer>
                 </div>

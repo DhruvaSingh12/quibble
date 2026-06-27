@@ -9,39 +9,53 @@ export class MentionSuggestionService {
   private view: EditorView | null = null;
   private searching = false;
   private searchQuery = '';
+  private lastFetchedQuery: string | null = null;
   private range: MentionRange | null = null;
   private suggestions: UserSuggestion[] = [];
   private selectedIndex = 0;
   private popup: SuggestionPopupUI;
+  private debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(options = { debugMode: false }) {
     this.popup = new SuggestionPopupUI(options);
   }
 
   private async loadSuggestions(query: string) {
-    if (this.searching) return;
-    
-    this.searching = true;
-    console.log('Loading suggestions for:', query);
-    
-    try {
-      const users = await getFollowingSuggestions(query || '');
-      
-      if (users && Array.isArray(users)) {
-        this.suggestions = users;
-      } else {
-        console.log('Invalid response format from getFollowingSuggestions');
-        this.suggestions = [];
-      }
-      
+    // Skip if already fetched for this exact query
+    if (this.lastFetchedQuery === query && this.suggestions.length > 0) {
       this.renderSuggestions();
-    } catch (error) {
-      console.error('Error fetching mention suggestions:', error);
-      this.suggestions = [];
-      this.renderSuggestions();
-    } finally {
-      this.searching = false;
+      return;
     }
+
+    // Debounce to avoid rapid-fire calls
+    if (this.debounceTimer) {
+      clearTimeout(this.debounceTimer);
+    }
+
+    this.debounceTimer = setTimeout(async () => {
+      if (this.searching) return;
+
+      this.searching = true;
+
+      try {
+        const users = await getFollowingSuggestions(query || '');
+
+        if (users && Array.isArray(users)) {
+          this.suggestions = users;
+        } else {
+          this.suggestions = [];
+        }
+
+        this.lastFetchedQuery = query;
+        this.renderSuggestions();
+      } catch (error) {
+        console.error('Error fetching mention suggestions:', error);
+        this.suggestions = [];
+        this.renderSuggestions();
+      } finally {
+        this.searching = false;
+      }
+    }, 300);
   }
 
   private renderSuggestions() {
@@ -72,8 +86,13 @@ export class MentionSuggestionService {
   }
 
   clearSuggestions() {
+    if (this.debounceTimer) {
+      clearTimeout(this.debounceTimer);
+      this.debounceTimer = null;
+    }
     this.range = null;
     this.searchQuery = '';
+    this.lastFetchedQuery = null;
     this.suggestions = [];
     this.selectedIndex = 0;
     this.popup.remove();
@@ -110,11 +129,14 @@ export class MentionSuggestionService {
     const textAfterAt = textBeforeCursor.substring(atIndex + 1);
     
     if (textAfterAt === '') {
-      this.searchQuery = '';
       this.range = { from: currentPos + atIndex, to: from };
-      this.selectedIndex = 0;
-      this.popup.create();
-      this.loadSuggestions('');
+      
+      if (this.searchQuery !== '' || this.lastFetchedQuery === null) {
+        this.searchQuery = '';
+        this.selectedIndex = 0;
+        this.popup.create();
+        this.loadSuggestions('');
+      }
       return;
     }
     
@@ -146,6 +168,10 @@ export class MentionSuggestionService {
   }
 
   destroy() {
+    if (this.debounceTimer) {
+      clearTimeout(this.debounceTimer);
+      this.debounceTimer = null;
+    }
     this.popup.remove();
   }
 }

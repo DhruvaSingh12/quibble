@@ -10,11 +10,9 @@ import {
 } from "@/components/ui/DropdownMenu";
 import { Button } from "@/components/ui/Button";
 import { MoreHorizontalIcon, Trash2, Edit } from "lucide-react";
-import { HiOutlineShare } from "react-icons/hi";
 import { useSession } from "@/providers/SessionProvider";
 import DeletePostDialog from "./delete/DeletePostDialog";
 import EditPostDialog from "./edit/EditPostDialog";
-import ShareModal from "./share/ShareModal";
 
 interface PostActionsProps {
   post: PostData;
@@ -29,10 +27,11 @@ export default function PostActions({
 }: PostActionsProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [showShareModal, setShowShareModal] = useState(false);
 
   const { user } = useSession();
-  const pageLink = `${window.location.origin}/posts/${post.id}`;
+
+  // Only show the dropdown if the user is the post author
+  if (user?.id !== post.user.id) return null;
 
   return (
     <>
@@ -45,29 +44,18 @@ export default function PostActions({
         <DropdownMenuContent align="end" className="w-24">
           <DropdownMenuItem
             className="cursor-pointer gap-2"
-            onClick={() => setShowShareModal(true)}
+            onClick={() => setShowEditDialog(true)}
           >
-            <HiOutlineShare className="size-4" />
-            Share
+            <Edit className="size-4" />
+            Edit
           </DropdownMenuItem>
-          {user?.id === post.user.id && (
-            <>
-              <DropdownMenuItem
-                className="cursor-pointer gap-2"
-                onClick={() => setShowEditDialog(true)}
-              >
-                <Edit className="size-4" />
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="cursor-pointer gap-2 text-destructive focus:text-destructive focus:bg-destructive/10"
-                onClick={() => setShowDeleteDialog(true)}
-              >
-                <Trash2 className="size-4" />
-                Delete
-              </DropdownMenuItem>
-            </>
-          )}
+          <DropdownMenuItem
+            className="cursor-pointer gap-2 text-destructive focus:text-destructive focus:bg-destructive/10"
+            onClick={() => setShowDeleteDialog(true)}
+          >
+            <Trash2 className="size-4" />
+            Delete
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       <DeletePostDialog
@@ -80,12 +68,6 @@ export default function PostActions({
         open={showEditDialog}
         onClose={() => setShowEditDialog(false)}
       />
-      {showShareModal && (
-        <ShareModal
-          pageLink={pageLink}
-          onClose={() => setShowShareModal(false)}
-        />
-      )}
     </>
   );
 }

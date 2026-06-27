@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/Button";
 import { FaMagnifyingGlass, FaX } from "react-icons/fa6";
 import kyInstance from "@/lib/ky";
 import Image from "next/image";
-import { Loader2 } from "lucide-react";
 
 interface GifPickerProps {
   onSelect: (gifUrl: string) => void;
@@ -106,29 +105,37 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
         className="flex-1 overflow-y-auto p-2"
         onScroll={handleScroll}
       >
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <div className="columns-2 sm:columns-3 gap-2">
           {gifs.map((gif) => (
             <button
               key={gif.id}
-              className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted transition-opacity hover:opacity-80"
+              className="relative block w-full overflow-hidden rounded-lg bg-muted transition-opacity hover:opacity-80 break-inside-avoid mb-2"
               onClick={() => onSelect(gif.media_formats.gif.url)}
             >
               <Image
                 src={gif.media_formats.tinygif.url}
                 alt={gif.content_description}
-                fill
-                sizes="(max-width: 768px) 50vw, 33vw"
-                className="object-cover"
+                width={gif.media_formats.tinygif.dims[0]}
+                height={gif.media_formats.tinygif.dims[1]}
+                className="w-full h-auto"
                 unoptimized
               />
             </button>
           ))}
+          
+          {isLoading && (
+            <>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div 
+                  key={`skeleton-${i}`} 
+                  className={`w-full rounded-lg bg-muted animate-pulse break-inside-avoid mb-2 ${
+                    i % 3 === 0 ? "aspect-[4/3]" : i % 2 === 0 ? "aspect-[3/4]" : "aspect-square"
+                  }`} 
+                />
+              ))}
+            </>
+          )}
         </div>
-        {isLoading && (
-          <div className="flex justify-center p-4">
-            <Loader2 className="animate-spin text-primary" />
-          </div>
-        )}
       </div>
     </div>
   );

@@ -2,11 +2,11 @@
 
 import InfiniteScrollContainer from "@/components/InfiniteScrollContainer";
 import Post from "@/components/posts/Post";
-import PostsLoadingSkeleton from "@/components/posts/PostLoadingSkeleton";
+import PostsLoadingSkeleton, { PostLoadingSkeleton } from "@/components/posts/PostLoadingSkeleton";
 import kyInstance from "@/lib/ky";
 import { PostsPage } from "@/lib/types";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Loader2, SearchX } from "lucide-react";
+import { SearchX } from "lucide-react";
 
 export default function ForYouFeed() {
   const { data, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage, status } = useInfiniteQuery({
@@ -35,7 +35,7 @@ export default function ForYouFeed() {
       {posts.map((post) => (
         <Post key={post.id} post={post} />
       ))}
-      {isFetchingNextPage && <Loader2 className="mt-3 items-center flex flex-row justify-center animate-spin" />}
+      {isFetchingNextPage && <PostLoadingSkeleton />}
     </InfiniteScrollContainer>
   );
 }

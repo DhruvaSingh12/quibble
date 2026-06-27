@@ -1,4 +1,3 @@
-import React from 'react';
 import ForYouFeed from './components/ForYouFeed';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import FollowingFeed from './components/FollowingFeed';

@@ -2,7 +2,7 @@
 
 import { validateRequest } from "@/auth";
 import prisma from "@/lib/prisma";
-import { getPostDataInclude } from "@/lib/types";
+import { getPostDataInclude, PostData } from "@/lib/types";
 
 export async function getPostsByHashtag(hashtag: string, page: number = 1, pageSize: number = 10) {
     const { user } = await validateRequest();
@@ -41,7 +41,7 @@ export async function getPostsByHashtag(hashtag: string, page: number = 1, pageS
     });
 
     return {
-        posts: displayPosts,
+        posts: displayPosts as PostData[],
         hasNextPage,
         currentPage: page
     };

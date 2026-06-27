@@ -2,11 +2,10 @@
 
 import InfiniteScrollContainer from "@/components/InfiniteScrollContainer";
 import Post from "@/components/posts/Post";
-import PostsLoadingSkeleton from "@/components/posts/PostLoadingSkeleton";
+import PostsLoadingSkeleton, { PostLoadingSkeleton } from "@/components/posts/PostLoadingSkeleton";
 import kyInstance from "@/lib/ky";
 import { PostsPage } from "@/lib/types";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
 
 interface UserPostsProps {
   userId: string;
@@ -63,7 +62,7 @@ export default function UserPosts({ userId }: UserPostsProps) {
       {posts.map((post) => (
         <Post key={post.id} post={post} />
       ))}
-      {isFetchingNextPage && <Loader2 className="mx-auto my-3 animate-spin" />}
+      {isFetchingNextPage && <PostLoadingSkeleton />}
     </InfiniteScrollContainer>
   );
 }

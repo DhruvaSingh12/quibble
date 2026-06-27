@@ -20,6 +20,10 @@ model User {
   posts              Post[]
   following          Follow[]            @relation("Following")
   followers          Follow[]            @relation("Followers")
+  likes              Like[]
+  dislikes           Dislike[]
+  comments           Comment[]
+  commentLikes       CommentLike[]
   emailVerifications EmailVerification[]
   passwordResets     PasswordReset[]
 
@@ -48,11 +52,14 @@ model Follow {
 }
 
 model Post {
-  id      String @id @default(cuid())
-  content String
-  userId  String
-  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  attachments    Media[]
+  id          String    @id @default(cuid())
+  content     String
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attachments Media[]
+  likes       Like[]
+  dislikes    Dislike[]
+  comments    Comment[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
@@ -99,4 +106,57 @@ model PasswordReset {
   createdAt DateTime @default(now())
 
   @@map("password_resets")
+}
+
+model Like {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@map("likes")
+}
+
+model Dislike {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@map("dislikes")
+}
+
+model Comment {
+  id        String    @id @default(cuid())
+  content   String
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId    String
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parentId  String?
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies      Comment[] @relation("CommentReplies")
+  commentLikes CommentLike[]
+  isDeleted    Boolean   @default(false)
+  gifUrl       String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  @@map("comments")
+}
+
+model CommentLike {
+  id        String  @id @default(cuid())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  commentId String
+  comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, commentId])
+  @@map("comment_likes")
 }

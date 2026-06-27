@@ -36,6 +36,21 @@ export function getPostDataInclude(loggedInUserId: string) {
             select: getUserDataSelect(loggedInUserId),
         },
         attachments: true,
+        likes: {
+            where: { userId: loggedInUserId },
+            select: { userId: true },
+        },
+        dislikes: {
+            where: { userId: loggedInUserId },
+            select: { userId: true },
+        },
+        _count: {
+            select: {
+                likes: true,
+                dislikes: true,
+                comments: true,
+            },
+        },
     } satisfies Prisma.PostInclude;
 }
 
@@ -46,6 +61,45 @@ export type PostData = Prisma.PostGetPayload<{
 export interface PostsPage {
     posts: PostData[];
     nextCursor: string | null;
+}
+
+export function getCommentDataInclude(loggedInUserId: string) {
+    return {
+        user: {
+            select: {
+                id: true,
+                username: true,
+                displayName: true,
+                avatarUrl: true,
+            },
+        },
+        _count: {
+            select: {
+                replies: true,
+                commentLikes: true,
+            },
+        },
+        commentLikes: {
+            where: { userId: loggedInUserId },
+            select: { userId: true },
+        },
+    } satisfies Prisma.CommentInclude;
+}
+
+export type CommentData = Prisma.CommentGetPayload<{
+    include: ReturnType<typeof getCommentDataInclude>;
+}>;
+
+export interface CommentsPage {
+    comments: CommentData[];
+    nextCursor: string | null;
+}
+
+export interface ReactionInfo {
+    likes: number;
+    dislikes: number;
+    isLikedByUser: boolean;
+    isDislikedByUser: boolean;
 }
 
 export interface FollowerInfo {
@@ -113,4 +167,9 @@ export interface DictionaryResponse {
         url: string;
     };
     sourceUrls: string[];
+}
+
+export interface CommentReactionInfo {
+    likes: number;
+    isLikedByUser: boolean;
 }

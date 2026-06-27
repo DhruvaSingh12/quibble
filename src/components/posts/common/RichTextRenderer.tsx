@@ -180,8 +180,26 @@ export default function RichTextRenderer({
         const imageUrls = Array.from(imgElements).map(img => img.src);
         setGifUrls(imageUrls);
 
+        // Process links to replace text with quibble.<hash>
+        const anchorElements = tempDiv.getElementsByTagName('a');
+        Array.from(anchorElements).forEach(a => {
+            // Skip mentions and hashtags
+            if (a.hasAttribute('data-mention') || a.hasAttribute('data-tag')) return;
+
+            const href = a.getAttribute('href');
+            if (href) {
+                let hash = 0;
+                for (let i = 0; i < href.length; i++) {
+                    hash = ((hash << 5) - hash) + href.charCodeAt(i);
+                    hash |= 0;
+                }
+                const shortHash = Math.abs(hash).toString(36).substring(0, 9);
+                a.textContent = `quibble.${shortHash}`;
+            }
+        });
+
         // Remove images from the HTML content for text display
-        const contentWithoutImages = content.replace(/<img[^>]*>/g, '');
+        const contentWithoutImages = tempDiv.innerHTML.replace(/<img[^>]*>/g, '');
 
         // Always set the content without images
         editor.commands.setContent(contentWithoutImages);
