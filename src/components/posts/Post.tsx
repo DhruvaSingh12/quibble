@@ -30,7 +30,7 @@ export default function Post({ post }: PostProps) {
   return (
     <div
       onClick={handlePostClick}
-      className="group/delete cursor-pointer p-6 border-b border-border last:border-0 transition-colors hover:bg-muted/30"
+      className="group/delete cursor-pointer p-3 lg:p-6 border-b border-border last:border-0 transition-colors hover:bg-muted/30"
     >
       <div className="flex flex-col justify-between gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">

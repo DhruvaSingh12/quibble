@@ -98,7 +98,7 @@ export default function PostEditor() {
   const hasContent =
     textLength > 0 ||
     selectedGif !== null ||
-    media.attachments.some((a) => a.mediaId);
+    media.attachments.some((a) => a.uploadedUrl);
   const canPost =
     hasContent && !media.isUploading && !media.isProcessing;
 
@@ -160,12 +160,19 @@ export default function PostEditor() {
       finalContent = `<img src="${selectedGif}" class="rounded-lg max-h-[150px] object-contain" />${input}`;
     }
 
-    const mediaIds = media.attachments
-      .map((a) => a.mediaId)
-      .filter((id): id is string => !!id);
+    const attachments = media.attachments
+      .filter((a) => a.uploadedUrl)
+      .map((a) => ({
+        url: a.uploadedUrl as string,
+        type: a.type === "image" ? "IMAGE" : "VIDEO" as "IMAGE" | "VIDEO",
+        mimeType: a.file.type,
+      }));
 
     mutation.mutate(
-      { content: finalContent, mediaIds },
+      {
+        content: finalContent,
+        attachments,
+      },
       {
         onSuccess: () => {
           editor?.commands.clearContent();

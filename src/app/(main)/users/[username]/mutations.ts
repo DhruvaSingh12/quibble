@@ -2,13 +2,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { PostsPage } from "@/lib/types";
 import { useUploadThing } from "@/lib/uploadthing";
 import { UpdateUserProfileValues } from "@/lib/validation";
-import {
-  InfiniteData,
-  QueryFilters,
-  QueryKey,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { InfiniteData, QueryFilters, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { updateUserProfile } from "./actions";
 
@@ -29,13 +23,22 @@ export function useUpdateProfileMutation() {
       values: UpdateUserProfileValues;
       avatar?: File;
     }) => {
-      return Promise.all([
-        updateUserProfile(values),
-        avatar && startAvatarUpload([avatar]),
-      ]);
+      let avatarUrl: string | undefined;
+
+      if (avatar) {
+        const uploadResult = await startAvatarUpload([avatar]);
+        avatarUrl = uploadResult?.[0]?.ufsUrl;
+      }
+
+      const updatedUser = await updateUserProfile({
+        ...values,
+        ...(avatarUrl && { avatarUrl }),
+      });
+
+      return { updatedUser, avatarUrl };
     },
-    onSuccess: async ([updatedUser, uploadResult]) => {
-      const newAvatarUrl = uploadResult?.[0].serverData.avatarUrl;
+    onSuccess: async ({ updatedUser, avatarUrl }) => {
+      const newAvatarUrl = avatarUrl;
 
       const queryFilter: QueryFilters = {
         queryKey: ["post-feed"],

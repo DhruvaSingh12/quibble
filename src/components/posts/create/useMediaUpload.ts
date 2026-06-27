@@ -5,7 +5,7 @@ import { useState, useCallback } from "react";
 
 export interface Attachment {
   file: File;
-  mediaId?: string;
+  uploadedUrl?: string;
   isUploading: boolean;
   type: "image" | "video";
   thumbnail?: string; // data URL for video thumbnails
@@ -144,7 +144,7 @@ export default function useMediaUpload() {
             if (!uploadResult) return a;
             return {
               ...a,
-              mediaId: uploadResult.serverData?.mediaId,
+              uploadedUrl: uploadResult.ufsUrl,
               isUploading: false,
             };
           });

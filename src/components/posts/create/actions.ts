@@ -5,18 +5,24 @@ import prisma from "@/lib/prisma";
 import { getPostDataInclude } from "@/lib/types";
 import { createPostSchema } from "@/lib/validation";
 
-export async function submitPost(input: {content: string, mediaIds: string[]}) {
+export async function submitPost(input: {content: string, attachments?: {url: string, type: "IMAGE" | "VIDEO", mimeType?: string}[]}) {
     const {user} = await validateRequest();
     if(!user) throw Error("Unauthorised")
     
-    const{content, mediaIds} = createPostSchema.parse(input);
+    const{content, attachments} = createPostSchema.parse(input);
     const newPost = await prisma.post.create({
         data: {
             content,
             userId: user.id,
-            attachments: {
-                connect: mediaIds.map(id => ({id}))
-            }
+            ...(attachments && attachments.length > 0 && {
+                attachments: {
+                    create: attachments.map(a => ({
+                        url: a.url,
+                        type: a.type,
+                        mimeType: a.mimeType
+                    }))
+                }
+            })
         },
         include: getPostDataInclude(user.id),
     });

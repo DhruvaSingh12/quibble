@@ -33,18 +33,7 @@ export const fileRouter = {
           }
         }
 
-        const newAvatarUrl = file.ufsUrl;
-
-        await prisma.user.update({
-          where: { id: metadata.user.id },
-          data: {
-            avatarUrl: newAvatarUrl,
-          },
-        });
-
-        console.log("Database updated with new avatar URL");
-
-        return { avatarUrl: newAvatarUrl };
+        return { avatarUrl: file.ufsUrl };
       } catch (error) {
         console.error("Error in onUploadComplete:", error);
         throw error;
@@ -63,21 +52,7 @@ export const fileRouter = {
     })
     .onUploadComplete(async ({ file }) => {
       console.log("[UploadThing CORE] onUploadComplete triggered for file:", file.name);
-      try {
-        const fileUrl = file.ufsUrl;
-        const media = await prisma.media.create({
-          data: {
-            url: fileUrl,
-            type: file.type.startsWith("image/") ? "IMAGE" : "VIDEO",
-            mimeType: file.type,
-          },
-        });
-        console.log("[UploadThing CORE] Prisma Media entry created successfully:", media.id);
-        return { mediaId: media.id, url: fileUrl };
-      } catch (error) {
-        console.error("[UploadThing CORE] Error creating Media entry in DB:", error);
-        throw error;
-      }
+      return { url: file.ufsUrl };
     }),
 } satisfies FileRouter;
 
