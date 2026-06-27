@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import SessionProvider from "../../providers/SessionProvider";
 import Navbar from "./components/Navbar";
 import MenuBar from "./components/MenuBar";
+import MobileBottomNav from "./components/MobileBottomNav";
 import TrendsSidebar from "@/components/TrendsSidebar";
 
 export default async function Layout({
@@ -27,12 +28,15 @@ export default async function Layout({
             <Navbar />
           </div>
           <div className="flex-1 overflow-hidden flex gap-2">
-            <div className="flex-1 min-w-0 h-full overflow-y-auto scrollbar-hide bg-card rounded-lg border border-border shadow-sm">
+            <div id="main-scroll-area" className="flex-1 min-w-0 h-full overflow-y-auto scrollbar-hide bg-card rounded-lg border border-border shadow-sm">
               {children}
             </div>
             <div className="hidden lg:block w-[200px] lg:w-[300px] flex-none h-full overflow-y-auto scrollbar-hide">
               <TrendsSidebar className="space-y-2 pb-2" />
             </div>
+          </div>
+          <div className="flex-none pt-2 md:hidden">
+            <MobileBottomNav />
           </div>
         </div>
       </div>

@@ -75,9 +75,12 @@ export type LoginValues = z.infer<typeof loginSchema>;
 
 
 export const createPostSchema = z.object({
-  content: requiredString.min(1, "Content is required!"),
-  mediaIds : z.array(z.string()).max(5, "You can only attach up to 5 images and 2 videos."),
-});
+  content: z.string(),
+  mediaIds: z.array(z.string()).max(5, "You can only attach up to 5 files."),
+}).refine(
+  (data) => data.content.trim().length > 0 || data.mediaIds.length > 0,
+  { message: "Post must have text or media.", path: ["content"] }
+);
 
 export const updateUserProfileSchema = z.object({
   displayName: requiredString.min(5, "Display name is required!"),

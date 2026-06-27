@@ -222,9 +222,9 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
         </DialogContent>
       </Dialog>
 
-      <div className="fixed inset-0 z-50 flex items-end justify-center backdrop-blur-sm transition-opacity duration-300">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-6 backdrop-blur-sm transition-opacity duration-300">
         <div
-          className={`w-full max-w-2xl rounded-t-lg bg-card shadow-2xl transition-all duration-300 ${
+          className={`w-full max-w-2xl sm:rounded-xl bg-card shadow-2xl transition-all duration-300 flex flex-col h-[100dvh] max-h-[100dvh] ${
             isVisible ? "translate-y-0 scale-100" : "translate-y-8 scale-95"
           }`}
         >
@@ -298,46 +298,34 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
           </div>
 
           {/* Editor Content */}
-          <div className="p-4">
-            <div className="rounded-lg border transition-all focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20">
+          <div className="p-4 flex-1 flex flex-col min-h-0">
+            <div className="rounded-lg border transition-all flex-1 flex flex-col min-h-0 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20">
               <EditorContent
                 editor={editor}
-                className="prose prose-sm max-h-[400px] min-h-[200px] w-full max-w-none cursor-text overflow-y-auto px-4 py-3 focus-within:outline-none [&>div]:min-h-[200px] [&>div]:outline-none"
+                className="prose prose-sm flex-1 w-full max-w-none cursor-text overflow-y-auto px-4 py-3 focus-within:outline-none [&>div]:min-h-full [&>div]:outline-none"
               />
             </div>
 
-            {/* Character Count */}
-            <div className="mt-2 flex items-start justify-between rounded-lg bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
-              <span>
-                {textLength > 0 ? (
-                  <span className={textLength > 2000 ? "text-destructive" : ""}>
-                    {textLength} characters
-                  </span>
-                ) : (
-                  "Start typing..."
-                )}
-              </span>
-            </div>
+          </div>
 
-            {/* Action Buttons */}
-            <div className="flex justify-center gap-2 pt-4">
-              <Button
-                variant="outline"
-                onClick={handleClose}
-                disabled={mutation.isPending}
-                className="min-w-[100px]"
-              >
-                Cancel
-              </Button>
-              <LoadingButton
-                loading={mutation.isPending}
-                onClick={onSubmit}
-                disabled={!textLength || input.trim() === post.content.trim()}
-                className="min-w-[120px]"
-              >
-                {mutation.isPending ? "Saving..." : "Save changes"}
-              </LoadingButton>
-            </div>
+          {/* Action Buttons */}
+          <div className="flex-none p-4 border-t border-border flex justify-center gap-4 bg-card sm:rounded-b-xl">
+            <Button
+              variant="outline"
+              onClick={handleClose}
+              disabled={mutation.isPending}
+              className="min-w-[120px]"
+            >
+              Cancel
+            </Button>
+            <LoadingButton
+              loading={mutation.isPending}
+              onClick={onSubmit}
+              disabled={!textLength || input.trim() === post.content.trim()}
+              className="min-w-[120px]"
+            >
+              {mutation.isPending ? "Saving..." : "Save changes"}
+            </LoadingButton>
           </div>
         </div>
       </div>

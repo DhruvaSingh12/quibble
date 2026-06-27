@@ -8,6 +8,7 @@ import UserAvatar from "@/components/UserAvatar";
 import { formatRelativeDate } from "@/lib/utils";
 import PostActions from "./PostActions";
 import RichTextRenderer from "./common/RichTextRenderer";
+import MediaGrid from "./common/MediaGrid";
 import { PostData } from "@/lib/types";
 
 interface PostProps {
@@ -20,7 +21,7 @@ export default function Post({ post }: PostProps) {
 
   const handlePostClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
-    if (target.closest('a') || target.closest('button') || target.closest('[role="button"]')) {
+    if (target.closest('a') || target.closest('button') || target.closest('[role="button"]') || target.closest('video')) {
       return;
     }
     router.push(`/posts/${post.id}`);
@@ -75,6 +76,12 @@ export default function Post({ post }: PostProps) {
             <PostActions post={post} onDropdownToggle={setIsDropdownOpen} />
           </div>
         </div>
+
+        {post.attachments && post.attachments.length > 0 && (
+          <div onClick={(e) => e.stopPropagation()}>
+            <MediaGrid attachments={post.attachments} />
+          </div>
+        )}
 
         <div className="relative">
           <RichTextRenderer

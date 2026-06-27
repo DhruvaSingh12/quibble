@@ -7,7 +7,6 @@ import TextStyle from "@tiptap/extension-text-style";
 import Typography from "@tiptap/extension-typography";
 import Link from "@tiptap/extension-link";
 import TiptapImage from "@tiptap/extension-image";
-import Image from "next/image";
 import "./editor.css";
 import { useRouter } from "next/navigation";
 import { MentionsHighlightExtension } from "./mention/MentionsHashtagsExtension";
@@ -231,18 +230,16 @@ export default function RichTextRenderer({
             {/* GIF Grid Display */}
             {gifUrls.length > 0 && (
                 <div className="mb-3">
-                    <div className={`grid gap-2 ${gifUrls.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                    <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         {gifUrls.map((url, index) => (
-                            <div key={index} className="relative overflow-hidden bg-card rounded-lg">
-                                <Image
+                            <div key={index} className="relative flex-none h-[200px] md:h-[280px] rounded-lg overflow-hidden bg-muted/30 snap-start border">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
                                     src={url}
                                     alt={`GIF ${index + 1}`}
-                                    width={500}
-                                    height={400}
-                                    className="w-full h-auto max-h-[400px] object-contain"
-                                    unoptimized
+                                    className="h-full w-auto min-w-[150px] max-w-[85vw] object-cover"
                                 />
-                                <div className="absolute bottom-2 right-2 bg-foreground text-card text-[8px] font-semibold px-2 py-1 rounded">
+                                <div className="absolute bottom-2 right-2 bg-foreground/90 backdrop-blur-sm text-background text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm">
                                     GIF
                                 </div>
                             </div>

@@ -62,14 +62,22 @@ export const fileRouter = {
       return {};
     })
     .onUploadComplete(async ({ file }) => {
-      const media = await prisma.media.create({
-        data: {
-          url: file.ufsUrl,
-          type: file.type.startsWith("image/") ? "IMAGE" : "VIDEO",
-        },
-      });
-
-      return { mediaId: media.id };
+      console.log("[UploadThing CORE] onUploadComplete triggered for file:", file.name);
+      try {
+        const fileUrl = file.ufsUrl;
+        const media = await prisma.media.create({
+          data: {
+            url: fileUrl,
+            type: file.type.startsWith("image/") ? "IMAGE" : "VIDEO",
+            mimeType: file.type,
+          },
+        });
+        console.log("[UploadThing CORE] Prisma Media entry created successfully:", media.id);
+        return { mediaId: media.id, url: fileUrl };
+      } catch (error) {
+        console.error("[UploadThing CORE] Error creating Media entry in DB:", error);
+        throw error;
+      }
     }),
 } satisfies FileRouter;
 
