@@ -5,8 +5,8 @@ import kyInstance from "@/lib/ky";
 import { QueryKey, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "../ui/use-toast";
 import { Button } from "../ui/Button";
-import { UserMinus, UserPlus2Icon } from "lucide-react";
 import { FollowerInfo } from "@/lib/types";
+import { FaCircleMinus, FaCirclePlus } from "react-icons/fa6";
 
 interface FollowButtonProps {
   userId: string;
@@ -36,10 +36,41 @@ export default function FollowButton({
 
       if (!previousState) return { previousState };
 
-      queryClient.setQueryData<FollowerInfo>(queryKey, {
+      const newState = {
         ...previousState,
         followers: previousState.followers + (previousState.isFollowedByUser ? -1 : 1),
         isFollowedByUser: !previousState.isFollowedByUser,
+      };
+
+      // Update FollowButton state
+      queryClient.setQueryData<FollowerInfo>(queryKey, newState);
+
+      // Optimistically update post feeds where this user is the author
+      const queryFilter = { queryKey: ["post-feed"] };
+      await queryClient.cancelQueries(queryFilter);
+
+      queryClient.setQueriesData<any>(queryFilter, (oldData: any) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page: any) => ({
+            ...page,
+            posts: page.posts.map((post: any) => {
+              if (post.user.id !== userId) return post;
+              return {
+                ...post,
+                user: {
+                  ...post.user,
+                  followers: newState.isFollowedByUser ? [{ followerId: "optimistic" }] : [],
+                  _count: {
+                    ...post.user._count,
+                    followers: newState.followers,
+                  },
+                },
+              };
+            }),
+          })),
+        };
       });
 
       return { previousState };
@@ -48,27 +79,25 @@ export default function FollowButton({
       if (context?.previousState) {
         queryClient.setQueryData(queryKey, context.previousState);
       }
+      queryClient.invalidateQueries({ queryKey: ["post-feed"] });
       console.error(error);
       toast({
         variant: "destructive",
         description: "Something went wrong. Please try again.",
       });
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey });
-    },
   });
 
   return (
     <Button
-      variant={data?.isFollowedByUser ? "secondary" : "default"}
+      variant="ghost"
       onClick={() => mutate()}
-      className="p-4 rounded-full"
+      className="rounded-full px-3 hover:bg-transparent hover:opacity-80 text-foreground p-0 min-h-0 h-auto"
     >
       {data?.isFollowedByUser ? (
-        <UserMinus className="w-5 h-5" aria-label="Unfollow" />
+        <FaCircleMinus className="w-7 h-7" aria-label="Unfollow" />
       ) : (
-        <UserPlus2Icon className="w-5 h-5" aria-label="Follow" />
+        <FaCirclePlus className="w-7 h-7" aria-label="Follow" />
       )}
     </Button>
   );

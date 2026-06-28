@@ -1,7 +1,7 @@
 "use client";
 
 import { PostData, ReactionInfo } from "@/lib/types";
-import { useQueryClient, useMutation, QueryKey } from "@tanstack/react-query";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { ThumbsUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 

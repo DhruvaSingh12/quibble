@@ -15,6 +15,10 @@ export async function GET(
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
+        const url = new URL(request.url);
+        const cursor = url.searchParams.get("cursor") || undefined;
+        const pageSize = 10;
+
         const followingList = await prisma.follow.findMany({
             where: {
                 followerId: userId,
@@ -26,6 +30,8 @@ export async function GET(
                         username: true,
                         displayName: true,
                         avatarUrl: true,
+                        bio: true,
+                        createdAt: true,
                         followers: {
                             where: {
                                 followerId: loggedInUser.id,
@@ -42,21 +48,27 @@ export async function GET(
                     },
                 },
             },
+            take: pageSize + 1,
+            cursor: cursor ? { followerId_followingId: { followerId: userId, followingId: cursor } } : undefined,
             orderBy: {
                 followingId: 'desc',
             },
         });
 
-        const transformedList = followingList.map(item => ({
+        const nextCursor = followingList.length > pageSize ? followingList[pageSize].following.id : null;
+
+        const transformedList = followingList.slice(0, pageSize).map(item => ({
             id: item.following.id,
             username: item.following.username,
             displayName: item.following.displayName,
             avatarUrl: item.following.avatarUrl,
+            bio: item.following.bio,
+            joined: item.following.createdAt,
             followers: item.following._count.followers,
-            isFollowedByViewer: item.following.followers.length > 0
+            isFollowedByUser: item.following.followers.length > 0
         }));
 
-        return NextResponse.json({ followingList: transformedList });
+        return NextResponse.json({ followingList: transformedList, nextCursor });
     } catch (error) {
         console.error("Error fetching following:", error);
         return new NextResponse("Internal Server Error", { status: 500 });

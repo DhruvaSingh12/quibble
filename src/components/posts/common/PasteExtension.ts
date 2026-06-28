@@ -98,10 +98,21 @@ const processText = (text: string): string => {
     return paragraphs.map(p => `<p>${p}</p>`).join('');
 };
 
-export const PasteExtension = Extension.create({
+export interface PasteExtensionOptions {
+    onPasteFiles?: (files: File[]) => void;
+}
+
+export const PasteExtension = Extension.create<PasteExtensionOptions>({
     name: 'pasteExtension',
     
+    addOptions() {
+        return {
+            onPasteFiles: undefined,
+        }
+    },
+
     addProseMirrorPlugins() {
+        const options = this.options;
         return [
             new Plugin({
                 key: new PluginKey('pasteExtension'),
@@ -111,6 +122,17 @@ export const PasteExtension = Extension.create({
                         const clipboardData = event.clipboardData;
                         if (!clipboardData) return false;
                         
+                        // Check for media files (images/videos)
+                        if (clipboardData.files && clipboardData.files.length > 0) {
+                            const files = Array.from(clipboardData.files);
+                            const mediaFiles = files.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
+                            
+                            if (mediaFiles.length > 0 && options.onPasteFiles) {
+                                options.onPasteFiles(mediaFiles);
+                                return true; // Handled
+                            }
+                        }
+
                         // Try to get HTML content first
                         const html = clipboardData.getData('text/html');
                         const text = clipboardData.getData('text/plain');

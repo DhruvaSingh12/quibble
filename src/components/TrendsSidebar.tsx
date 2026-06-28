@@ -25,25 +25,35 @@ export default function TrendsSidebar({ className }: TrendsSidebarProps) {
   )
 }
 
+const getWhoToFollow = async (userId: string) => {
+  return unstable_cache(
+    async () => {
+      return await prisma.user.findMany({
+        where: {
+          NOT: {
+            id: userId,
+          },
+          followers: {
+            none: {
+              followerId: userId,
+            },
+          },
+        },
+        select: getUserDataSelect(userId),
+        take: 5,
+      });
+    },
+    ["who_to_follow", userId],
+    { revalidate: 60 * 15 } // 15 minutes
+  )();
+};
+
 async function WhoToFollow() {
   const { user } = await validateRequest();
 
   if (!user) return null;
 
-  const usersToFollow = await prisma.user.findMany({
-    where: {
-      NOT: {
-        id: user.id,
-      },
-      followers: {
-        none: {
-          followerId: user.id,
-        },
-      },
-    },
-    select: getUserDataSelect(user.id),
-    take: 5,
-  });
+  const usersToFollow = await getWhoToFollow(user.id);
 
   return (
     <div className="bg-card border border-border rounded-lg p-4 shadow-sm space-y-4">

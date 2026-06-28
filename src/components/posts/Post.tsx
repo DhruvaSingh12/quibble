@@ -11,6 +11,7 @@ import RichTextRenderer from "./common/RichTextRenderer";
 import MediaGrid from "./common/MediaGrid";
 import LikeButton from "./reactions/LikeButton";
 import DislikeButton from "./reactions/DislikeButton";
+import BookmarkButton from "./BookmarkButton";
 import ShareModal from "./share/ShareModal";
 import { PostData } from "@/lib/types";
 import { MessageSquare } from "lucide-react";
@@ -112,6 +113,7 @@ export default function Post({ post }: PostProps) {
             <MessageSquare className="size-[18px]" />
             <span className="tabular-nums text-[13px]">{post._count.comments}</span>
           </button>
+          <BookmarkButton post={post} />
           <button
             onClick={() => setShowShareModal(true)}
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"

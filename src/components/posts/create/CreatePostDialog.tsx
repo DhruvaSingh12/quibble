@@ -81,7 +81,12 @@ export default function PostEditor() {
           class: "rounded-lg max-h-[300px] object-contain",
         },
       }),
-      PasteExtension,
+      PasteExtension.configure({
+        onPasteFiles: (files) => {
+          media.startUpload(files);
+          setActiveTab("media");
+        }
+      }),
       MentionsInputExtension,
       Placeholder.configure({ placeholder: "What's on your mind?" }),
     ],

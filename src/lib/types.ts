@@ -18,9 +18,7 @@ export function getUserDataSelect(loggedInUserId: string) {
         },
         _count: {
             select: {
-                posts: true,
                 followers: true,
-                following: true,
             },
         },
     } satisfies Prisma.UserSelect;
@@ -41,6 +39,10 @@ export function getPostDataInclude(loggedInUserId: string) {
             select: { userId: true },
         },
         dislikes: {
+            where: { userId: loggedInUserId },
+            select: { userId: true },
+        },
+        bookmarks: {
             where: { userId: loggedInUserId },
             select: { userId: true },
         },
@@ -102,6 +104,10 @@ export interface ReactionInfo {
     isDislikedByUser: boolean;
 }
 
+export interface BookmarkInfo {
+    isBookmarkedByUser: boolean;
+}
+
 export interface FollowerInfo {
     followers: number;
     isFollowedByUser: boolean;
@@ -127,10 +133,19 @@ export interface FollowerListItem {
     displayName: string;
     avatarUrl: string | null;
     bio: string | null;
-    joined: string;
+    joined: Date;
     followers: number;
     isFollowedByUser: boolean;
-    isFollowedByViewer?: boolean;
+}
+
+export interface FollowerPage {
+    followerList: FollowerListItem[];
+    nextCursor: string | null;
+}
+
+export interface FollowingPage {
+    followingList: FollowerListItem[];
+    nextCursor: string | null;
 }
 
 export interface Phonetic {

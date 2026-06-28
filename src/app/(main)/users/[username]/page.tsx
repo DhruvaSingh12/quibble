@@ -28,7 +28,16 @@ const getUser = cache(async (username: string, loggedInUserId: string) => {
         mode: "insensitive",
       },
     },
-    select: getUserDataSelect(loggedInUserId),
+    select: {
+      ...getUserDataSelect(loggedInUserId),
+      _count: {
+        select: {
+          followers: true,
+          posts: true,
+          following: true,
+        },
+      },
+    }
   });
 
   if (!user) notFound();
@@ -78,7 +87,7 @@ export default async function Page({ params }: PageProps) {
 }
 
 interface UserProfileProps {
-  user: UserData;
+  user: Awaited<ReturnType<typeof getUser>>;
   loggedInUserId: string;
 }
 
@@ -121,9 +130,9 @@ async function UserProfile({ user, loggedInUserId }: UserProfileProps) {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer p-2">
-                  <Info className="h-5 w-5" />
-                </div>
+                <button className="text-foreground hover:opacity-80 transition-colors cursor-pointer p-0 min-h-0 h-auto">
+                  <Info className="h-7 w-7" />
+                </button>
               </TooltipTrigger>
               <TooltipContent>
                 <p>Joined {formatDate(user.createdAt, "do MMM yyyy")}</p>
