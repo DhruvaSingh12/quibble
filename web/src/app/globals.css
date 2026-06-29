@@ -1,0 +1,286 @@
+@import "tailwindcss";
+
+@plugin "tailwindcss-animate";
+
+@theme {
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-equalizer: equalizer 0.8s ease-in-out infinite;
+  --animate-marquee: marquee 15s linear infinite;
+  --animate-indeterminate: indeterminate 2s linear infinite;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+
+    to {
+      height: 0;
+    }
+  }
+
+  @keyframes equalizer {
+
+    0%,
+    100% {
+      height: 20%;
+    }
+
+    50% {
+      height: 100%;
+    }
+  }
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0%);
+    }
+
+    to {
+      transform: translateX(-100%);
+    }
+  }
+
+  @keyframes indeterminate {
+    0% {
+      transform: translateX(-100%);
+    }
+
+    50% {
+      transform: translateX(100%);
+    }
+
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 98%;
+    /* off-white */
+    --foreground: 0 0% 5%;
+    /* near-black text */
+    --card: 0 0% 100%;
+    /* white card */
+    --card-foreground: 0 0% 6%;
+    /* deep charcoal text on cards */
+    --popover: 0 0% 100%;
+    /* white popovers */
+    --popover-foreground: 0 0% 6%;
+    /* deep charcoal in popovers */
+    --primary: 0 0% 8%;
+    /* primary black */
+    --primary-foreground: 0 0% 96%;
+    /* light text on primary */
+    --secondary: 0 0% 92%;
+    /* light gray surface */
+    --secondary-foreground: 0 0% 8%;
+    /* black on secondary */
+    --muted: 0 0% 90%;
+    /* muted gray background */
+    --muted-foreground: 0 0% 40%;
+    /* medium gray text */
+    --accent: 0 0% 88%;
+    /* subtle accent gray */
+    --accent-foreground: 0 0% 10%;
+    /* dark text on accent */
+    --destructive: 0 0% 30%;
+    /* dark gray destructive */
+    --destructive-foreground: 0 0% 96%;
+    /* light text on destructive */
+    --border: 0 0% 82%;
+    /* light border */
+    --input: 0 0% 82%;
+    /* light input background */
+    --ring: 0 0% 16%;
+    /* dark focus ring */
+    --chart-1: 0 0% 20%;
+    /* charcoal series 1 */
+    --chart-2: 0 0% 35%;
+    /* mid-dark gray series 2 */
+    --chart-3: 0 0% 50%;
+    /* medium gray series 3 */
+    --chart-4: 0 0% 65%;
+    /* mid-light gray series 4 */
+    --chart-5: 0 0% 80%;
+    /* light gray series 5 */
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    color-scheme: dark;
+    --background: 0 0% 6%;
+    /* near-black */
+    --foreground: 0 0% 92%;
+    /* off-white text */
+    --card: 0 0% 8%;
+    /* very dark card */
+    --card-foreground: 0 0% 92%;
+    /* off-white on cards */
+    --popover: 0 0% 8%;
+    /* very dark popover */
+    --popover-foreground: 0 0% 92%;
+    /* off-white in popovers */
+    --primary: 0 0% 92%;
+    /* primary off-white */
+    --primary-foreground: 0 0% 8%;
+    /* deep charcoal on primary */
+    --secondary: 0 0% 16%;
+    /* dark gray surface */
+    --secondary-foreground: 0 0% 92%;
+    /* off-white on secondary */
+    --muted: 0 0% 20%;
+    /* muted dark gray */
+    --muted-foreground: 0 0% 68%;
+    /* mid-light gray text */
+    --accent: 0 0% 20%;
+    /* accent dark gray */
+    --accent-foreground: 0 0% 92%;
+    /* off-white on accent */
+    --destructive: 0 0% 38%;
+    /* charcoal destructive */
+    --destructive-foreground: 0 0% 94%;
+    /* pale text on destructive */
+    --border: 0 0% 18%;
+    /* dark border */
+    --input: 0 0% 18%;
+    /* dark input background */
+    --ring: 0 0% 70%;
+    /* light ring */
+    --chart-1: 0 0% 18%;
+    /* series 1 dark */
+    --chart-2: 0 0% 32%;
+    /* series 2 gray */
+    --chart-3: 0 0% 48%;
+    /* series 3 mid-gray */
+    --chart-4: 0 0% 64%;
+    /* series 4 light gray */
+    --chart-5: 0 0% 78%;
+    /* series 5 pale gray */
+  }
+}
+
+::selection {
+  background-color: #000000;
+  color: #FFFFFF;
+}
+
+.dark ::selection {
+  background-color: #FFFFFF;
+  color: #000000;
+}
+
+* {
+  scrollbar-width: none;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  input[type="button"]:not(:disabled),
+  input[type="submit"]:not(:disabled),
+  input[type="reset"]:not(:disabled),
+  label {
+    cursor: pointer;
+  }
+  
+  button:disabled,
+  [role="button"][aria-disabled="true"],
+  input:disabled {
+    cursor: not-allowed;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--figtree), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+}
+
+@layer utilities {
+
+  /* Hide scrollbar for cmdk components globally */
+  [cmdk-list]::-webkit-scrollbar,
+  [cmdk-group]::-webkit-scrollbar,
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  [cmdk-list],
+  [cmdk-group],
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+  }
+}
+
+.mention-highlight {
+  color: hsl(var(--primary));
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.mention-highlight:hover,
+.mention-highlight:focus {
+  text-decoration: underline;
+  outline: none;
+}
+
+.hashtag-highlight {
+  color: hsl(var(--primary));
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.hashtag-highlight:hover,
+.hashtag-highlight:focus {
+  text-decoration: underline;
+  outline: none;
+}

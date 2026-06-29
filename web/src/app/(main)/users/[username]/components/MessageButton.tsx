@@ -1,0 +1,51 @@
+"use client";
+
+import { Button } from "@/components/ui/Button";
+import { Mail } from "lucide-react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import ky from "ky";
+import { useToast } from "@/components/ui/use-toast";
+
+interface MessageButtonProps {
+    userId: string;
+}
+
+export default function MessageButton({ userId }: MessageButtonProps) {
+    const [loading, setLoading] = useState(false);
+    const router = useRouter();
+    const { toast } = useToast();
+
+    const handleMessageClick = async () => {
+        try {
+            setLoading(true);
+            const url = `/api/chat/conversations`;
+            const res = await ky.post(url, {
+                json: { targetUserId: userId },
+            }).json<{ conversationId: string }>();
+
+            router.push(`/messages/${res.conversationId}`);
+        } catch (error) {
+            console.error(error);
+            toast({
+                title: "Error",
+                description: "Failed to start conversation.",
+                variant: "destructive"
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <Button 
+            variant="secondary" 
+            onClick={handleMessageClick}
+            disabled={loading}
+            className="flex items-center gap-2"
+        >
+            <Mail className="h-4 w-4" />
+            Message
+        </Button>
+    );
+}
