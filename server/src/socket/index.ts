@@ -18,7 +18,13 @@ export const initSocket = (httpServer: HttpServer) => {
 
   io = new Server(httpServer, {
     cors: {
-      origin: process.env.FRONTEND_URL || "http://localhost:3000",
+      origin: (origin, callback) => {
+        if (!origin || origin.includes("localhost") || origin.includes("127.0.0.1") || origin.includes("192.168") || origin.includes("10.")) {
+          callback(null, true);
+        } else {
+          callback(null, process.env.FRONTEND_URL || "http://localhost:3000");
+        }
+      },
       credentials: true,
     },
     adapter: createAdapter(pubClient, subClient),

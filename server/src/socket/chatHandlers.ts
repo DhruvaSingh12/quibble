@@ -114,7 +114,9 @@ export const registerChatHandlers = (io: Server, socket: any) => {
             const { conversationId, isTyping } = data;
             const room = `chat:${conversationId}`;
 
-            if (!socket.rooms.has(room)) return;
+            if (!socket.rooms.has(room)) {
+                return;
+            }
 
             socket.to(room).emit("chat_typing", { senderId: userId, isTyping });
         } catch (error) {
@@ -128,7 +130,13 @@ export const registerChatHandlers = (io: Server, socket: any) => {
             const { conversationId } = data;
             const room = `chat:${conversationId}`;
 
-            if (!socket.rooms.has(room)) return;
+            if (!socket.rooms.has(room)) {
+                const convo = await verifyConversationMember(conversationId, userId);
+                if (!convo) {
+                    return;
+                }
+                socket.join(room);
+            }
 
             const now = new Date();
 
@@ -158,7 +166,14 @@ export const registerChatHandlers = (io: Server, socket: any) => {
             if (!messageIds || messageIds.length === 0) return;
 
             const room = `chat:${conversationId}`;
-            if (!socket.rooms.has(room)) return;
+            if (!socket.rooms.has(room)) {
+                const convo = await verifyConversationMember(conversationId, userId);
+                if (!convo) {
+                    if (callback) callback({ error: "Forbidden" });
+                    return;
+                }
+                socket.join(room);
+            }
 
             if (forEveryone) {
                 const count = await prisma.chatMessage.count({
@@ -188,6 +203,118 @@ export const registerChatHandlers = (io: Server, socket: any) => {
         } catch (error) {
             console.error("Error in chat_delete_messages:", error);
             if (callback) callback({ error: "Internal server error" });
+        }
+    });
+
+    socket.on("chat_react_message", async (data: { conversationId: string, messageId: string, emoji: string }, callback?: (res: any) => void) => {
+        try {
+            const userId = socket.data.user.id;
+            const { conversationId, messageId, emoji } = data;
+            
+            const room = `chat:${conversationId}`;
+            if (!socket.rooms.has(room)) {
+                const convo = await verifyConversationMember(conversationId, userId);
+                if (!convo) {
+                    if (callback) callback({ error: "Forbidden" });
+                    return;
+                }
+                socket.join(room);
+            }
+
+            if (emoji) {
+                await prisma.chatMessageReaction.upsert({
+                    where: {
+                        messageId_userId: { messageId, userId }
+                    },
+                    update: { emoji },
+                    create: { messageId, userId, emoji }
+                });
+            } else {
+                await prisma.chatMessageReaction.deleteMany({
+                    where: { messageId, userId }
+                });
+            }
+
+            const payload = { conversationId, messageId, userId, emoji };
+            socket.to(room).emit("chat_message_reacted", payload);
+            if (callback) callback({ success: true, reaction: payload });
+
+        } catch (error) {
+            console.error("Error in chat_react_message:", error);
+            if (callback) callback({ error: "Internal server error" });
+        }
+    });
+
+    // --- WebRTC Calling Handlers ---
+
+    socket.on("call_initiate", async (data: { conversationId: string, isVideo: boolean }, callback?: (res: any) => void) => {
+        try {
+            const userId = socket.data.user.id;
+            const { conversationId, isVideo } = data;
+
+            const convo = await verifyConversationMember(conversationId, userId);
+            if (!convo) {
+                if (callback) callback({ error: "Forbidden" });
+                return;
+            }
+
+            const caller = await prisma.user.findUnique({
+                where: { id: userId },
+                select: { id: true, username: true, displayName: true, avatarUrl: true }
+            });
+
+            const recipientId = convo.user1Id === userId ? convo.user2Id : convo.user1Id;
+            
+            io.to(`user:${recipientId}`).emit("call_incoming", {
+                conversationId,
+                caller,
+                isVideo
+            });
+
+            if (callback) callback({ success: true });
+        } catch (error) {
+            console.error("Error in call_initiate:", error);
+            if (callback) callback({ error: "Internal Error" });
+        }
+    });
+
+    socket.on("call_accept", async (data: { conversationId: string }) => {
+        const userId = socket.data.user.id;
+        const { conversationId } = data;
+        const convo = await verifyConversationMember(conversationId, userId);
+        if (convo) {
+            const recipientId = convo.user1Id === userId ? convo.user2Id : convo.user1Id;
+            io.to(`user:${recipientId}`).emit("call_accepted", { conversationId, peerId: userId });
+        }
+    });
+
+    socket.on("call_reject", async (data: { conversationId: string }) => {
+        const userId = socket.data.user.id;
+        const { conversationId } = data;
+        const convo = await verifyConversationMember(conversationId, userId);
+        if (convo) {
+            const recipientId = convo.user1Id === userId ? convo.user2Id : convo.user1Id;
+            io.to(`user:${recipientId}`).emit("call_rejected", { conversationId });
+        }
+    });
+
+    socket.on("call_signal", async (data: { conversationId: string, signal: any }) => {
+        const userId = socket.data.user.id;
+        const { conversationId, signal } = data;
+        const convo = await verifyConversationMember(conversationId, userId);
+        if (convo) {
+            const recipientId = convo.user1Id === userId ? convo.user2Id : convo.user1Id;
+            io.to(`user:${recipientId}`).emit("call_signal", { conversationId, signal, senderId: userId });
+        }
+    });
+
+    socket.on("call_end", async (data: { conversationId: string }) => {
+        const userId = socket.data.user.id;
+        const { conversationId } = data;
+        const convo = await verifyConversationMember(conversationId, userId);
+        if (convo) {
+            const recipientId = convo.user1Id === userId ? convo.user2Id : convo.user1Id;
+            io.to(`user:${recipientId}`).emit("call_ended", { conversationId });
         }
     });
 };

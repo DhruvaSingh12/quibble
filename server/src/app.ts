@@ -26,7 +26,13 @@ export function buildApp() {
   app.use(helmet());
   app.use(
     cors({
-      origin: env.FRONTEND_URL,
+      origin: (origin, callback) => {
+        if (!origin || origin.includes("localhost") || origin.includes("127.0.0.1") || origin.includes("192.168") || origin.includes("10.")) {
+          callback(null, true);
+        } else {
+          callback(null, env.FRONTEND_URL);
+        }
+      },
       credentials: true,
     })
   );

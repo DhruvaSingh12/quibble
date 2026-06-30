@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Play, Check, CheckCheck, Trash2 } from 'lucide-react';
+import { FaFaceDizzy, FaFaceGrinWide, FaFaceGrinHearts, FaFaceGrinSquintTears, FaFaceKissWinkHeart, FaFaceSadCry, FaFaceSurprise, FaHeart, FaThumbsUp, FaFaceKiss } from 'react-icons/fa6';
 import { format, isSameDay, isToday, isYesterday } from "date-fns";
 import { CustomAudioPlayer } from "@/components/chat/MediaPlayers";
 import InfiniteScrollContainer from "@/components/InfiniteScrollContainer";
@@ -21,7 +22,94 @@ interface ChatMessageListProps {
     selectedMessageIds?: Set<string>;
     toggleMessageSelection?: (id: string) => void;
     selectionMode?: boolean;
+    onReact?: (messageId: string, emoji: string) => void;
+    onRemoveReaction?: (messageIds: string[], emoji: string) => void;
 }
+
+const ReactionBadge = ({
+    reactions,
+    isMe,
+    currentUserId,
+    messageIds,
+    onRemoveReaction
+}: {
+    reactions?: { userId: string, emoji: string }[],
+    isMe: boolean,
+    currentUserId: string,
+    messageIds: string[],
+    onRemoveReaction?: (messageIds: string[], emoji: string) => void
+}) => {
+    if (!reactions || reactions.length === 0) return null;
+
+    const [activeEmojiMenu, setActiveEmojiMenu] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!activeEmojiMenu) return;
+        const handleOutsideClick = () => setActiveEmojiMenu(null);
+        window.addEventListener("click", handleOutsideClick);
+        return () => window.removeEventListener("click", handleOutsideClick);
+    }, [activeEmojiMenu]);
+
+    const emojiMap: Record<string, any> = {
+        'face-dizzy': FaFaceDizzy,
+        'face-grin-wide': FaFaceGrinWide,
+        'face-grin-hearts': FaFaceGrinHearts,
+        'face-grin-squint-tears': FaFaceGrinSquintTears,
+        'face-kiss-wink-heart': FaFaceKissWinkHeart,
+        'face-sad-cry': FaFaceSadCry,
+        'face-surprise': FaFaceSurprise,
+        'heart': FaHeart,
+        'thumbsup': FaThumbsUp,
+        'face-kiss': FaFaceKiss,
+    };
+
+    const grouped = reactions.reduce((acc, r) => {
+        acc[r.emoji] = (acc[r.emoji] || 0) + 1;
+        return acc;
+    }, {} as Record<string, number>);
+
+    return (
+        <div className={`absolute -bottom-3 ${isMe ? 'right-2' : 'left-2'} flex items-center gap-1 z-30 pointer-events-none`}>
+            {Object.entries(grouped).map(([emoji, count]) => {
+                const Icon = emojiMap[emoji];
+                if (!Icon) return null;
+                const hasMyReaction = reactions.some(r => r.userId === currentUserId && r.emoji === emoji);
+                return (
+                    <div
+                        key={emoji}
+                        onClick={(e) => {
+                            if (!hasMyReaction) return;
+                            e.stopPropagation();
+                            e.preventDefault();
+                            setActiveEmojiMenu(prev => prev === emoji ? null : emoji);
+                        }}
+                        className={`flex items-center gap-1 bg-background border border-border shadow-md rounded-full px-1.5 py-0.5 text-[11px] font-medium animate-in zoom-in duration-200 pointer-events-auto relative ${hasMyReaction ? 'cursor-pointer hover:bg-muted' : ''}`}
+                    >
+                        <Icon className="w-4 h-4" />
+                        {count > 1 && <span className="ml-0.5 text-foreground">{count}</span>}
+
+                        {activeEmojiMenu === emoji && (
+                            <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground border border-border shadow-lg rounded-lg px-2 py-1.5 text-[11px] whitespace-nowrap z-50 flex items-center gap-1.5 animate-in fade-in slide-in-from-bottom-1 duration-150">
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+                                        onRemoveReaction?.(messageIds, emoji);
+                                        setActiveEmojiMenu(null);
+                                    }}
+                                    className="text-destructive hover:text-destructive/80 flex items-center gap-1 font-semibold"
+                                >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    Remove
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                );
+            })}
+        </div>
+    );
+};
 
 export function ChatMessageList({
     messages,
@@ -32,16 +120,20 @@ export function ChatMessageList({
     fetchMoreMessages,
     selectedMessageIds = new Set(),
     toggleMessageSelection = () => { },
-    selectionMode = false
+    selectionMode = false,
+    onReact,
+    onRemoveReaction
 }: ChatMessageListProps) {
     const chronMessages = messages.slice().reverse();
     const allMedia = chronMessages
-        .filter(m => ["image", "gif", "video"].includes(m.payload?.type))
+        .filter(m => !m.deletedAt && ["image", "gif", "video"].includes(m.payload?.type))
         .map(m => ({
             ...m.payload,
+            id: m.id || m.localId,
             createdAt: m.createdAt,
             readAt: m.readAt,
-            isMe: m.senderId === user?.id
+            isMe: m.senderId === user?.id,
+            reactions: m.reactions
         }));
 
     const [selectedMediaIndex, setSelectedMediaIndex] = useState<number | null>(null);
@@ -88,8 +180,8 @@ export function ChatMessageList({
             case "image":
             case "gif":
                 return compact ? (
-                    <div className="relative w-full bg-muted/20 overflow-hidden group/media cursor-pointer block" onClick={() => handleMediaClick(payload, messageId)}>
-                        <img src={payload.content} alt="Media" className="w-full h-auto object-cover transition-transform group-hover/item:scale-105 duration-500 block" />
+                    <div className="relative w-full bg-muted/20 overflow-hidden group/media cursor-pointer block rounded-xl" onClick={() => handleMediaClick(payload, messageId)}>
+                        <img src={payload.content} alt="Media" className="w-full h-auto object-cover transition-transform group-hover/item:scale-105 duration-500 block rounded-xl" />
                         {payload.type === "gif" && <div className="absolute bottom-1.5 left-1.5 bg-black/60 text-white text-[9px] font-bold px-1 rounded backdrop-blur-sm pointer-events-none">GIF</div>}
                     </div>
                 ) : (
@@ -108,8 +200,8 @@ export function ChatMessageList({
                 );
             case "video":
                 return compact ? (
-                    <div className="relative w-full bg-muted/20 overflow-hidden group/media cursor-pointer block" onClick={() => handleMediaClick(payload, messageId)}>
-                        <video src={payload.content} className="w-full h-auto object-cover opacity-90 block" />
+                    <div className="relative w-full bg-muted/20 overflow-hidden group/media cursor-pointer block rounded-xl" onClick={() => handleMediaClick(payload, messageId)}>
+                        <video src={payload.content} className="w-full h-auto object-cover opacity-90 block rounded-xl" />
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-black/10">
                             <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white shadow-md border border-white/20">
                                 <Play className="w-5 h-5 ml-1" fill="currentColor" />
@@ -256,10 +348,17 @@ export function ChatMessageList({
                                                 {renderMessageContent(m.payload, m.id, false)}
                                                 <div className="absolute bottom-1 right-2 flex items-center gap-1 text-[10px] text-white bg-black/40 px-1.5 py-0.5 rounded-full backdrop-blur-sm pointer-events-none">
                                                     <span>{format(new Date(m.createdAt || Date.now()), "h:mm a")}</span>
-                                                    {isMe && (m.readAt ? <CheckCheck className="w-3.5 h-3.5" /> : <Check className="w-3 h-3" />)}
+                                                    {isMe && (m.readAt ? <CheckCheck className="w-[14px] h-[14px] ml-0.5" strokeWidth={1.5} /> : <Check className="w-[13px] h-[13px] ml-0.5" strokeWidth={1.5} />)}
                                                 </div>
                                             </div>
                                         </div>
+                                        <ReactionBadge 
+                                            reactions={m.reactions} 
+                                            isMe={isMe} 
+                                            currentUserId={user?.id}
+                                            messageIds={[m.id]}
+                                            onRemoveReaction={onRemoveReaction}
+                                        />
                                     </div>
                                 </div>
                             );
@@ -296,11 +395,18 @@ export function ChatMessageList({
                                             {renderMessageContent(m.payload, m.id, false)}
                                             <div className="float-right flex items-center gap-1 text-[10px] opacity-70 mt-1 ml-3 -mb-1">
                                                 <span>{format(new Date(m.createdAt || Date.now()), "h:mm a")}</span>
-                                                {isMe && (m.readAt ? <CheckCheck className="w-3.5 h-3.5" /> : <Check className="w-3 h-3" />)}
+                                                {isMe && (m.readAt ? <CheckCheck className="w-[14px] h-[14px] ml-0.5" strokeWidth={1.5} /> : <Check className="w-[13px] h-[13px] ml-0.5" strokeWidth={1.5} />)}
                                             </div>
                                             <div className="clear-both" />
                                         </div>
                                     </div>
+                                    <ReactionBadge 
+                                        reactions={m.reactions} 
+                                        isMe={isMe} 
+                                        currentUserId={user?.id}
+                                        messageIds={[m.id]}
+                                        onRemoveReaction={onRemoveReaction}
+                                    />
                                 </div>
                             </div>
                         );
@@ -315,14 +421,14 @@ export function ChatMessageList({
                                         </div>
                                     )}
                                     <div className={`max-w-[85%] lg:max-w-[70%] relative ${isMe ? "items-end" : "items-start"} opacity-100 transition-opacity`}>
-                            <div className="columns-2 gap-1 rounded-2xl w-[250px] sm:w-[300px] bg-muted/20 border border-border/10 shadow-sm p-1">
+                                        <div className="columns-2 gap-1 rounded-2xl w-[250px] sm:w-[300px] bg-muted/20 border border-border/10 shadow-sm p-1">
                                             {group.messages.map((m: any) => {
                                                 const interactionId = m.id || m.localId;
                                                 const isSelected = selectedMessageIds.has(interactionId);
                                                 return (
-                                                    <div 
-                                                        key={m.localId || m.id} 
-                                                        className={`relative mb-1 overflow-hidden group/item cursor-pointer rounded-xl break-inside-avoid pointer-events-auto`}
+                                                    <div
+                                                        key={m.localId || m.id}
+                                                        className={`relative mb-2 overflow-visible group/item cursor-pointer rounded-xl break-inside-avoid pointer-events-auto`}
                                                         onClick={(e) => handleMessageInteraction(e, interactionId)}
                                                         onContextMenu={(e) => handleMessageInteraction(e, interactionId, true)}
                                                         onTouchStart={() => handleTouchStart(interactionId)}
@@ -337,23 +443,30 @@ export function ChatMessageList({
                                                             </div>
                                                         )}
                                                         {m.deletedAt ? (
-                                                            <div className="w-full h-full min-h-[150px] flex flex-col items-center justify-center bg-muted/50 border border-border/40 text-muted-foreground p-4 gap-2">
+                                                            <div className="w-full h-full min-h-[150px] flex flex-col items-center justify-center bg-muted/50 border border-border/40 text-muted-foreground p-4 gap-2 rounded-xl overflow-hidden">
                                                                 <Trash2 className="w-5 h-5 opacity-70" />
                                                                 <span className="text-xs text-center italic">Deleted</span>
                                                             </div>
                                                         ) : (
-                                                            <>
+                                                            <div className="rounded-xl overflow-hidden relative">
                                                                 {renderMessageContent(m.payload, m.id, true)}
                                                                 <div className="absolute bottom-1 right-2 flex items-center gap-1 text-[10px] text-white bg-black/40 px-1.5 py-0.5 rounded-full backdrop-blur-sm pointer-events-none">
                                                                     <span>{format(new Date(m.createdAt || Date.now()), "h:mm a")}</span>
-                                                                    {isMe && (m.readAt ? <CheckCheck className="w-3.5 h-3.5" /> : <Check className="w-3 h-3" />)}
+                                                                    {isMe && (m.readAt ? <CheckCheck className="w-[14px] h-[14px] ml-0.5" strokeWidth={1.5} /> : <Check className="w-[13px] h-[13px] ml-0.5" strokeWidth={1.5} />)}
                                                                 </div>
-                                                            </>
+                                                            </div>
                                                         )}
                                                     </div>
                                                 );
                                             })}
                                         </div>
+                                        <ReactionBadge 
+                                            reactions={group.messages.flatMap((m: any) => m.reactions || [])} 
+                                            isMe={isMe} 
+                                            currentUserId={user?.id}
+                                            messageIds={group.messages.map((m: any) => m.id)}
+                                            onRemoveReaction={onRemoveReaction}
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -383,6 +496,8 @@ export function ChatMessageList({
                 onClose={() => setSelectedMediaIndex(null)}
                 mediaList={allMedia as any}
                 initialIndex={selectedMediaIndex ?? 0}
+                onReact={onReact}
+                currentUserId={user?.id}
             />
         </>
     );

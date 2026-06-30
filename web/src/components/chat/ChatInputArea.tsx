@@ -1,8 +1,10 @@
 import React from 'react';
 import { Button } from '@/components/ui/Button';
-import { Send, Plus, X, ImageIcon, Music, Loader2 } from 'lucide-react';
+import { Paperclip, X, ImageIcon, Music, Loader2 } from 'lucide-react';
 import GifPicker from "@/components/posts/common/GifPicker";
 import EmojiPicker, { Theme } from "emoji-picker-react";
+import { useTheme } from "next-themes";
+import { FaCircleChevronRight, FaF, FaFaceKissBeam, FaG, FaI } from 'react-icons/fa6';
 
 interface ChatInputAreaProps {
     inputText: string;
@@ -21,7 +23,6 @@ interface ChatInputAreaProps {
 
 export function ChatInputArea({
     inputText,
-    setInputText,
     handleSendText,
     handleTyping,
     activePanel,
@@ -33,8 +34,10 @@ export function ChatInputArea({
     onEmojiClick,
     onGifSelect,
 }: ChatInputAreaProps) {
+    const { resolvedTheme } = useTheme();
+
     return (
-        <div className="p-3 border-t bg-background/95 backdrop-blur z-10 flex-none relative">
+        <div className="px-3 pb-3 bg-transparent backdrop-blur z-10 flex-none relative">
             {/* Popover / Panels relative to Input */}
             {activePanel !== "none" && (
                 <div className="absolute bottom-[calc(100%+10px)] left-2 z-20 w-80 bg-card rounded-2xl border shadow-xl overflow-hidden animate-in slide-in-from-bottom-2 fade-in">
@@ -49,7 +52,7 @@ export function ChatInputArea({
                             <div className="absolute inset-0">
                                 <EmojiPicker
                                     onEmojiClick={onEmojiClick}
-                                    theme={Theme.AUTO}
+                                    theme={resolvedTheme === 'dark' ? Theme.DARK : Theme.LIGHT}
                                     width="100%"
                                     height="100%"
                                     style={{ border: 'none' }}
@@ -75,6 +78,7 @@ export function ChatInputArea({
                                     ref={fileInputRef}
                                     accept="image/*,video/*,audio/*"
                                     onChange={handleFileUpload}
+                                    multiple
                                 />
                             </div>
                         )}
@@ -89,55 +93,59 @@ export function ChatInputArea({
             )}
 
             {isMutualFollow ? (
-                <form onSubmit={(e) => { e.preventDefault(); handleSendText(); }} className="flex items-end gap-2 max-w-4xl mx-auto">
-                    <div className="flex items-center gap-1">
+                <form onSubmit={(e) => { e.preventDefault(); handleSendText(); }} className="flex items-center w-full max-w-4xl mx-auto">
+                    <div className="flex-1 flex items-center gap-1 bg-muted/40 border border-border/60 rounded-3xl p-1.5 focus-within:ring-4 focus-within:ring-primary/10 focus-within:border-primary/40 transition-all shadow-sm">
+
                         <Button
                             type="button"
                             variant="ghost"
                             size="icon"
-                            className={`rounded-full transition-colors ${activePanel === "upload" ? "bg-muted text-primary" : ""}`}
+                            className={`rounded-full h-8 w-8 sm:h-10 sm:w-10 flex-none transition-colors ${activePanel === "upload" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted/60"}`}
                             onClick={() => setActivePanel(activePanel === "upload" ? "none" : "upload")}
                         >
-                            <Plus className="h-5 w-5" />
+                            <Paperclip className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px]" />
                         </Button>
+
                         <Button
                             type="button"
                             variant="ghost"
                             size="icon"
-                            className={`rounded-full transition-colors hidden sm:inline-flex ${activePanel === "gif" ? "bg-muted text-primary" : ""}`}
+                            className={`rounded-full h-8 w-8 sm:h-10 sm:w-10 flex flex-row items-center justify-center transition-colors sm:inline-flex ${activePanel === "gif" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted/60"}`}
                             onClick={() => setActivePanel(activePanel === "gif" ? "none" : "gif")}
                         >
-                            <div className="font-bold text-[10px] border-2 border-current px-1 py-0.5 rounded-md leading-none">GIF</div>
+                            <FaG className="w-[9px] h-[9px] sm:w-[11px] sm:h-[11px]" />
+                            <FaI className="w-[9px] h-[9px] sm:w-[11px] sm:h-[11px]" />
+                            <FaF className="w-[9px] h-[9px] sm:w-[11px] sm:h-[11px]" />
                         </Button>
-                    </div>
 
-                    <div className="flex-1 flex items-end gap-2 bg-muted/40 border rounded-3xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all">
                         <input
                             type="text"
                             value={inputText}
                             onChange={handleTyping}
                             placeholder="Message..."
-                            className="flex-1 bg-transparent px-2 py-2 text-[15px] focus:outline-none min-w-0"
+                            className="flex-1 bg-transparent px-1 sm:px-2 py-1.5 sm:py-2.5 text-[14px] sm:text-[15px] focus:outline-none min-w-0 placeholder:text-muted-foreground/70"
                         />
+
                         <Button
                             type="button"
                             variant="ghost"
                             size="icon"
-                            className={`rounded-full h-9 w-9 flex-none transition-colors ${activePanel === "emoji" ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+                            className={`rounded-full h-8 w-8 sm:h-10 sm:w-10 flex-none transition-colors ${activePanel === "emoji" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted/60"}`}
                             onClick={() => setActivePanel(activePanel === "emoji" ? "none" : "emoji")}
                         >
-                            <span className="text-xl leading-none block mb-1">😀</span>
+                            <FaFaceKissBeam className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px]" />
+                        </Button>
+
+                        <Button
+                            type="submit"
+                            size="icon"
+                            variant="ghost"
+                            disabled={!inputText.trim()}
+                            className="rounded-full h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center bg-transparent hover:bg-transparent p-0 transition-all disabled:opacity-50 text-primary disabled:text-muted-foreground"
+                        >
+                            <FaCircleChevronRight className="w-[24px] h-[24px] sm:w-[28px] sm:h-[28px]" />
                         </Button>
                     </div>
-
-                    <Button
-                        type="submit"
-                        size="icon"
-                        disabled={!inputText.trim()}
-                        className="rounded-full h-11 w-11 flex-none shadow-sm transition-transform active:scale-95 disabled:opacity-50"
-                    >
-                        <Send className="h-5 w-5" />
-                    </Button>
                 </form>
             ) : (
                 <div className="text-center p-3 text-muted-foreground bg-muted/30 rounded-xl">

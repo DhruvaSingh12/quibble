@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  allowedDevOrigins: ["10.62.248.247", "192.168.1.16"],
   serverExternalPackages: ['@node-rs/argon2'],
   images: {
     remotePatterns: [

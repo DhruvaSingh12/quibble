@@ -30,6 +30,7 @@ model User {
   conversationsAsUser1 ChatConversation[]  @relation("ConversationUser1")
   conversationsAsUser2 ChatConversation[]  @relation("ConversationUser2")
   messagesSent         ChatMessage[]       @relation("MessageSender")
+  messageReactions     ChatMessageReaction[]
 
   createdAt DateTime @default(now())
 
@@ -204,8 +205,22 @@ model ChatMessage {
   deletedAt      DateTime?
   deletedFor     String[]         @default([])
   createdAt      DateTime         @default(now())
+  reactions      ChatMessageReaction[]
 
   @@index([conversationId, createdAt])
   @@index([senderId])
   @@map("chat_messages")
+}
+
+model ChatMessageReaction {
+  id         String      @id @default(cuid())
+  messageId  String
+  message    ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emoji      String
+  createdAt  DateTime    @default(now())
+
+  @@unique([messageId, userId])
+  @@map("chat_message_reactions")
 }

@@ -4,7 +4,16 @@ let socket: Socket | null = null;
 
 export const getSocket = () => {
     if (!socket) {
-        socket = io(process.env.NEXT_PUBLIC_API_URL, {
+        let apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+        
+        if (typeof window !== "undefined") {
+            const hostname = window.location.hostname;
+            if (hostname !== "localhost" && apiUrl.includes("localhost")) {
+                apiUrl = apiUrl.replace("localhost", hostname);
+            }
+        }
+
+        socket = io(apiUrl, {
             withCredentials: true,
             autoConnect: false,
         });

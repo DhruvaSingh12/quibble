@@ -182,14 +182,51 @@ export default function ChatRoomPage(props: { params: Promise<{ conversationId: 
             }
         };
 
+        const handleReadMsgs = (data: any) => {
+            if (data.conversationId === conversationId) {
+                setMessages(prev => prev.map(m => (!m.readAt && m.senderId === user?.id) ? { ...m, readAt: data.readAt } : m));
+            }
+        };
+
+        const handleMessageReacted = (data: { conversationId: string, messageId: string, userId: string, emoji: string }) => {
+            if (data.conversationId === conversationId) {
+                setMessages(prev => prev.map(m => {
+                    if (m.id === data.messageId || m.localId === data.messageId) {
+                        const reactions = m.reactions ? [...m.reactions] : [];
+                        const existingIdx = reactions.findIndex((r: any) => r.userId === data.userId);
+                        
+                        if (data.emoji) {
+                            if (existingIdx > -1) {
+                                reactions[existingIdx].emoji = data.emoji;
+                            } else {
+                                reactions.push({ userId: data.userId, emoji: data.emoji });
+                            }
+                        } else {
+                            // Empty emoji means removed
+                            if (existingIdx > -1) {
+                                reactions.splice(existingIdx, 1);
+                            }
+                        }
+                        
+                        return { ...m, reactions };
+                    }
+                    return m;
+                }));
+            }
+        };
+
         socket.on("chat_new_message", handleNewMsg);
         socket.on("chat_typing", handleTyping);
         socket.on("chat_messages_deleted", handleDeletedMsgs);
+        socket.on("chat_messages_read", handleReadMsgs);
+        socket.on("chat_message_reacted", handleMessageReacted);
 
         return () => {
             socket.off("chat_new_message", handleNewMsg);
             socket.off("chat_typing", handleTyping);
             socket.off("chat_messages_deleted", handleDeletedMsgs);
+            socket.off("chat_messages_read", handleReadMsgs);
+            socket.off("chat_message_reacted", handleMessageReacted);
         };
     }, [socket, keyHex, conversationId, user?.id]);
 
@@ -304,28 +341,103 @@ export default function ChatRoomPage(props: { params: Promise<{ conversationId: 
         handleSendPayload({ type: "gif", content: url });
     };
 
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+    const handleReactForMessage = (messageId: string, emoji: string) => {
+        if (!socket) return;
+        
+        let finalEmoji = emoji;
+        setMessages(prev => prev.map(m => {
+            if (m.id === messageId || m.localId === messageId) {
+                const reactions = m.reactions ? [...m.reactions] : [];
+                const existingIdx = reactions.findIndex((r: any) => r.userId === user?.id);
+                
+                if (existingIdx > -1) {
+                    if (reactions[existingIdx].emoji === emoji) {
+                        // Toggle off
+                        finalEmoji = "";
+                        reactions.splice(existingIdx, 1);
+                    } else {
+                        // Change emoji
+                        reactions[existingIdx].emoji = emoji;
+                    }
+                } else {
+                    // New emoji
+                    reactions.push({ userId: user?.id, emoji });
+                }
+                
+                return { ...m, reactions };
+            }
+            return m;
+        }));
 
-        let type: ChatPayload["type"] = "text";
-        if (file.type.startsWith("image/")) type = "image";
-        else if (file.type.startsWith("video/")) type = "video";
-        else if (file.type.startsWith("audio/")) type = "audio";
-        else return alert("Unsupported file type.");
+        socket.emit("chat_react_message", { conversationId, messageId, emoji: finalEmoji }, (res: any) => {
+            if (res?.error) {
+                console.error("Failed to react to message:", res.error);
+            }
+        });
+    };
+
+    const handleReact = (emoji: string) => {
+        if (!socket || selectedMessageIds.size !== 1) return;
+        const messageId = Array.from(selectedMessageIds)[0];
+        handleReactForMessage(messageId, emoji);
+        clearSelection();
+    };
+
+    const handleRemoveReactionDirectly = (messageIds: string[], emoji: string) => {
+        if (!socket) return;
+        messageIds.forEach(messageId => {
+            setMessages(prev => prev.map(m => {
+                if (m.id === messageId || m.localId === messageId) {
+                    const reactions = m.reactions ? [...m.reactions] : [];
+                    const existingIdx = reactions.findIndex((r: any) => r.userId === user?.id);
+                    if (existingIdx > -1) {
+                        reactions.splice(existingIdx, 1);
+                    }
+                    return { ...m, reactions };
+                }
+                return m;
+            }));
+
+            socket.emit("chat_react_message", { conversationId, messageId, emoji: "" }, (res: any) => {
+                if (res?.error) {
+                    console.error("Failed to remove reaction:", res.error);
+                }
+            });
+        });
+    };
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+        if (files.length === 0) return;
+
+        if (files.length > 5) {
+            alert("You can only select up to 5 files at once.");
+            return;
+        }
 
         setIsUploading(true);
         setActivePanel("none");
         try {
-            const res = await startUpload([file]);
-            if (res && res[0]) {
-                const finalUrl = res[0].ufsUrl ?? res[0].url;
-                handleSendPayload({ type, content: finalUrl });
+            const res = await startUpload(files);
+            if (res && res.length > 0) {
+                for (let i = 0; i < res.length; i++) {
+                    const uploaded = res[i];
+                    const file = files[i];
+                    
+                    let type: ChatPayload["type"] = "text";
+                    if (file.type.startsWith("image/")) type = "image";
+                    else if (file.type.startsWith("video/")) type = "video";
+                    else if (file.type.startsWith("audio/")) type = "audio";
+                    
+                    const finalUrl = uploaded.ufsUrl ?? uploaded.url;
+                    await handleSendPayload({ type, content: finalUrl });
+                }
             }
         } catch (error) {
             alert("File upload failed.");
         } finally {
             setIsUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = "";
         }
     };
 
@@ -338,7 +450,7 @@ export default function ChatRoomPage(props: { params: Promise<{ conversationId: 
     return (
         <div className="flex flex-col h-full w-full relative overflow-hidden bg-background">
             {/* Header */}
-            <ChatHeader friend={friend} peerTyping={peerTyping} />
+            <ChatHeader friend={friend} peerTyping={peerTyping} conversationId={conversationId} />
 
             <ChatSelectionActionBar
                 selectedCount={selectedMessageIds.size}
@@ -346,6 +458,7 @@ export default function ChatRoomPage(props: { params: Promise<{ conversationId: 
                 onDeleteMe={() => handleDeleteMessages(false)}
                 onDeleteEveryone={() => handleDeleteMessages(true)}
                 canDeleteEveryone={canDeleteEveryone}
+                onReact={handleReact}
             />
 
             {/* Messages Area */}
@@ -359,6 +472,8 @@ export default function ChatRoomPage(props: { params: Promise<{ conversationId: 
                 selectedMessageIds={selectedMessageIds}
                 toggleMessageSelection={toggleMessageSelection}
                 selectionMode={selectionMode}
+                onReact={handleReactForMessage}
+                onRemoveReaction={handleRemoveReactionDirectly}
             />
 
             {/* Input Area */}

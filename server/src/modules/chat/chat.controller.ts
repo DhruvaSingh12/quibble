@@ -124,6 +124,12 @@ export const getMessages = async (req: Request, res: Response) => {
                 createdAt: true,
                 readAt: true,
                 deletedAt: true,
+                reactions: {
+                    select: {
+                        userId: true,
+                        emoji: true,
+                    },
+                },
             },
         });
 
