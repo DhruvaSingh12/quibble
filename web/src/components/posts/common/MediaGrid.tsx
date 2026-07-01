@@ -12,7 +12,7 @@ export default function MediaGrid({ attachments }: MediaGridProps) {
   if (!attachments || attachments.length === 0) return null;
 
   return (
-    <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+    <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] scrollbar-none">
       {attachments.map((media) => (
         <div
           key={media.id}

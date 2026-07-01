@@ -7,7 +7,8 @@
         "build": "next build --webpack",
         "start": "next start",
         "lint": "eslint .",
-        "studio": "node scripts/studio.js"
+        "studio": "node scripts/studio.js",
+        "postinstall": "npx prisma generate --schema=../server/prisma/schema.prisma"
     },
     "dependencies": {
         "@hookform/resolvers": "^5.4.0",
