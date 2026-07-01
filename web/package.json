@@ -8,7 +8,7 @@
         "start": "next start",
         "lint": "eslint .",
         "studio": "node scripts/studio.js",
-        "postinstall": "npx prisma generate --schema=../server/prisma/schema.prisma"
+        "postinstall": "node -e \"const fs = require('fs'); fs.mkdirSync('prisma', { recursive: true }); fs.copyFileSync('../server/prisma/schema.prisma', 'prisma/schema.prisma');\" && npx prisma generate"
     },
     "dependencies": {
         "@hookform/resolvers": "^5.4.0",

@@ -1,0 +1,226 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                   String              @id
+  username             String              @unique
+  displayName          String
+  email                String?             @unique
+  emailVerified        Boolean             @default(false)
+  passwordHash         String?
+  googleId             String?             @unique
+  avatarUrl            String?
+  bio                  String?
+  sessions             Session[]
+  posts                Post[]
+  following            Follow[]            @relation("Following")
+  followers            Follow[]            @relation("Followers")
+  likes                Like[]
+  dislikes             Dislike[]
+  comments             Comment[]
+  commentLikes         CommentLike[]
+  emailVerifications   EmailVerification[]
+  passwordResets       PasswordReset[]
+  bookmarks            Bookmark[]
+  conversationsAsUser1 ChatConversation[]  @relation("ConversationUser1")
+  conversationsAsUser2 ChatConversation[]  @relation("ConversationUser2")
+  messagesSent         ChatMessage[]       @relation("MessageSender")
+  messageReactions     ChatMessageReaction[]
+
+  createdAt DateTime @default(now())
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Follow {
+  followerId  String
+  follower    User   @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
+  followingId String
+  following   User   @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@map("follows")
+}
+
+model Post {
+  id          String     @id @default(cuid())
+  content     String
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attachments Media[]
+  likes       Like[]
+  dislikes    Dislike[]
+  comments    Comment[]
+  bookmarks   Bookmark[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  @@map("posts")
+}
+
+model Media {
+  id       String    @id @default(cuid())
+  postId   String?
+  post     Post?     @relation(fields: [postId], references: [id], onDelete: SetNull)
+  type     MediaType
+  url      String
+  mimeType String?
+
+  createdAt DateTime @default(now())
+
+  @@map("post_media")
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+model EmailVerification {
+  id        String   @id @default(cuid())
+  email     String
+  otp       String
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("email_verifications")
+}
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expires   DateTime
+  createdAt DateTime @default(now())
+
+  @@map("password_resets")
+}
+
+model Like {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@map("likes")
+}
+
+model Dislike {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@map("dislikes")
+}
+
+model Comment {
+  id           String        @id @default(cuid())
+  content      String
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId       String
+  post         Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parentId     String?
+  parent       Comment?      @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies      Comment[]     @relation("CommentReplies")
+  commentLikes CommentLike[]
+  isDeleted    Boolean       @default(false)
+  gifUrl       String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  @@map("comments")
+}
+
+model CommentLike {
+  id        String  @id @default(cuid())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  commentId String
+  comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, commentId])
+  @@map("comment_likes")
+}
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+  @@map("bookmarks")
+}
+
+model ChatConversation {
+  id        String   @id @default(cuid())
+  user1Id   String
+  user2Id   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user1    User          @relation("ConversationUser1", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2    User          @relation("ConversationUser2", fields: [user2Id], references: [id], onDelete: Cascade)
+  messages ChatMessage[]
+
+  @@unique([user1Id, user2Id])
+  @@map("chat_conversations")
+}
+
+model ChatMessage {
+  id             String           @id @default(cuid())
+  conversationId String
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User             @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  text           String
+  readAt         DateTime?
+  deletedAt      DateTime?
+  deletedFor     String[]         @default([])
+  createdAt      DateTime         @default(now())
+  reactions      ChatMessageReaction[]
+
+  @@index([conversationId, createdAt])
+  @@index([senderId])
+  @@map("chat_messages")
+}
+
+model ChatMessageReaction {
+  id         String      @id @default(cuid())
+  messageId  String
+  message    ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emoji      String
+  createdAt  DateTime    @default(now())
+
+  @@unique([messageId, userId])
+  @@map("chat_message_reactions")
+}
