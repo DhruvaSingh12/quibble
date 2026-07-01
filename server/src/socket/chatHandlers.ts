@@ -123,8 +123,18 @@ export const registerChatHandlers = (io: Server, socket: any) => {
 
             // Update inbox views for both users via personal socket rooms
             await emitConversationUpdate(io, conversationId, userId);
-            const recipientId = convo.user1Id === userId ? convo.user2Id : convo.user1Id;
-            await emitConversationUpdate(io, conversationId, recipientId);
+            let recipientId = socket.data.chatRecipients?.[conversationId];
+            if (!recipientId) {
+                const convo = await verifyConversationMember(conversationId, userId);
+                if (convo) {
+                    recipientId = convo.user1Id === userId ? convo.user2Id : convo.user1Id;
+                    if (!socket.data.chatRecipients) socket.data.chatRecipients = {};
+                    socket.data.chatRecipients[conversationId] = recipientId;
+                }
+            }
+            if (recipientId) {
+                await emitConversationUpdate(io, conversationId, recipientId);
+            }
         } catch (error) {
             console.error("Error in chat_message:", error);
             if (callback) callback({ error: "Internal server error" });
