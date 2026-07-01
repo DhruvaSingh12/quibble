@@ -12,12 +12,11 @@ import Typography from "@tiptap/extension-typography";
 import CharacterCount from "@tiptap/extension-character-count";
 
 import HardBreak from "@tiptap/extension-hard-break";
-import Link from "@tiptap/extension-link";
 import React, { useEffect, useCallback, useState } from "react";
 import { useSession } from "@/providers/SessionProvider";
 import UserAvatar from "@/components/UserAvatar";
-import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription} from "@/components/ui/Dialog";
-import { FaX, FaBold, FaItalic,  FaStrikethrough, FaListUl, FaListOl, FaQuoteLeft, FaCode } from "react-icons/fa6";
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "@/components/ui/Dialog";
+import { FaX, FaBold, FaItalic, FaStrikethrough, FaListUl, FaListOl, FaQuoteLeft, FaCode } from "react-icons/fa6";
 import "../common/editor.css";
 import { toast } from "@/components/ui/use-toast";
 import { PasteExtension } from "../common/PasteExtension";
@@ -25,164 +24,164 @@ import { MentionsInputExtension } from "../common/mention/InputExtension";
 
 
 interface EditPostDialogProps {
-    post: PostData;
-    open: boolean;
-    onClose: () => void;
+  post: PostData;
+  open: boolean;
+  onClose: () => void;
 }
 
 export default function EditPostDialog({ post, open, onClose }: EditPostDialogProps) {
-    const { user } = useSession();
-    const mutation = useEditPostMutation();
-    const [isVisible, setIsVisible] = useState(false);
-    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const { user } = useSession();
+  const mutation = useEditPostMutation();
+  const [isVisible, setIsVisible] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
-    const editor = useEditor({
-        extensions: [
-            StarterKit.configure({ bulletList: { keepMarks: true, keepAttributes: false },
-                orderedList: { keepMarks: true, keepAttributes: false },
-                paragraph: { HTMLAttributes: {class: 'tiptap-paragraph'}},
-                bold: { HTMLAttributes: {class: 'tiptap-bold'}},
-                italic: { HTMLAttributes: {class: 'tiptap-italic'}},
-                strike: { HTMLAttributes: { class: 'tiptap-strike' }},
-                code: { HTMLAttributes: { class: 'tiptap-code'}},
-                blockquote: { HTMLAttributes: { class: 'tiptap-blockquote' }},
-                hardBreak: false,
-                dropcursor: { color: '#3b82f6', width: 2 },
-            }),
-            HardBreak.configure({ HTMLAttributes: {class: 'tiptap-hard-break'}}),
-            TextStyle,
-            Typography.configure({
-                openDoubleQuote: '"',
-                closeDoubleQuote: '"',
-                openSingleQuote: "'",
-                closeSingleQuote: "'",
-                emDash: '—',
-                ellipsis: '…',
-                leftArrow: '←',
-                rightArrow: '→',
-            }),
-            CharacterCount.configure({limit: 3000}),
-            Link.configure({
-                HTMLAttributes: {
-                    class: 'text-primary hover:underline',
-                },
-                autolink: true, // Automatically detects and converts URLs to links
-                openOnClick: false, // Don't open links while editing
-                linkOnPaste: true, // Automatically convert pasted URLs to links
-            }),
-            PasteExtension,
-            MentionsInputExtension,
-            Placeholder.configure({ placeholder: "What's on your mind?" })
-        ],
-        immediatelyRender: false,
-        parseOptions: { preserveWhitespace: 'full' },
-        editorProps: { attributes: {class: 'tiptap focus:outline-none'}},
-    });
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        bulletList: { keepMarks: true, keepAttributes: false },
+        orderedList: { keepMarks: true, keepAttributes: false },
+        paragraph: { HTMLAttributes: { class: 'tiptap-paragraph' } },
+        bold: { HTMLAttributes: { class: 'tiptap-bold' } },
+        italic: { HTMLAttributes: { class: 'tiptap-italic' } },
+        strike: { HTMLAttributes: { class: 'tiptap-strike' } },
+        code: { HTMLAttributes: { class: 'tiptap-code' } },
+        blockquote: { HTMLAttributes: { class: 'tiptap-blockquote' } },
+        hardBreak: false,
+        dropcursor: { color: '#3b82f6', width: 2 },
+        link: {
+          HTMLAttributes: {
+            class: 'text-primary hover:underline',
+          },
+          autolink: true,
+          openOnClick: false,
+          linkOnPaste: true,
+        },
+      }),
+      HardBreak.configure({ HTMLAttributes: { class: 'tiptap-hard-break' } }),
+      TextStyle,
+      Typography.configure({
+        openDoubleQuote: '"',
+        closeDoubleQuote: '"',
+        openSingleQuote: "'",
+        closeSingleQuote: "'",
+        emDash: '—',
+        ellipsis: '…',
+        leftArrow: '←',
+        rightArrow: '→',
+      }),
+      CharacterCount.configure({ limit: 3000 }),
+      PasteExtension,
+      MentionsInputExtension,
+      Placeholder.configure({ placeholder: "What's on your mind?" })
+    ],
+    immediatelyRender: false,
+    parseOptions: { preserveWhitespace: 'full' },
+    editorProps: { attributes: { class: 'tiptap focus:outline-none' } },
+  });
 
-    useEffect(() => {
-      if (open) {
-        if (editor) {
-          editor.commands.focus();
-        }
-        if (editor && post.content) {
-          editor.commands.setContent(post.content);
-          setIsVisible(true);
-        }
-        document.body.style.overflow = "hidden";
-
-        return () => {
-          document.body.style.overflow = "";
-        };
+  useEffect(() => {
+    if (open) {
+      if (editor) {
+        editor.commands.focus();
       }
-    }, [open, editor, post]);
+      if (editor && post.content) {
+        editor.commands.setContent(post.content);
+        setIsVisible(true);
+      }
+      document.body.style.overflow = "hidden";
 
-    const input = editor?.getHTML() || "";
-    const textLength = editor?.getText().length || 0;
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }
+  }, [open, editor, post]);
 
-    const handleClose = useCallback(() => {
-        const currentContent = input.trim();
-        const originalContent = post.content.trim();
-        const hasChanges = currentContent !== originalContent;
-        if (hasChanges && !mutation.isPending) {
-            setShowConfirmDialog(true);
-            return;
+  const input = editor?.getHTML() || "";
+  const textLength = editor?.getText().length || 0;
+
+  const handleClose = useCallback(() => {
+    const currentContent = input.trim();
+    const originalContent = post.content.trim();
+    const hasChanges = currentContent !== originalContent;
+    if (hasChanges && !mutation.isPending) {
+      setShowConfirmDialog(true);
+      return;
+    }
+    toast({
+      title: "Edit canceled",
+      description: "Changes to your post were discarded.",
+      variant: "default"
+    });
+    setIsVisible(false);
+    setTimeout(onClose, 200);
+  }, [input, post, mutation, onClose]);
+
+  const onSubmit = useCallback(() => {
+    if (!textLength) return;
+    mutation.mutate(
+      { id: post.id, content: input },
+      {
+        onSuccess: () => {
+          setIsVisible(false);
+          setTimeout(onClose, 200);
         }
-        toast({
-            title: "Edit canceled",
-            description: "Changes to your post were discarded.",
-            variant: "default"
-        });
-        setIsVisible(false);
-        setTimeout(onClose, 200);
-    }, [input, post, mutation, onClose]);
-
-    const onSubmit = useCallback(() => {
-        if (!textLength) return;
-        mutation.mutate(
-            { id: post.id, content: input },
-            {
-                onSuccess: () => {
-                    setIsVisible(false);
-                    setTimeout(onClose, 200);
-                }
-            }
-        );
-    }, [input, textLength, post, mutation, onClose]);
-
-    const handleKeyDown = useCallback((e: KeyboardEvent) => {
-        if (!open || !editor) return;
-        if (e.ctrlKey || e.metaKey) {
-            switch (e.key) {
-                case 'b':
-                    e.preventDefault();
-                    editor.chain().focus().toggleBold().run();
-                    break;
-                case 'i':
-                    e.preventDefault();
-                    editor.chain().focus().toggleItalic().run();
-                    break;
-                case 'Enter':
-                    e.preventDefault();
-                    if (textLength && input.trim() !== post.content.trim()) {
-                        onSubmit();
-                    }
-                    break;
-            }
-        }
-    }, [open, editor, textLength, input, post, onSubmit]);
-
-    const ToolbarButton = ({ 
-        onClick, 
-        isActive = false, 
-        icon: Icon, 
-        title 
-    }: { 
-        onClick: () => void; 
-        isActive?: boolean; 
-        icon: React.ComponentType<{ className?: string }>; 
-        title: string; 
-    }) => (
-        <button
-            type="button"
-            onMouseDown={(e) => {
-                e.preventDefault();
-                onClick();
-            }}
-            className={`p-2 rounded-lg hover:bg-muted transition-colors ${
-                isActive ? 'bg-primary/10 text-primary' : 'text-muted-foreground'
-            }`}
-            title={title}
-        >
-            <Icon className="h-4 w-4" />
-        </button>
+      }
     );
+  }, [input, textLength, post, mutation, onClose]);
 
-    useEffect(() => {
-        document.addEventListener('keydown', handleKeyDown);
-        return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [handleKeyDown]);
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (!open || !editor) return;
+    if (e.ctrlKey || e.metaKey) {
+      switch (e.key) {
+        case 'b':
+          e.preventDefault();
+          editor.chain().focus().toggleBold().run();
+          break;
+        case 'i':
+          e.preventDefault();
+          editor.chain().focus().toggleItalic().run();
+          break;
+        case 'Enter':
+          e.preventDefault();
+          if (textLength && input.trim() !== post.content.trim()) {
+            onSubmit();
+          }
+          break;
+      }
+    }
+  }, [open, editor, textLength, input, post, onSubmit]);
 
-    if (!open) return null;
+  const ToolbarButton = ({
+    onClick,
+    isActive = false,
+    icon: Icon,
+    title
+  }: {
+    onClick: () => void;
+    isActive?: boolean;
+    icon: React.ComponentType<{ className?: string }>;
+    title: string;
+  }) => (
+    <button
+      type="button"
+      onMouseDown={(e) => {
+        e.preventDefault();
+        onClick();
+      }}
+      className={`p-2 rounded-lg hover:bg-muted transition-colors ${isActive ? 'bg-primary/10 text-primary' : 'text-muted-foreground'
+        }`}
+      title={title}
+    >
+      <Icon className="h-4 w-4" />
+    </button>
+  );
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
+
+  if (!open) return null;
 
   return (
     <>
@@ -224,9 +223,8 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
 
       <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-6 backdrop-blur-sm transition-opacity duration-300">
         <div
-          className={`w-full max-w-2xl sm:rounded-xl bg-card shadow-2xl transition-all duration-300 flex flex-col h-[100dvh] max-h-[100dvh] ${
-            isVisible ? "translate-y-0 scale-100" : "translate-y-8 scale-95"
-          }`}
+          className={`w-full max-w-2xl sm:rounded-xl bg-card shadow-2xl transition-all duration-300 flex flex-col h-dvh max-h-dvh ${isVisible ? "translate-y-0 scale-100" : "translate-y-8 scale-95"
+            }`}
         >
           {/* Header */}
           <div className="flex items-center justify-between border-b p-4">

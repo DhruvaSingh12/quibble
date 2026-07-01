@@ -23,9 +23,37 @@ type Conversation = {
         text: string;
         createdAt: string;
         isRead: boolean;
+        deletedAt?: string | null;
     } | null;
     unreadCount: number;
 };
+
+function formatLastMessageText(decryptedText: string, deletedAt?: string | null): string {
+    if (deletedAt) {
+        return "Message was deleted";
+    }
+    try {
+        const payload = JSON.parse(decryptedText);
+        if (payload && typeof payload === "object" && "type" in payload && "content" in payload) {
+            switch (payload.type) {
+                case "image":
+                    return "📷 Photo";
+                case "video":
+                    return "🎥 Video";
+                case "audio":
+                    return "🎵 Audio";
+                case "gif":
+                    return "GIF";
+                case "text":
+                default:
+                    return payload.content || "";
+            }
+        }
+    } catch {
+        // Fallback if not stringified JSON
+    }
+    return decryptedText;
+}
 
 export default function MessagesInboxPage() {
     const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -42,7 +70,8 @@ export default function MessagesInboxPage() {
                 const decrypted = await Promise.all(res.conversations.map(async c => {
                     if (c.lastMessage) {
                         try {
-                            c.lastMessage.text = await decryptMessage(c.lastMessage.text, c.keyHex);
+                            const decryptedText = await decryptMessage(c.lastMessage.text, c.keyHex);
+                            c.lastMessage.text = formatLastMessageText(decryptedText, c.lastMessage.deletedAt);
                         } catch (e) {
                             c.lastMessage.text = "Decryption error";
                         }
@@ -79,7 +108,7 @@ export default function MessagesInboxPage() {
                 return prev;
             });
 
-            // A better way: find convo from current state
+            // find convo from current state
             setConversations(prev => {
                 const idx = prev.findIndex(c => c.conversationId === data.conversationId);
                 if (idx === -1) return prev;
@@ -94,7 +123,10 @@ export default function MessagesInboxPage() {
                             const newIdx = currentPrev.findIndex(c => c.conversationId === data.conversationId);
                             if (newIdx === -1) return currentPrev;
                             const newConvo = { ...currentPrev[newIdx] };
-                            newConvo.lastMessage = { ...data.lastMessage, text: decryptedText };
+                            newConvo.lastMessage = { 
+                                ...data.lastMessage, 
+                                text: formatLastMessageText(decryptedText, data.lastMessage.deletedAt) 
+                            };
                             newConvo.unreadCount += 1;
                             const newArray = [...currentPrev];
                             newArray[newIdx] = newConvo;
@@ -105,6 +137,17 @@ export default function MessagesInboxPage() {
                             });
                         });
                     }).catch(() => {});
+                } else {
+                    // Handled if lastMessage becomes null (e.g. all messages deleted)
+                    setConversations(currentPrev => {
+                        const newIdx = currentPrev.findIndex(c => c.conversationId === data.conversationId);
+                        if (newIdx === -1) return currentPrev;
+                        const newConvo = { ...currentPrev[newIdx] };
+                        newConvo.lastMessage = null;
+                        const newArray = [...currentPrev];
+                        newArray[newIdx] = newConvo;
+                        return newArray;
+                    });
                 }
                 
                 return prev;

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
-import { Paperclip, X, ImageIcon, Music, Loader2 } from 'lucide-react';
+import { Paperclip, X, ImageIcon, Music, Loader2, Camera } from 'lucide-react';
 import GifPicker from "@/components/posts/common/GifPicker";
 import EmojiPicker, { Theme } from "emoji-picker-react";
 import { useTheme } from "next-themes";
@@ -10,7 +10,7 @@ interface ChatInputAreaProps {
     inputText: string;
     setInputText: (v: string) => void;
     handleSendText: () => void;
-    handleTyping: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    handleTyping: (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => void;
     activePanel: "none" | "emoji" | "gif" | "upload";
     setActivePanel: (v: "none" | "emoji" | "gif" | "upload") => void;
     isUploading: boolean;
@@ -19,6 +19,7 @@ interface ChatInputAreaProps {
     handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
     onEmojiClick: (e: any) => void;
     onGifSelect: (url: string) => void;
+    onCameraClick?: () => void;
 }
 
 export function ChatInputArea({
@@ -33,8 +34,24 @@ export function ChatInputArea({
     handleFileUpload,
     onEmojiClick,
     onGifSelect,
+    onCameraClick,
 }: ChatInputAreaProps) {
     const { resolvedTheme } = useTheme();
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    useEffect(() => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = 'auto';
+            textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+        }
+    }, [inputText]);
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSendText();
+        }
+    };
 
     return (
         <div className="px-3 pb-3 bg-transparent backdrop-blur z-10 flex-none relative">
@@ -110,6 +127,17 @@ export function ChatInputArea({
                             type="button"
                             variant="ghost"
                             size="icon"
+                            className="rounded-full h-8 w-8 sm:h-10 sm:w-10 flex-none text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                            onClick={onCameraClick}
+                            title="Take Photo"
+                        >
+                            <Camera className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px]" />
+                        </Button>
+
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
                             className={`rounded-full h-8 w-8 sm:h-10 sm:w-10 flex flex-row items-center justify-center transition-colors sm:inline-flex ${activePanel === "gif" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted/60"}`}
                             onClick={() => setActivePanel(activePanel === "gif" ? "none" : "gif")}
                         >
@@ -118,12 +146,16 @@ export function ChatInputArea({
                             <FaF className="w-[9px] h-[9px] sm:w-[11px] sm:h-[11px]" />
                         </Button>
 
-                        <input
-                            type="text"
+                        <textarea
+                            ref={textareaRef}
+                            rows={1}
+                            maxLength={1000}
                             value={inputText}
-                            onChange={handleTyping}
+                            onChange={(e) => handleTyping(e as any)}
+                            onKeyDown={handleKeyDown}
                             placeholder="Message..."
-                            className="flex-1 bg-transparent px-1 sm:px-2 py-1.5 sm:py-2.5 text-[14px] sm:text-[15px] focus:outline-none min-w-0 placeholder:text-muted-foreground/70"
+                            className="flex-1 bg-transparent px-1 sm:px-2 py-2 text-[14px] sm:text-[15px] focus:outline-none min-w-0 placeholder:text-muted-foreground/70 resize-none overflow-y-auto max-h-[120px]"
+                            style={{ height: 'auto' }}
                         />
 
                         <Button

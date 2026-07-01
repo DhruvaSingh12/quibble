@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Phone, Video } from 'lucide-react';
+import { Phone, Video } from 'lucide-react';
+import { FaAngleLeft } from 'react-icons/fa6';
 import { Button } from '@/components/ui/Button';
 import UserAvatar from '../UserAvatar';
 import { useCall, CallPeer } from '@/providers/CallProvider';
@@ -34,17 +35,19 @@ export function ChatHeader({ friend, peerTyping, conversationId }: ChatHeaderPro
     return (
         <div className="flex items-center gap-3 p-3 border-b flex-none sticky top-0 bg-background/80 backdrop-blur-md z-10">
             <Button variant="ghost" size="icon" asChild className="md:hidden">
-                <Link href="/messages"><ArrowLeft className="h-5 w-5" /></Link>
+                <Link href="/messages"><FaAngleLeft className="h-5 w-5" /></Link>
             </Button>
-            <UserAvatar avatarUrl={friend.avatarUrl} size={42} />
-            <div className="flex flex-col">
-                <span className="font-bold leading-tight">{friend.displayName}</span>
-                {peerTyping ? (
-                    <span className="text-xs text-primary font-medium animate-pulse">Typing...</span>
-                ) : (
-                    <span className="text-xs text-muted-foreground">@{friend.username}</span>
-                )}
-            </div>
+            <Link href={`/users/${friend.username}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                <UserAvatar avatarUrl={friend.avatarUrl} size={42} />
+                <div className="flex flex-col">
+                    <span className="font-bold leading-tight">{friend.displayName}</span>
+                    {peerTyping ? (
+                        <span className="text-xs text-primary font-medium animate-pulse">Typing...</span>
+                    ) : (
+                        <span className="text-xs text-muted-foreground">@{friend.username}</span>
+                    )}
+                </div>
+            </Link>
             <div className="flex-1" />
             <div className="flex items-center gap-1">
                 <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary rounded-full" onClick={() => handleCall(false)}>

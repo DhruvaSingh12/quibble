@@ -4,7 +4,8 @@ import UserButton from "@/components/UserButton";
 import Logo from "@/components/Logo";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { ArrowLeft, ArrowRight, Search } from "lucide-react";
+import { ArrowRight, Search } from "lucide-react";
+import { FaAngleLeft } from "react-icons/fa6";
 import { usePathname, useRouter } from "next/navigation";
 
 export default function Navbar() {
@@ -19,7 +20,7 @@ export default function Navbar() {
         {/* Desktop Nav */}
         <div className="hidden md:flex gap-2">
           <Button variant="outline" size="icon" className="rounded-full bg-background/80 border-border" onClick={() => router.back()}>
-            <ArrowLeft className="h-4 w-4" />
+            <FaAngleLeft className="h-4 w-4" />
           </Button>
           <Button variant="outline" size="icon" className="rounded-full bg-background/80 border-border" onClick={() => router.forward()}>
             <ArrowRight className="h-4 w-4" />

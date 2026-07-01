@@ -5,7 +5,6 @@ import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { TextStyle } from "@tiptap/extension-text-style";
 import Typography from "@tiptap/extension-typography";
-import Link from "@tiptap/extension-link";
 import TiptapImage from "@tiptap/extension-image";
 import "./editor.css";
 import { useRouter } from "next/navigation";
@@ -149,16 +148,15 @@ export default function RichTextRenderer({
                     keepMarks: true,
                     keepAttributes: false,
                 },
-                link: false,
+                link: {
+                    HTMLAttributes: {
+                        class: 'text-primary hover:underline',
+                    }
+                },
             }),
             TextStyle,
             Typography,
             MentionsHighlightExtension,
-            Link.configure({
-                HTMLAttributes: {
-                    class: 'text-primary hover:underline',
-                }
-            }),
             TiptapImage.configure({
                 allowBase64: true,
                 HTMLAttributes: {

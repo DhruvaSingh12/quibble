@@ -12,6 +12,39 @@ async function verifyConversationMember(conversationId: string, userId: string) 
     return convo;
 }
 
+async function emitConversationUpdate(io: Server, conversationId: string, userId: string) {
+    const convo = await prisma.chatConversation.findUnique({
+        where: { id: conversationId },
+        include: {
+            messages: {
+                where: {
+                    NOT: {
+                        deletedFor: { has: userId }
+                    }
+                },
+                orderBy: { createdAt: "desc" },
+                take: 1,
+                select: { id: true, senderId: true, text: true, createdAt: true, readAt: true, deletedAt: true }
+            }
+        }
+    });
+
+    if (!convo) return;
+
+    const lastMessage = convo.messages[0];
+    io.to(`user:${userId}`).emit("chat:conversation_update", {
+        conversationId,
+        lastMessage: lastMessage ? {
+            id: lastMessage.id,
+            senderId: lastMessage.senderId,
+            text: lastMessage.text,
+            createdAt: lastMessage.createdAt.toISOString(),
+            isRead: lastMessage.readAt !== null || lastMessage.senderId === userId,
+            deletedAt: lastMessage.deletedAt ? lastMessage.deletedAt.toISOString() : null,
+        } : null
+    });
+}
+
 export const registerChatHandlers = (io: Server, socket: any) => {
 
     socket.on("chat_join", async (data: { conversationId: string }) => {
@@ -88,20 +121,10 @@ export const registerChatHandlers = (io: Server, socket: any) => {
                 callback({ success: true, message: payload });
             }
 
-            // Update recipient's inbox via their personal socket room
-            const recipientId = socket.data.chatRecipients?.[conversationId];
-            if (recipientId) {
-                io.to(`user:${recipientId}`).emit("chat:conversation_update", {
-                    conversationId,
-                    lastMessage: {
-                        id: message.id,
-                        senderId: userId,
-                        text: message.text,
-                        createdAt: message.createdAt.toISOString(),
-                        isRead: false,
-                    },
-                });
-            }
+            // Update inbox views for both users via personal socket rooms
+            await emitConversationUpdate(io, conversationId, userId);
+            const recipientId = convo.user1Id === userId ? convo.user2Id : convo.user1Id;
+            await emitConversationUpdate(io, conversationId, recipientId);
         } catch (error) {
             console.error("Error in chat_message:", error);
             if (callback) callback({ error: "Internal server error" });
@@ -199,6 +222,16 @@ export const registerChatHandlers = (io: Server, socket: any) => {
                 });
 
                 if (callback) callback({ success: true, messageIds, forEveryone: false });
+            }
+
+            // Sync conversation inbox view
+            const convo = await verifyConversationMember(conversationId, userId);
+            if (convo) {
+                await emitConversationUpdate(io, conversationId, userId);
+                if (forEveryone) {
+                    const recipientId = convo.user1Id === userId ? convo.user2Id : convo.user1Id;
+                    await emitConversationUpdate(io, conversationId, recipientId);
+                }
             }
         } catch (error) {
             console.error("Error in chat_delete_messages:", error);

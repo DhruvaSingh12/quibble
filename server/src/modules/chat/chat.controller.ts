@@ -24,9 +24,14 @@ export const getConversations = async (req: Request, res: Response) => {
                 user1: { select: { id: true, username: true, displayName: true, avatarUrl: true, followers: { select: { followerId: true } }, following: { select: { followingId: true } } } },
                 user2: { select: { id: true, username: true, displayName: true, avatarUrl: true, followers: { select: { followerId: true } }, following: { select: { followingId: true } } } },
                 messages: {
+                    where: {
+                        NOT: {
+                            deletedFor: { has: userId }
+                        }
+                    },
                     orderBy: { createdAt: "desc" },
                     take: 1,
-                    select: { id: true, senderId: true, text: true, createdAt: true, readAt: true },
+                    select: { id: true, senderId: true, text: true, createdAt: true, readAt: true, deletedAt: true },
                 },
             },
         });
@@ -72,6 +77,7 @@ export const getConversations = async (req: Request, res: Response) => {
                         text: lastMessage.text,
                         createdAt: lastMessage.createdAt.toISOString(),
                         isRead: lastMessage.readAt !== null || lastMessage.senderId === userId,
+                        deletedAt: lastMessage.deletedAt ? lastMessage.deletedAt.toISOString() : null,
                     }
                     : null,
                 unreadCount: unreadMap.get(c.id) ?? 0,

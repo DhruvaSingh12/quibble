@@ -11,6 +11,7 @@ import { ChatHeader } from "@/components/chat/ChatHeader";
 import { ChatInputArea } from "@/components/chat/ChatInputArea";
 import { ChatMessageList } from "@/components/chat/ChatMessageList";
 import { ChatSelectionActionBar } from "@/components/chat/ChatSelectionActionBar";
+import { CameraModal } from "@/components/chat/CameraModal";
 
 interface ChatPayload {
     type: "text" | "image" | "video" | "audio" | "gif";
@@ -53,6 +54,7 @@ export default function ChatRoomPage(props: { params: Promise<{ conversationId: 
     // UI Panels
     const [activePanel, setActivePanel] = useState<"none" | "emoji" | "gif" | "upload">("none");
     const [isUploading, setIsUploading] = useState(false);
+    const [isCameraOpen, setIsCameraOpen] = useState(false);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -278,7 +280,7 @@ export default function ChatRoomPage(props: { params: Promise<{ conversationId: 
         handleSendPayload({ type: "text", content: text });
     };
 
-    const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleTyping = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setInputText(e.target.value);
         if (!socket || !isMutualFollow) return;
 
@@ -406,6 +408,27 @@ export default function ChatRoomPage(props: { params: Promise<{ conversationId: 
         });
     };
 
+    const handleUploadFileDirectly = async (file: File) => {
+        setIsUploading(true);
+        try {
+            const res = await startUpload([file]);
+            if (res && res.length > 0) {
+                const uploaded = res[0];
+                let type: ChatPayload["type"] = "text";
+                if (file.type.startsWith("image/")) type = "image";
+                else if (file.type.startsWith("video/")) type = "video";
+                else if (file.type.startsWith("audio/")) type = "audio";
+                
+                const finalUrl = uploaded.ufsUrl ?? uploaded.url;
+                await handleSendPayload({ type, content: finalUrl });
+            }
+        } catch (error) {
+            alert("File upload failed.");
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
         if (files.length === 0) return;
@@ -490,6 +513,13 @@ export default function ChatRoomPage(props: { params: Promise<{ conversationId: 
                 handleFileUpload={handleFileUpload}
                 onEmojiClick={onEmojiClick}
                 onGifSelect={onGifSelect}
+                onCameraClick={() => setIsCameraOpen(true)}
+            />
+
+            <CameraModal
+                isOpen={isCameraOpen}
+                onClose={() => setIsCameraOpen(false)}
+                onCapture={handleUploadFileDirectly}
             />
         </div>
     );

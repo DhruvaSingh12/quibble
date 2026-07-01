@@ -74,6 +74,13 @@ const ReactionBadge = ({
                 const Icon = emojiMap[emoji];
                 if (!Icon) return null;
                 const hasMyReaction = reactions.some(r => r.userId === currentUserId && r.emoji === emoji);
+                const isSingle = count === 1;
+
+                const shapeClass = isSingle ? "w-[26px] h-[26px]" : "h-[26px] px-2.5 gap-1";
+                const colorClass = hasMyReaction
+                    ? "bg-primary/15 border-primary/25 text-primary shadow-sm hover:bg-primary/25"
+                    : "bg-muted/80 border-border/30 text-foreground shadow-sm hover:bg-muted";
+
                 return (
                     <div
                         key={emoji}
@@ -83,10 +90,10 @@ const ReactionBadge = ({
                             e.preventDefault();
                             setActiveEmojiMenu(prev => prev === emoji ? null : emoji);
                         }}
-                        className={`flex items-center gap-1 bg-background border border-border shadow-md rounded-full px-1.5 py-0.5 text-[11px] font-medium animate-in zoom-in duration-200 pointer-events-auto relative ${hasMyReaction ? 'cursor-pointer hover:bg-muted' : ''}`}
+                        className={`flex items-center justify-center rounded-full border text-[11px] font-semibold animate-in zoom-in duration-200 pointer-events-auto relative ${shapeClass} ${colorClass} ${hasMyReaction ? 'cursor-pointer' : ''}`}
                     >
-                        <Icon className="w-4 h-4" />
-                        {count > 1 && <span className="ml-0.5 text-foreground">{count}</span>}
+                        <Icon className="w-3.5 h-3.5" />
+                        {!isSingle && <span className="text-[10px] text-foreground/90 font-medium">{count}</span>}
 
                         {activeEmojiMenu === emoji && (
                             <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground border border-border shadow-lg rounded-lg px-2 py-1.5 text-[11px] whitespace-nowrap z-50 flex items-center gap-1.5 animate-in fade-in slide-in-from-bottom-1 duration-150">
@@ -107,6 +114,35 @@ const ReactionBadge = ({
                     </div>
                 );
             })}
+        </div>
+    );
+};
+
+const ExpandableText = ({ content }: { content: string }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const limit = 400;
+    const shouldTruncate = content.length > limit;
+
+    if (!shouldTruncate) {
+        return <p className="whitespace-pre-wrap wrap-break-word leading-relaxed">{content}</p>;
+    }
+
+    const displayedText = isExpanded ? content : `${content.slice(0, limit)}...`;
+
+    return (
+        <div>
+            <p className="whitespace-pre-wrap wrap-break-word leading-relaxed">{displayedText}</p>
+            <button
+                onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    setIsExpanded(!isExpanded);
+                }}
+                className="text-[11px] mt-1 block font-semibold hover:underline opacity-80 hover:opacity-100 transition-opacity underline-offset-2"
+                style={{ color: 'inherit' }}
+            >
+                {isExpanded ? "See less" : "See more"}
+            </button>
         </div>
     );
 };
@@ -222,7 +258,7 @@ export function ChatMessageList({
                 return <CustomAudioPlayer src={payload.content} />;
             case "text":
             default:
-                return <p className="whitespace-pre-wrap wrap-break-word leading-relaxed">{payload.content || "Empty"}</p>;
+                return <ExpandableText content={payload.content || "Empty"} />;
         }
     };
     const formatDateSeparator = (date: Date) => {
@@ -324,9 +360,10 @@ export function ChatMessageList({
                             );
                         }
 
+                        const hasReactions = m.reactions && m.reactions.length > 0;
                         if (isMedia) {
                             return (
-                                <div key={m.localId || m.id} className={`flex w-full ${isMe ? "justify-end" : "justify-start"} items-center group`}>
+                                <div key={m.localId || m.id} className={`flex w-full ${isMe ? "justify-end" : "justify-start"} items-center group ${hasReactions ? "pb-3" : ""}`}>
                                     {selectionMode && (
                                         <div className="shrink-0 mr-3">
                                             <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${isSelected ? "bg-primary border-primary" : "border-muted-foreground/30"}`}>
@@ -352,9 +389,9 @@ export function ChatMessageList({
                                                 </div>
                                             </div>
                                         </div>
-                                        <ReactionBadge 
-                                            reactions={m.reactions} 
-                                            isMe={isMe} 
+                                        <ReactionBadge
+                                            reactions={m.reactions}
+                                            isMe={isMe}
                                             currentUserId={user?.id}
                                             messageIds={[m.id]}
                                             onRemoveReaction={onRemoveReaction}
@@ -365,7 +402,7 @@ export function ChatMessageList({
                         }
 
                         return (
-                            <div key={m.localId || m.id} className={`flex w-full ${isMe ? "justify-end" : "justify-start"} items-center group`}>
+                            <div key={m.localId || m.id} className={`flex w-full ${isMe ? "justify-end" : "justify-start"} items-center group ${hasReactions ? "pb-3" : ""}`}>
                                 {selectionMode && (
                                     <div className="shrink-0 mr-3">
                                         <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${isSelected ? "bg-primary border-primary" : "border-muted-foreground/30"}`}>
@@ -381,8 +418,8 @@ export function ChatMessageList({
                                 `}>
                                     <div
                                         className={`
-                                            rounded-2xl px-4 py-2.5 shadow-sm min-w-[80px] cursor-pointer relative overflow-hidden
-                                            ${isMe ? "bg-primary text-primary-foreground rounded-br-sm" : "bg-muted/70 border border-border/50 rounded-bl-sm"}
+                                            rounded-2xl px-4 py-2.5 shadow-sm min-w-[80px] cursor-pointer relative overflow-hidden border
+                                            ${isMe ? "bg-primary/10 text-primary border-primary/15 rounded-br-sm" : "bg-muted/40 border-border/30 text-foreground rounded-bl-sm"}
                                         `}
                                         onClick={(e) => handleMessageInteraction(e, interactionId)}
                                         onContextMenu={(e) => handleMessageInteraction(e, interactionId, true)}
@@ -400,9 +437,9 @@ export function ChatMessageList({
                                             <div className="clear-both" />
                                         </div>
                                     </div>
-                                    <ReactionBadge 
-                                        reactions={m.reactions} 
-                                        isMe={isMe} 
+                                    <ReactionBadge
+                                        reactions={m.reactions}
+                                        isMe={isMe}
                                         currentUserId={user?.id}
                                         messageIds={[m.id]}
                                         onRemoveReaction={onRemoveReaction}
@@ -412,9 +449,11 @@ export function ChatMessageList({
                         );
                     } else {
                         const isMe = group.senderId === user?.id;
+                        const groupReactions = group.messages.flatMap((m: any) => m.reactions || []);
+                        const hasGroupReactions = groupReactions.length > 0;
                         return (
                             <div key={`group-${groupIdx}`} className="flex flex-col gap-1 relative z-10 w-full group/group">
-                                <div className={`flex w-full ${isMe ? "justify-end" : "justify-start"} items-center`}>
+                                <div className={`flex w-full ${isMe ? "justify-end" : "justify-start"} items-center ${hasGroupReactions ? "pb-3" : ""}`}>
                                     {selectionMode && (
                                         <div className="shrink-0 mr-3 self-end mb-2">
                                             <div className="w-5 h-5 rounded-full border flex items-center justify-center border-muted-foreground/30 opacity-0 pointer-events-none"></div>
@@ -460,9 +499,9 @@ export function ChatMessageList({
                                                 );
                                             })}
                                         </div>
-                                        <ReactionBadge 
-                                            reactions={group.messages.flatMap((m: any) => m.reactions || [])} 
-                                            isMe={isMe} 
+                                        <ReactionBadge
+                                            reactions={group.messages.flatMap((m: any) => m.reactions || [])}
+                                            isMe={isMe}
                                             currentUserId={user?.id}
                                             messageIds={group.messages.map((m: any) => m.id)}
                                             onRemoveReaction={onRemoveReaction}

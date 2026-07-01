@@ -56,10 +56,24 @@ export function MediaModal({ isOpen, onClose, mediaList, initialIndex, onReact, 
         return () => window.removeEventListener("click", handleOutsideClick);
     }, [activeEmojiMenu]);
 
-    const handleTouchStart = () => {
+    const touchStartX = useRef<number | null>(null);
+    const touchEndX = useRef<number | null>(null);
+    const minSwipeDistance = 50;
+
+    const handleTouchStart = (e: React.TouchEvent) => {
         longPressTimer.current = setTimeout(() => {
             setShowReactPanel(prev => !prev);
         }, 500);
+        touchStartX.current = e.targetTouches[0].clientX;
+        touchEndX.current = null;
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        if (longPressTimer.current) {
+            clearTimeout(longPressTimer.current);
+            longPressTimer.current = null;
+        }
+        touchEndX.current = e.targetTouches[0].clientX;
     };
 
     const handleTouchEnd = () => {
@@ -67,6 +81,19 @@ export function MediaModal({ isOpen, onClose, mediaList, initialIndex, onReact, 
             clearTimeout(longPressTimer.current);
             longPressTimer.current = null;
         }
+        if (touchStartX.current && touchEndX.current) {
+            const distance = touchStartX.current - touchEndX.current;
+            const isLeftSwipe = distance > minSwipeDistance;
+            const isRightSwipe = distance < -minSwipeDistance;
+
+            if (isLeftSwipe && currentIndex < mediaList.length - 1) {
+                setCurrentIndex(prev => prev + 1);
+            } else if (isRightSwipe && currentIndex > 0) {
+                setCurrentIndex(prev => prev - 1);
+            }
+        }
+        touchStartX.current = null;
+        touchEndX.current = null;
     };
 
     const handleContextMenu = (e: React.MouseEvent) => {
@@ -179,7 +206,7 @@ export function MediaModal({ isOpen, onClose, mediaList, initialIndex, onReact, 
                         onDoubleClick={handleDoubleClick}
                         onTouchStart={handleTouchStart}
                         onTouchEnd={handleTouchEnd}
-                        onTouchMove={handleTouchEnd}
+                        onTouchMove={handleTouchMove}
                     >
                         <CustomVideoPlayer src={media.content} />
                     </div>
@@ -190,7 +217,7 @@ export function MediaModal({ isOpen, onClose, mediaList, initialIndex, onReact, 
                         onDoubleClick={handleDoubleClick}
                         onTouchStart={handleTouchStart}
                         onTouchEnd={handleTouchEnd}
-                        onTouchMove={handleTouchEnd}
+                        onTouchMove={handleTouchMove}
                     >
                         <img
                             src={media.content}

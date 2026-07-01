@@ -52,15 +52,24 @@ export default function CommentThread({
 
   return (
     <div>
-      {replies.map((reply) => (
-        <CommentItem
-          key={reply.id}
-          comment={reply}
-          postId={postId}
-          postAuthorId={postAuthorId}
-          depth={depth}
-        />
-      ))}
+      {(() => {
+        const seenIds = new Set<string>();
+        return replies
+          .filter((reply) => {
+            if (!reply.id || seenIds.has(reply.id)) return false;
+            seenIds.add(reply.id);
+            return true;
+          })
+          .map((reply) => (
+            <CommentItem
+              key={reply.id}
+              comment={reply}
+              postId={postId}
+              postAuthorId={postAuthorId}
+              depth={depth}
+            />
+          ));
+      })()}
       {hasNextPage && (
         <button
           onClick={() => fetchNextPage()}

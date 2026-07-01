@@ -8,7 +8,6 @@ import Typography from "@tiptap/extension-typography";
 import CharacterCount from "@tiptap/extension-character-count";
 import { useCallback, useEffect, useRef, useState } from "react";
 import HardBreak from "@tiptap/extension-hard-break";
-import Link from "@tiptap/extension-link";
 import TiptapImage from "@tiptap/extension-image";
 import { useSession } from "@/providers/SessionProvider";
 import UserAvatar from "@/components/UserAvatar";
@@ -53,7 +52,12 @@ export default function PostEditor() {
         blockquote: { HTMLAttributes: { class: "tiptap-blockquote" } },
         hardBreak: false,
         dropcursor: { color: "#3b82f6", width: 2 },
-        link: false,
+        link: {
+          HTMLAttributes: { class: "text-primary hover:underline" },
+          autolink: true,
+          openOnClick: false,
+          linkOnPaste: true,
+        },
       }),
       HardBreak.configure({
         HTMLAttributes: { class: "tiptap-hard-break" },
@@ -70,12 +74,6 @@ export default function PostEditor() {
         rightArrow: "→",
       }),
       CharacterCount.configure({ limit: 3000 }),
-      Link.configure({
-        HTMLAttributes: { class: "text-primary hover:underline" },
-        autolink: true,
-        openOnClick: false,
-        linkOnPaste: true,
-      }),
       TiptapImage.configure({
         allowBase64: true,
         HTMLAttributes: {
@@ -304,7 +302,7 @@ export default function PostEditor() {
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-6 backdrop-blur-sm transition-opacity duration-300">
           <div
-            className={`w-full max-w-3xl sm:rounded-xl bg-card shadow-2xl transition-all duration-300 flex flex-col h-[100dvh] max-h-[100dvh] ${isVisible
+            className={`w-full max-w-3xl sm:rounded-xl bg-card shadow-2xl transition-all duration-300 flex flex-col h-dvh max-h-dvh ${isVisible
               ? "translate-y-0 scale-100 opacity-100"
               : "translate-y-8 scale-95 opacity-0"
               }`}

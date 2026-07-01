@@ -15,7 +15,7 @@ export default function GifPreview({ url, onRemove }: GifPreviewProps) {
           alt="Selected GIF"
           width={500}
           height={220}
-          className="max-h-full h-full max-w-full object-contain rounded-md"
+          className="max-h-full h-full w-auto max-w-full object-contain rounded-md"
           unoptimized
         />
         <button
