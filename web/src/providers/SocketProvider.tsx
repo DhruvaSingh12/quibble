@@ -8,13 +8,13 @@ import { useSession } from "./SessionProvider";
 const SocketContext = createContext<Socket | null>(null);
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
-    const { user } = useSession();
+    const { user, session } = useSession();
     const [socket, setSocket] = useState<Socket | null>(null);
 
     useEffect(() => {
-        if (!user) return;
+        if (!user || !session) return;
 
-        const s = getSocket();
+        const s = getSocket(session.id);
         s.connect();
         setSocket(s);
 

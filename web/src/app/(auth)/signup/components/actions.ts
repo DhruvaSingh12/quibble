@@ -1,3 +1,5 @@
+"use server";
+
 import { SignUpValues } from "@/lib/validation";
 import kyInstance from "@/lib/ky";
 import { HTTPError } from "ky";

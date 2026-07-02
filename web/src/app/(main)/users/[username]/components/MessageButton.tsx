@@ -1,11 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import { Mail } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ky from "@/lib/ky";
 import { useToast } from "@/components/ui/use-toast";
+import { FaMessage } from "react-icons/fa6";
 
 interface MessageButtonProps {
     userId: string;
@@ -38,14 +38,13 @@ export default function MessageButton({ userId }: MessageButtonProps) {
     };
 
     return (
-        <Button 
-            variant="secondary" 
+        <Button
+            variant="ghost"
             onClick={handleMessageClick}
             disabled={loading}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 rounded-full"
         >
-            <Mail className="h-4 w-4" />
-            Message
+            <FaMessage className="h-6 w-6" />
         </Button>
     );
 }

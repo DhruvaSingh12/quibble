@@ -13,7 +13,6 @@ import Linkify from "@/components/Linkify";
 import EditProfileButton from "./components/EditProfileButton";
 import MessageButton from "./components/MessageButton";
 import FollowingCount from "@/components/follow/FollowingCount";
-import { Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/Tooltip";
 import { cookies } from "next/headers";
 
@@ -115,26 +114,20 @@ async function UserProfile({ user, loggedInUserId }: UserProfileProps) {
 
       {/* Header Row: Name & Button */}
       <div className="flex items-start justify-between">
-        <div className="flex flex-col">
-          <h1 className="text-2xl sm:text-3xl font-bold">{user.displayName}</h1>
-          <div className="text-muted-foreground">@{user.username}</div>
-        </div>
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex flex-col cursor-default w-fit">
+                <h1 className="text-2xl sm:text-3xl font-bold">{user.displayName}</h1>
+                <div className="text-muted-foreground">@{user.username}</div>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Joined {formatDate(user.createdAt, "do MMM yyyy")}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         <div className="shrink-0 flex items-center gap-2">
-          <TooltipProvider delayDuration={0}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  className="text-foreground hover:opacity-80 transition-colors cursor-pointer p-0 min-h-0 h-auto bg-transparent border-none"
-                >
-                  <Info className="h-7 w-7" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Joined {formatDate(user.createdAt, "do MMM yyyy")}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
           {user.id === loggedInUserId ? (
             <EditProfileButton user={user} />
           ) : (

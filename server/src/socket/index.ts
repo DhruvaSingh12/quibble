@@ -22,7 +22,12 @@ export const initSocket = (httpServer: HttpServer) => {
         if (!origin || origin.includes("localhost") || origin.includes("127.0.0.1") || origin.includes("192.168") || origin.includes("10.")) {
           callback(null, true);
         } else {
-          callback(null, process.env.FRONTEND_URL || "http://localhost:3000");
+          const frontendUrl = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/$/, "") : "http://localhost:3000";
+          if (origin === frontendUrl) {
+            callback(null, origin);
+          } else {
+            callback(null, frontendUrl);
+          }
         }
       },
       credentials: true,
@@ -33,9 +38,11 @@ export const initSocket = (httpServer: HttpServer) => {
   io.use(async (socket, next) => {
     try {
       const cookieHeader = socket.request.headers.cookie;
-      if (!cookieHeader) return next(new Error("Unauthorized"));
+      const token = socket.handshake.auth?.token;
+      
+      if (!cookieHeader && !token) return next(new Error("Unauthorized"));
 
-      const reqMock = { headers: { cookie: cookieHeader } };
+      const reqMock = { headers: { cookie: cookieHeader, authorization: token ? `Bearer ${token}` : undefined } };
       const { user } = await parseAuthCookies(reqMock as any);
 
       if (!user) return next(new Error("Unauthorized"));

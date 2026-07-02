@@ -37,8 +37,9 @@ export default function LoginForm() {
         const result = await login(values);
         if (result?.error) {
           setError(result.error);
+        } else {
+          window.location.href = "/";
         }
-        // If no error and no result (successful redirect), the redirect will happen automatically
       } catch {
         setError("Something went wrong. Please try again.");
       }

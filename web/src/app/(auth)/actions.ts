@@ -1,4 +1,8 @@
+"use server";
+
 import kyInstance from "@/lib/ky";
+import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 
 export async function logout() {
     try {
@@ -6,5 +10,7 @@ export async function logout() {
     } catch (e) {
         console.error(e);
     }
-    window.location.href = "/login";
+    
+    (await cookies()).delete("session");
+    redirect("/login");
 }

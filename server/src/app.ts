@@ -30,7 +30,12 @@ export function buildApp() {
         if (!origin || origin.includes("localhost") || origin.includes("127.0.0.1") || origin.includes("192.168") || origin.includes("10.")) {
           callback(null, true);
         } else {
-          callback(null, env.FRONTEND_URL);
+          const frontendUrl = env.FRONTEND_URL ? env.FRONTEND_URL.replace(/\/$/, "") : "";
+          if (origin === frontendUrl) {
+            callback(null, origin);
+          } else {
+            callback(null, frontendUrl);
+          }
         }
       },
       credentials: true,

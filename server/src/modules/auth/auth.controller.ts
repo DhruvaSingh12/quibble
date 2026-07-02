@@ -81,7 +81,7 @@ export const login = async (req: Request, res: Response) => {
 
   const session = await createSession(user.id);
   setSessionCookie(res, session.id, session.expiresAt);
-  res.json({ success: true, user: { id: user.id, username: user.username, displayName: user.displayName, avatarUrl: user.avatarUrl } });
+  res.json({ success: true, user: { id: user.id, username: user.username, displayName: user.displayName, avatarUrl: user.avatarUrl }, token: session.id });
 };
 
 export const verifyEmail = async (req: Request, res: Response) => {
@@ -108,7 +108,7 @@ export const verifyEmail = async (req: Request, res: Response) => {
 
   const session = await createSession(user.id);
   setSessionCookie(res, session.id, session.expiresAt);
-  res.json({ success: true });
+  res.json({ success: true, token: session.id });
 };
 
 export const resendOtp = async (req: Request, res: Response) => {

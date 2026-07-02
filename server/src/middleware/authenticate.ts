@@ -14,13 +14,22 @@ declare global {
 
 export const parseAuthCookies = async (req: Request) => {
   const cookies = req.headers.cookie ? parseCookie(req.headers.cookie) : {};
-  const sessionId = cookies.session;
+  let sessionId = cookies.session;
+  
+  if (!sessionId && req.headers.authorization?.startsWith("Bearer ")) {
+    sessionId = req.headers.authorization.split(" ")[1];
+  }
+
   if (!sessionId) return { session: null, user: null };
   return validateSession(sessionId);
 };
 
 export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
-  const sessionId = req.cookies.session;
+  let sessionId = req.cookies.session;
+  if (!sessionId && req.headers.authorization?.startsWith("Bearer ")) {
+    sessionId = req.headers.authorization.split(" ")[1];
+  }
+
   if (!sessionId) {
     return res.status(401).json({ error: "Unauthorized" });
   }
@@ -36,7 +45,10 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
 };
 
 export const optionalAuthenticate = async (req: Request, res: Response, next: NextFunction) => {
-  const sessionId = req.cookies.session;
+  let sessionId = req.cookies.session;
+  if (!sessionId && req.headers.authorization?.startsWith("Bearer ")) {
+    sessionId = req.headers.authorization.split(" ")[1];
+  }
   if (!sessionId) return next();
 
   const { session, user } = await validateSession(sessionId);
