@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Check, CheckCheck, Trash2 } from 'lucide-react';
+import { Play, Check, CheckCheck, Trash2, FileText, X, Reply } from 'lucide-react';
+import PdfPreviewCard from "../posts/common/PdfPreviewCard";
 import { FaFaceDizzy, FaFaceGrinWide, FaFaceGrinHearts, FaFaceGrinSquintTears, FaFaceKissWinkHeart, FaFaceSadCry, FaFaceSurprise, FaHeart, FaThumbsUp, FaFaceKiss } from 'react-icons/fa6';
 import { format, isSameDay, isToday, isYesterday } from "date-fns";
 import { CustomAudioPlayer } from "@/components/chat/MediaPlayers";
@@ -8,7 +9,7 @@ import BounceLoader from "@/components/BounceLoader";
 import { MediaModal } from "@/components/chat/MediaModal";
 
 interface ChatPayload {
-    type: "text" | "image" | "video" | "audio" | "gif";
+    type: "text" | "image" | "video" | "audio" | "gif" | "pdf";
     content: string;
 }
 
@@ -118,20 +119,42 @@ const ReactionBadge = ({
     );
 };
 
+const renderTextWithLinks = (text: string) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
+    return parts.map((part, i) => {
+        if (part.match(/^https?:\/\/[^\s]+$/)) {
+            return (
+                <a
+                    key={i}
+                    href={part}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline underline-offset-2 break-all font-medium"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    {part}
+                </a>
+            );
+        }
+        return part;
+    });
+};
+
 const ExpandableText = ({ content }: { content: string }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const limit = 400;
     const shouldTruncate = content.length > limit;
 
     if (!shouldTruncate) {
-        return <p className="whitespace-pre-wrap wrap-break-word leading-relaxed">{content}</p>;
+        return <p className="whitespace-pre-wrap wrap-break-word leading-relaxed">{renderTextWithLinks(content)}</p>;
     }
 
     const displayedText = isExpanded ? content : `${content.slice(0, limit)}...`;
 
     return (
         <div>
-            <p className="whitespace-pre-wrap wrap-break-word leading-relaxed">{displayedText}</p>
+            <p className="whitespace-pre-wrap wrap-break-word leading-relaxed">{renderTextWithLinks(displayedText)}</p>
             <button
                 onClick={(e) => {
                     e.stopPropagation();
@@ -213,6 +236,12 @@ export function ChatMessageList({
     const renderMessageContent = (payload: ChatPayload, messageId: string, compact = false) => {
         if (!payload) return null;
         switch (payload.type) {
+            case "pdf":
+                return (
+                    <div className={compact ? "w-full h-full aspect-square" : "w-[220px] sm:w-[260px] aspect-square"}>
+                        <PdfPreviewCard url={payload.content} className="w-full h-full rounded-xl shadow-sm border-none" />
+                    </div>
+                );
             case "image":
             case "gif":
                 return compact ? (
@@ -281,14 +310,16 @@ export function ChatMessageList({
 
         const payloadType = m.payload?.type;
         const isMedia = payloadType === "image" || payloadType === "gif" || payloadType === "video";
+        const isPdf = payloadType === "pdf";
 
-        if (isMedia) {
+        if (isMedia || isPdf) {
+            const groupType = isPdf ? "pdf_group" : "media_group";
             const mediaGroup = [m];
             while (i + 1 < chronMessages.length) {
                 const next = chronMessages[i + 1];
                 const nextPayloadType = next.payload?.type;
-                const nextIsMedia = nextPayloadType === "image" || nextPayloadType === "gif" || nextPayloadType === "video";
-                if (nextIsMedia && next.senderId === m.senderId) {
+                const nextIsSameType = isPdf ? nextPayloadType === "pdf" : (nextPayloadType === "image" || nextPayloadType === "gif" || nextPayloadType === "video");
+                if (nextIsSameType && next.senderId === m.senderId && !next.deletedAt) {
                     mediaGroup.push(next);
                     i++;
                 } else {
@@ -296,7 +327,7 @@ export function ChatMessageList({
                 }
             }
             if (mediaGroup.length > 1) {
-                groupedMessages.push({ type: "media_group", senderId: m.senderId, messages: mediaGroup });
+                groupedMessages.push({ type: groupType, senderId: m.senderId, messages: mediaGroup });
             } else {
                 groupedMessages.push({ type: "single", message: m });
             }
@@ -329,7 +360,7 @@ export function ChatMessageList({
                         const m = group.message;
                         const isMe = m.senderId === user?.id;
                         const isText = m.payload?.type === "text" || !m.payload;
-                        const isMedia = !isText && ["image", "gif", "video"].includes(m.payload?.type);
+                        const isMedia = !isText && ["image", "gif", "video", "pdf"].includes(m.payload?.type);
 
                         const isSelected = selectedMessageIds.has(m.id) || (m.localId && selectedMessageIds.has(m.localId));
                         const interactionId = m.id || m.localId;
@@ -379,14 +410,21 @@ export function ChatMessageList({
                                         onTouchEnd={handleTouchEnd}
                                         onTouchMove={handleTouchEnd}
                                     >
-                                        <div className="rounded-2xl w-fit max-w-[250px] sm:max-w-[300px] h-[250px] bg-muted/20 border border-border/10 shadow-sm p-1 relative">
+                                        <div className={`rounded-2xl w-fit max-w-[250px] sm:max-w-[300px] bg-muted/20 border border-border/10 shadow-sm p-1 relative ${m.payload?.type === "pdf" ? "" : "h-[250px]"}`}>
                                             {isSelected && <div className="absolute inset-0 bg-primary/20 z-20 pointer-events-none rounded-2xl"></div>}
-                                            <div className="relative w-full h-full overflow-hidden rounded-xl pointer-events-auto">
+                                            <div className="relative w-full h-full overflow-hidden rounded-xl pointer-events-auto flex flex-col">
                                                 {renderMessageContent(m.payload, m.id, false)}
-                                                <div className="absolute bottom-1 right-2 flex items-center gap-1 text-[10px] text-white bg-black/40 px-1.5 py-0.5 rounded-full backdrop-blur-sm pointer-events-none">
-                                                    <span>{format(new Date(m.createdAt || Date.now()), "h:mm a")}</span>
-                                                    {isMe && (m.readAt ? <CheckCheck className="w-[14px] h-[14px] ml-0.5" strokeWidth={1.5} /> : <Check className="w-[13px] h-[13px] ml-0.5" strokeWidth={1.5} />)}
-                                                </div>
+                                                {m.payload?.type === "pdf" ? (
+                                                    <div className="flex items-center justify-end gap-1 text-[10px] opacity-70 mt-1 mr-1 mb-0.5 pointer-events-none">
+                                                        <span>{format(new Date(m.createdAt || Date.now()), "h:mm a")}</span>
+                                                        {isMe && (m.readAt ? <CheckCheck className="w-[14px] h-[14px] ml-0.5" strokeWidth={1.5} /> : <Check className="w-[13px] h-[13px] ml-0.5" strokeWidth={1.5} />)}
+                                                    </div>
+                                                ) : (
+                                                    <div className="absolute bottom-1 right-2 flex items-center gap-1 text-[10px] text-white bg-black/40 px-1.5 py-0.5 rounded-full backdrop-blur-sm pointer-events-none">
+                                                        <span>{format(new Date(m.createdAt || Date.now()), "h:mm a")}</span>
+                                                        {isMe && (m.readAt ? <CheckCheck className="w-[14px] h-[14px] ml-0.5" strokeWidth={1.5} /> : <Check className="w-[13px] h-[13px] ml-0.5" strokeWidth={1.5} />)}
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                         <ReactionBadge
@@ -447,10 +485,11 @@ export function ChatMessageList({
                                 </div>
                             </div>
                         );
-                    } else {
+                    } else if (group.type === "media_group" || group.type === "pdf_group") {
                         const isMe = group.senderId === user?.id;
                         const groupReactions = group.messages.flatMap((m: any) => m.reactions || []);
                         const hasGroupReactions = groupReactions.length > 0;
+                        const isPdfGroup = group.type === "pdf_group";
                         return (
                             <div key={`group-${groupIdx}`} className="flex flex-col gap-1 relative z-10 w-full group/group">
                                 <div className={`flex w-full ${isMe ? "justify-end" : "justify-start"} items-center ${hasGroupReactions ? "pb-3" : ""}`}>
@@ -460,14 +499,14 @@ export function ChatMessageList({
                                         </div>
                                     )}
                                     <div className={`max-w-[85%] lg:max-w-[70%] relative ${isMe ? "items-end" : "items-start"} opacity-100 transition-opacity`}>
-                                        <div className="columns-2 gap-1 rounded-2xl w-[250px] sm:w-[300px] bg-muted/20 border border-border/10 shadow-sm p-1">
+                                        <div className={`rounded-2xl bg-muted/20 border border-border/10 shadow-sm p-1 ${isPdfGroup ? "grid grid-cols-2 gap-1 w-[250px] sm:w-[300px]" : "columns-2 gap-1 w-[250px] sm:w-[300px]"}`}>
                                             {group.messages.map((m: any) => {
                                                 const interactionId = m.id || m.localId;
                                                 const isSelected = selectedMessageIds.has(interactionId);
                                                 return (
                                                     <div
                                                         key={m.localId || m.id}
-                                                        className={`relative mb-2 overflow-visible group/item cursor-pointer rounded-xl break-inside-avoid pointer-events-auto`}
+                                                        className={`relative overflow-visible group/item cursor-pointer rounded-xl break-inside-avoid pointer-events-auto flex w-full h-full ${!isPdfGroup ? "mb-2" : ""}`}
                                                         onClick={(e) => handleMessageInteraction(e, interactionId)}
                                                         onContextMenu={(e) => handleMessageInteraction(e, interactionId, true)}
                                                         onTouchStart={() => handleTouchStart(interactionId)}
@@ -487,12 +526,19 @@ export function ChatMessageList({
                                                                 <span className="text-xs text-center italic">Deleted</span>
                                                             </div>
                                                         ) : (
-                                                            <div className="rounded-xl overflow-hidden relative">
+                                                            <div className="rounded-xl overflow-hidden relative w-full h-full flex flex-col">
                                                                 {renderMessageContent(m.payload, m.id, true)}
-                                                                <div className="absolute bottom-1 right-2 flex items-center gap-1 text-[10px] text-white bg-black/40 px-1.5 py-0.5 rounded-full backdrop-blur-sm pointer-events-none">
-                                                                    <span>{format(new Date(m.createdAt || Date.now()), "h:mm a")}</span>
-                                                                    {isMe && (m.readAt ? <CheckCheck className="w-[14px] h-[14px] ml-0.5" strokeWidth={1.5} /> : <Check className="w-[13px] h-[13px] ml-0.5" strokeWidth={1.5} />)}
-                                                                </div>
+                                                                {isPdfGroup ? (
+                                                                    <div className="flex items-center justify-end gap-1 text-[10px] opacity-70 mt-1 mr-1 mb-0.5 pointer-events-none">
+                                                                        <span>{format(new Date(m.createdAt || Date.now()), "h:mm a")}</span>
+                                                                        {isMe && (m.readAt ? <CheckCheck className="w-[14px] h-[14px] ml-0.5" strokeWidth={1.5} /> : <Check className="w-[13px] h-[13px] ml-0.5" strokeWidth={1.5} />)}
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="absolute bottom-1 right-2 flex items-center gap-1 text-[10px] text-white bg-black/40 px-1.5 py-0.5 rounded-full backdrop-blur-sm pointer-events-none">
+                                                                        <span>{format(new Date(m.createdAt || Date.now()), "h:mm a")}</span>
+                                                                        {isMe && (m.readAt ? <CheckCheck className="w-[14px] h-[14px] ml-0.5" strokeWidth={1.5} /> : <Check className="w-[13px] h-[13px] ml-0.5" strokeWidth={1.5} />)}
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         )}
                                                     </div>

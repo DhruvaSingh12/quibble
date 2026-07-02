@@ -168,7 +168,7 @@ export default function PostEditor() {
       .filter((a) => a.uploadedUrl)
       .map((a) => ({
         url: a.uploadedUrl as string,
-        type: a.type === "image" ? "IMAGE" : "VIDEO" as "IMAGE" | "VIDEO",
+        type: a.type === "image" ? "IMAGE" : a.type === "pdf" ? "PDF" : "VIDEO" as "IMAGE" | "VIDEO" | "PDF",
         mimeType: a.file.type,
       }));
 
@@ -241,7 +241,7 @@ export default function PostEditor() {
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/*,video/mp4,video/webm,video/quicktime,.heic,.heif"
+        accept="image/*, video/*, application/pdf"
         multiple
         className="hidden"
         onChange={handleFilesChosen}

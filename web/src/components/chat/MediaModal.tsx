@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { X, ChevronLeft, ChevronRight, Check, CheckCheck, Trash2, Smile } from 'lucide-react';
 import { format } from "date-fns";
 import { CustomVideoPlayer } from './MediaPlayers';
+import PdfPreviewCard from '../posts/common/PdfPreviewCard';
 import { FaFaceDizzy, FaFaceGrinWide, FaFaceGrinHearts, FaFaceGrinSquintTears, FaFaceKissWinkHeart, FaFaceSadCry, FaFaceSurprise, FaHeart, FaThumbsUp, FaFaceKiss, FaG, FaI, FaF } from 'react-icons/fa6';
 
 const emojiMap: Record<string, any> = {
@@ -22,7 +23,7 @@ interface MediaModalProps {
     onClose: () => void;
     mediaList: {
         id?: string;
-        type: "image" | "gif" | "video";
+        type: "image" | "gif" | "video" | "pdf";
         content: string;
         createdAt?: string;
         readAt?: string;
@@ -209,6 +210,17 @@ export function MediaModal({ isOpen, onClose, mediaList, initialIndex, onReact, 
                         onTouchMove={handleTouchMove}
                     >
                         <CustomVideoPlayer src={media.content} />
+                    </div>
+                ) : media.type === "pdf" ? (
+                    <div
+                        className="relative h-full w-full flex items-center justify-center overflow-hidden cursor-pointer p-4 md:p-10"
+                        onContextMenu={handleContextMenu}
+                        onDoubleClick={handleDoubleClick}
+                        onTouchStart={handleTouchStart}
+                        onTouchEnd={handleTouchEnd}
+                        onTouchMove={handleTouchMove}
+                    >
+                        <PdfPreviewCard url={media.content} className="max-w-[800px] w-full shadow-md" />
                     </div>
                 ) : (
                     <div

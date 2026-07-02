@@ -89,6 +89,7 @@ model Media {
 enum MediaType {
   IMAGE
   VIDEO
+  PDF
 }
 
 model EmailVerification {

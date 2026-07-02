@@ -3,6 +3,7 @@
 import type { Media } from "@prisma/client";
 import { Play } from "lucide-react";
 import { useRef, useState, useCallback } from "react";
+import PdfPreviewCard from "./PdfPreviewCard";
 
 interface MediaGridProps {
   attachments: Media[];
@@ -18,7 +19,9 @@ export default function MediaGrid({ attachments }: MediaGridProps) {
           key={media.id}
           className="relative flex-none h-[200px] md:h-[280px] rounded-lg overflow-hidden bg-muted/30 snap-start border"
         >
-          {media.type === "VIDEO" ? (
+          {media.type === "PDF" || media.mimeType === "application/pdf" ? (
+            <PdfPreviewCard url={media.url} className="h-[200px] md:h-[280px] rounded-lg border-none" />
+          ) : media.type === "VIDEO" ? (
             <VideoPlayer media={media} />
           ) : (
             // eslint-disable-next-line @next/next/no-img-element

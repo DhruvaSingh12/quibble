@@ -16,50 +16,6 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "**.ufs.sh",
-      },
-      {
-        protocol: "https",
-        hostname: "i.ytimg.com",
-      },
-      {
-        protocol: "https",
-        hostname: "**.youtube.com",
-      },
-      {
-        protocol: "https",
-        hostname: "**.vimeo.com",
-      },
-      {
-        protocol: "https",
-        hostname: "**.giphy.com",
-      },
-      {
-        protocol: "https",
-        hostname: "**.spotify.com",
-      },
-      {
-        protocol: "https",
-        hostname: "i.scdn.co",
-      },
-      {
-        protocol: "https",
-        hostname: "**.twimg.com",
-      },
-      {
-        protocol: "https",
-        hostname: "**.googleusercontent.com",
-      },
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-      },
-      {
-        protocol: "https",
-        hostname: "**.cdninstagram.com",
-      },
-      {
-        protocol: "https",
-        hostname: "**",
       }
     ],
   },

@@ -2,7 +2,6 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/Skeleton";
-import Image from "next/image";
 import kyInstance from "@/lib/ky";
 import Link from "next/link";
 
@@ -31,7 +30,7 @@ export default function LinkPreview({ url }: LinkPreviewProps) {
             if (data.success && data.metadata) {
                 return data.metadata;
             }
-            return null;
+            throw new Error("Failed to fetch link preview metadata");
         },
         staleTime: 1000 * 60 * 60, // 1 hour cache
         gcTime: 1000 * 60 * 60 * 2, // 2 hour garbage collection
@@ -68,13 +67,10 @@ export default function LinkPreview({ url }: LinkPreviewProps) {
             <div className="flex gap-3 p-3">
                 {previewData.image && previewData.image.startsWith('http') && (
                     <div className="relative h-[80px] w-[80px] shrink-0 overflow-hidden rounded-lg bg-accent/10">
-                        <Image
+                        <img
                             src={previewData.image}
                             alt={previewData.title || "Link preview image"}
-                            fill
-                            sizes="80px"
-                            unoptimized
-                            className="object-cover"
+                            className="h-full w-full object-cover"
                             onError={(e) => {
                                 const target = e.target as HTMLImageElement;
                                 target.style.display = 'none';

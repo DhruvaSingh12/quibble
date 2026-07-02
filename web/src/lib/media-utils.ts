@@ -226,7 +226,7 @@ export function generateVideoThumbnail(file: File): Promise<string> {
 // Public: process a file (image or video)
 export interface ProcessedFile {
   file: File;
-  type: "image" | "video";
+  type: "image" | "video" | "pdf";
   thumbnail?: string; // data URL for video thumbnails
   duration?: number; // video duration in seconds
 }
@@ -258,5 +258,13 @@ export async function processFile(file: File): Promise<ProcessedFile> {
     };
   }
 
-  throw new Error("Unsupported file type. Please upload an image or video.");
+  if (file.type === "application/pdf") {
+    // PDF max size check (16MB)
+    if (file.size > 16 * 1024 * 1024) {
+      throw new Error("PDF is too large. Maximum size is 16MB.");
+    }
+    return { file, type: "pdf" };
+  }
+
+  throw new Error("Unsupported file type. Please upload an image, video, or PDF.");
 }

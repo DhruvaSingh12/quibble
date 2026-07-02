@@ -172,19 +172,30 @@ export default function RichTextRenderer({
     useEffect(() => {
         if (!editor) return;
 
-        // Extract GIF/image URLs from content
+        // 1. Reset editor to the original raw content so Tiptap can parse and autolink everything.
+        editor.commands.setContent(content);
+        
+        // 2. Read the fully parsed HTML
+        const parsedHtml = editor.getHTML();
         const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = content;
+        tempDiv.innerHTML = parsedHtml;
+        
+        // 3. Extract GIFs
         const imgElements = tempDiv.getElementsByTagName('img');
         const imageUrls = Array.from(imgElements).map(img => img.src);
         setGifUrls(imageUrls);
 
-        // Process links to replace text with quibble.<hash>
+        // 4. Extract valid links for previews
         const anchorElements = tempDiv.getElementsByTagName('a');
-        Array.from(anchorElements).forEach(a => {
-            // Skip mentions and hashtags
-            if (a.hasAttribute('data-mention') || a.hasAttribute('data-tag')) return;
+        const extractedLinks = Array.from(anchorElements)
+            .filter(a => !a.hasAttribute('data-mention') && !a.hasAttribute('data-tag'))
+            .map(a => a.getAttribute('href'))
+            .filter((href): href is string => !!href)
+            .slice(0, 3); // Limit to 3 previews maximum
 
+        // 5. Transform link text to quibble.xxxxxxx
+        Array.from(anchorElements).forEach(a => {
+            if (a.hasAttribute('data-mention') || a.hasAttribute('data-tag')) return;
             const href = a.getAttribute('href');
             if (href) {
                 let hash = 0;
@@ -197,42 +208,27 @@ export default function RichTextRenderer({
             }
         });
 
-        // Remove images from the HTML content for text display
+        // 6. Remove images from HTML to prevent duplicate rendering
         const contentWithoutImages = tempDiv.innerHTML.replace(/<img[^>]*>/g, '');
-
-        // Always set the content without images
         editor.commands.setContent(contentWithoutImages);
 
-        // Check if content needs truncation by text length
+        // 7. Handle truncation
         const textContent = editor.getText();
         const shouldTruncate = textContent.length > maxLength;
         setNeedsTruncation(shouldTruncate);
 
         if (shouldTruncate && !isExpanded) {
-            // Create truncated version
             const truncatedText = textContent.slice(0, maxLength);
             const lastSpaceIndex = truncatedText.lastIndexOf(" ");
             const finalText = lastSpaceIndex > -1
                 ? truncatedText.slice(0, lastSpaceIndex) + "..."
                 : truncatedText + "...";
-
-            // Set truncated content
             editor.commands.setContent(`<p>${finalText}</p>`);
         }
 
-        // Extract links from content when expanded or not truncated
+        // 8. Set link previews conditionally
         if (isExpanded || !shouldTruncate) {
-            const doc = editor.getHTML();
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = doc;
-
-            const linkElements = tempDiv.getElementsByTagName('a');
-            const newLinks = Array.from(linkElements)
-                .map(a => a.getAttribute('href'))
-                .filter((href): href is string => !!href)
-                .slice(0, 3); // Limit to 3 previews maximum
-
-            setLinks(newLinks);
+            setLinks(extractedLinks);
         } else {
             setLinks([]);
         }

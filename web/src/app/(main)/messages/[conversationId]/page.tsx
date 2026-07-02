@@ -14,7 +14,7 @@ import { ChatSelectionActionBar } from "@/components/chat/ChatSelectionActionBar
 import { CameraModal } from "@/components/chat/CameraModal";
 
 interface ChatPayload {
-    type: "text" | "image" | "video" | "audio" | "gif";
+    type: "text" | "image" | "video" | "audio" | "gif" | "pdf";
     content: string;
 }
 
@@ -451,6 +451,7 @@ export default function ChatRoomPage(props: { params: Promise<{ conversationId: 
                     if (file.type.startsWith("image/")) type = "image";
                     else if (file.type.startsWith("video/")) type = "video";
                     else if (file.type.startsWith("audio/")) type = "audio";
+                    else if (file.type === "application/pdf") type = "pdf";
                     
                     const finalUrl = uploaded.ufsUrl ?? uploaded.url;
                     await handleSendPayload({ type, content: finalUrl });

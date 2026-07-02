@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
-import { Paperclip, X, ImageIcon, Music, Loader2, Camera } from 'lucide-react';
+import { Paperclip, X, ImageIcon, Music, Loader2, Camera, FileText } from 'lucide-react';
 import GifPicker from "@/components/posts/common/GifPicker";
 import EmojiPicker, { Theme } from "emoji-picker-react";
 import { useTheme } from "next-themes";
@@ -89,11 +89,15 @@ export function ChatInputArea({
                                     <Music className="h-5 w-5 opacity-80" />
                                     Audio File
                                 </Button>
+                                <Button variant="ghost" className="w-full justify-start gap-3 h-12 font-medium" onClick={() => fileInputRef.current?.click()}>
+                                    <FileText className="h-5 w-5 opacity-80" />
+                                    Document (PDF)
+                                </Button>
                                 <input
                                     type="file"
                                     className="hidden"
                                     ref={fileInputRef}
-                                    accept="image/*,video/*,audio/*"
+                                    accept="image/*,video/*,audio/*,application/pdf"
                                     onChange={handleFileUpload}
                                     multiple
                                 />

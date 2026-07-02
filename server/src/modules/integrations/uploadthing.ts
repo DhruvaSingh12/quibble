@@ -20,6 +20,7 @@ export const uploadRouter = {
     image: { maxFileSize: "4MB", maxFileCount: 5 },
     video: { maxFileSize: "64MB", maxFileCount: 5 },
     audio: { maxFileSize: "16MB", maxFileCount: 5 },
+    pdf: { maxFileSize: "16MB", maxFileCount: 1 },
   })
     .middleware(async ({ req }) => {
       const expressReq = req as unknown as Request;

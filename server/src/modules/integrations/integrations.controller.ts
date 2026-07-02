@@ -26,9 +26,16 @@ export const getLinkPreview = async (req: Request, res: Response) => {
     const cacheKey = `link-preview:${url}`;
     let cachedData = null;
     try {
-      cachedData = await redis.get(cacheKey);
+      if (redis.status === 'ready') {
+        console.log(`[LinkPreview] Checking Redis for ${url}`);
+        const redisStart = Date.now();
+        cachedData = await redis.get(cacheKey);
+        console.log(`[LinkPreview] Redis returned in ${Date.now() - redisStart}ms`);
+      } else {
+        console.log(`[LinkPreview] Redis not ready, skipping cache.`);
+      }
     } catch (redisError) {
-      // Ignore Redis connection errors so preview can still fetch
+      console.log(`[LinkPreview] Redis error:`, redisError);
     }
 
     if (cachedData) {
@@ -38,17 +45,28 @@ export const getLinkPreview = async (req: Request, res: Response) => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000);
 
+    console.log(`[LinkPreview] Fetching ${url}`);
+    const fetchStart = Date.now();
     const response = await fetch(url, {
-      headers: { "User-Agent": "Quibble Link Preview Bot/1.0" },
+      headers: { 
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9"
+      },
       signal: controller.signal as any,
     });
-    clearTimeout(timeout);
+    console.log(`[LinkPreview] Fetch headers received in ${Date.now() - fetchStart}ms. Status: ${response.status}`);
 
     if (!response.ok) {
+      clearTimeout(timeout);
       throw new Error(`Failed to fetch URL: ${response.statusText}`);
     }
 
+    const textStart = Date.now();
     const html = await response.text();
+    console.log(`[LinkPreview] Body received in ${Date.now() - textStart}ms. Length: ${html.length}`);
+    clearTimeout(timeout);
+
     const headHtml = html.slice(0, 50000);
     const root = parse(headHtml);
 
@@ -83,13 +101,16 @@ export const getLinkPreview = async (req: Request, res: Response) => {
 
     // Cache the result for 24 hours
     try {
-      await redis.setex(cacheKey, 86400, JSON.stringify(result));
+      if (redis.status === 'ready') {
+        await redis.setex(cacheKey, 86400, JSON.stringify(result));
+      }
     } catch (redisError) {
       // Ignore Redis connection errors
     }
 
     res.json(result);
   } catch (error) {
+    console.error("Link preview fetch error:", error);
     res.status(200).json({ success: false, error: "Failed to fetch link preview" });
   }
 };

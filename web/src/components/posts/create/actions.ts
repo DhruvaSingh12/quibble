@@ -1,7 +1,7 @@
 import kyInstance from "@/lib/ky";
 import { PostData } from "@/lib/types";
 
-export async function submitPost(input: {content: string, attachments?: {url: string, type: "IMAGE" | "VIDEO", mimeType?: string}[]}) {
+export async function submitPost(input: {content: string, attachments?: {url: string, type: "IMAGE" | "VIDEO" | "PDF", mimeType?: string}[]}) {
     try {
         const response = await kyInstance.post("posts", { json: input }).json<PostData>();
         return response;

@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { FaMagnifyingGlass, FaX } from "react-icons/fa6";
 import kyInstance from "@/lib/ky";
-import Image from "next/image";
 
 interface GifPickerProps {
   onSelect: (gifUrl: string) => void;
@@ -52,7 +51,7 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
       }
 
       const response = await kyInstance
-        .get("tenor", { searchParams })
+        .get("integrations/tenor", { searchParams })
         .json<TenorResponse>();
 
       if (pos) {
@@ -112,13 +111,14 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
               className="relative block w-full overflow-hidden rounded-lg bg-muted transition-opacity hover:opacity-80 break-inside-avoid mb-2"
               onClick={() => onSelect(gif.media_formats.gif.url)}
             >
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={gif.media_formats.tinygif.url}
                 alt={gif.content_description}
                 width={gif.media_formats.tinygif.dims[0]}
                 height={gif.media_formats.tinygif.dims[1]}
                 className="w-full h-auto"
-                unoptimized
+                loading="lazy"
               />
             </button>
           ))}

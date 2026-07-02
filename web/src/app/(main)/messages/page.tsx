@@ -37,13 +37,15 @@ function formatLastMessageText(decryptedText: string, deletedAt?: string | null)
         if (payload && typeof payload === "object" && "type" in payload && "content" in payload) {
             switch (payload.type) {
                 case "image":
-                    return "📷 Photo";
+                    return "Shared an image";
                 case "video":
-                    return "🎥 Video";
+                    return "Shared a video";
                 case "audio":
-                    return "🎵 Audio";
+                    return "Shared an audio";
+                case "pdf":
+                    return "Shared a pdf";
                 case "gif":
-                    return "GIF";
+                    return "Shared a gif";
                 case "text":
                 default:
                     return payload.content || "";
@@ -94,28 +96,14 @@ export default function MessagesInboxPage() {
         if (!socket) return;
 
         const handleUpdate = async (data: any) => {
-            // Find existing conversation to get keyHex
-            setConversations(prev => {
-                const idx = prev.findIndex(c => c.conversationId === data.conversationId);
-                if (idx > -1) {
-                    const convo = { ...prev[idx] };
-                    
-                    // We must do async decryption outside state updater if we needed fresh prev, 
-                    // but we can just decrypt and dispatch another update.
-                    // Actually, let's decrypt first, then update state.
-                    return prev; 
-                }
-                return prev;
-            });
-
             // find convo from current state
             setConversations(prev => {
                 const idx = prev.findIndex(c => c.conversationId === data.conversationId);
                 if (idx === -1) return prev;
-                
+
                 const convo = { ...prev[idx] };
                 const keyHex = convo.keyHex;
-                
+
                 // Decrypt asynchronously
                 if (data.lastMessage) {
                     decryptMessage(data.lastMessage.text, keyHex).then(decryptedText => {
@@ -123,9 +111,9 @@ export default function MessagesInboxPage() {
                             const newIdx = currentPrev.findIndex(c => c.conversationId === data.conversationId);
                             if (newIdx === -1) return currentPrev;
                             const newConvo = { ...currentPrev[newIdx] };
-                            newConvo.lastMessage = { 
-                                ...data.lastMessage, 
-                                text: formatLastMessageText(decryptedText, data.lastMessage.deletedAt) 
+                            newConvo.lastMessage = {
+                                ...data.lastMessage,
+                                text: formatLastMessageText(decryptedText, data.lastMessage.deletedAt)
                             };
                             newConvo.unreadCount += 1;
                             const newArray = [...currentPrev];
@@ -136,7 +124,7 @@ export default function MessagesInboxPage() {
                                 return bt.localeCompare(at);
                             });
                         });
-                    }).catch(() => {});
+                    }).catch(() => { });
                 } else {
                     // Handled if lastMessage becomes null (e.g. all messages deleted)
                     setConversations(currentPrev => {
@@ -149,7 +137,7 @@ export default function MessagesInboxPage() {
                         return newArray;
                     });
                 }
-                
+
                 return prev;
             });
         };

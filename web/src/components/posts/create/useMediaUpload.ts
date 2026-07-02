@@ -7,7 +7,7 @@ export interface Attachment {
   file: File;
   uploadedUrl?: string;
   isUploading: boolean;
-  type: "image" | "video";
+  type: "image" | "video" | "pdf";
   thumbnail?: string; // data URL for video thumbnails
   duration?: number; // video duration in seconds
   previewUrl: string; // object URL for image previews
@@ -50,6 +50,26 @@ export default function useMediaUpload() {
       const newVideos = files.filter((f) =>
         f.type.startsWith("video/"),
       ).length;
+      const newPdfs = files.filter((f) => f.type === "application/pdf").length;
+
+      // Check PDF exclusivity rule
+      const hasExistingPdf = attachments.some(a => a.type === "pdf");
+      if (newPdfs > 0 && (attachments.length > 0 || files.length > 1)) {
+        toast({
+          title: "PDF must be shared alone",
+          description: "If you are sharing a PDF, it must be the only attachment.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (hasExistingPdf && files.length > 0) {
+        toast({
+          title: "Cannot add more files",
+          description: "A PDF is already attached. It must be shared alone.",
+          variant: "destructive",
+        });
+        return;
+      }
 
       if (attachments.length + files.length > MAX_TOTAL_ATTACHMENTS) {
         toast({
@@ -112,7 +132,7 @@ export default function useMediaUpload() {
         thumbnail: p.thumbnail,
         duration: p.duration,
         previewUrl:
-          p.type === "image"
+          p.type === "image" || p.type === "pdf"
             ? URL.createObjectURL(p.file)
             : p.thumbnail || "",
       }));

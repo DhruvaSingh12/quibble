@@ -1,5 +1,6 @@
 import { Attachment } from "./useMediaUpload";
 import { Film, Loader2, X, Plus } from "lucide-react";
+import PdfPreviewCard from "../common/PdfPreviewCard";
 
 interface MediaPreviewProps {
   attachments: Attachment[];
@@ -33,7 +34,14 @@ export default function MediaPreview({
             key={attachment.file.name}
             className="group relative w-full h-full overflow-hidden rounded-lg border bg-muted"
           >
-            {attachment.type === "image" ? (
+            {attachment.type === "pdf" ? (
+              <PdfPreviewCard
+                url={attachment.previewUrl}
+                fileName={attachment.file.name}
+                className="h-full rounded-none border-none"
+                hideDownload={true}
+              />
+            ) : attachment.type === "image" ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={attachment.previewUrl}
@@ -83,8 +91,8 @@ export default function MediaPreview({
           </div>
         ))}
 
-        {/* Add more button as grid item */}
-        {attachments.length < 5 && (
+        {/* Add more button as grid item — hidden if a PDF is attached (PDFs must be alone) */}
+        {attachments.length < 5 && !attachments.some(a => a.type === "pdf") && (
           <button
             onClick={onAddMore}
             disabled={isUploading || isProcessing}

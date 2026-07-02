@@ -1,10 +1,10 @@
-﻿import { z } from "zod";
+import { z } from "zod";
 
 export const createPostSchema = z.object({
   content: z.string(),
   attachments: z.array(z.object({
     url: z.string().url(),
-    type: z.enum(["IMAGE", "VIDEO"]),
+    type: z.enum(["IMAGE", "VIDEO", "PDF"]),
     mimeType: z.string().optional()
   })).max(5, "You can only attach up to 5 files.").optional(),
 }).refine(

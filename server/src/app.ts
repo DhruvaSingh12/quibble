@@ -58,7 +58,7 @@ export function buildApp() {
   app.use("/api/v1/posts", postsRouter);
   app.use("/api/v1", socialRouter);
   app.use("/api/v1/chat", chatRouter);
-  app.use("/api/v1", integrationsRouter);
+  app.use("/api/v1/integrations", integrationsRouter);
   app.use("/api/uploadthing", createRouteHandler({ router: uploadRouter }));
   
   // API Routes will be mounted here
