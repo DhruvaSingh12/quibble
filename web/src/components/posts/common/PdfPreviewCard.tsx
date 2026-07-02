@@ -10,6 +10,7 @@ interface PdfPreviewCardProps {
   url: string;
   className?: string;
   hideDownload?: boolean;
+  fileName?: string;
 }
 
 export default function PdfPreviewCard({ url, className, hideDownload = false }: PdfPreviewCardProps) {
