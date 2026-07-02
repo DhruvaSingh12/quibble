@@ -12,7 +12,7 @@ interface SinglePostProps {
 export default function SinglePost({ post: initialPost }: SinglePostProps) {
   const { data: post } = useQuery({
     queryKey: ["post-data", initialPost.id],
-    queryFn: () => kyInstance.get(`/api/posts/${initialPost.id}`).json<PostData>(),
+    queryFn: () => kyInstance.get(`posts/${initialPost.id}`).json<PostData>(),
     initialData: initialPost,
   });
 

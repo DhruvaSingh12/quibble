@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import ky from "ky";
+import ky from "@/lib/ky";
 import Link from "next/link";
 import UserAvatar from "@/components/UserAvatar";
 import { formatDistanceToNow } from "date-fns";
@@ -63,7 +63,7 @@ export default function MessagesInboxPage() {
     useEffect(() => {
         const fetchConversations = async () => {
             try {
-                const url = `/api/chat/conversations`;
+                const url = `chat/conversations`;
                 const res = await ky.get(url).json<{ conversations: Conversation[] }>();
 
                 // Decrypt last messages

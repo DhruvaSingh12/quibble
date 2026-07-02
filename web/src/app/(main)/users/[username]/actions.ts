@@ -1,15 +1,15 @@
+import kyInstance from "@/lib/ky";
 import { UpdateUserProfileValues } from "@/lib/validation";
+import { UserData } from "@/lib/types";
 
 export async function updateUserProfile(values: UpdateUserProfileValues) {
-    const response = await fetch("/api/users/me", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values)
-    });
-
-    if (!response.ok) {
+    try {
+        const response = await kyInstance.patch("users/me", {
+            json: values
+        }).json<UserData>();
+        return response;
+    } catch (error) {
+        console.error("Failed to update profile:", error);
         throw new Error("Failed to update profile");
     }
-
-    return response.json();
 }

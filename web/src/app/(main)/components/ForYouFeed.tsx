@@ -11,7 +11,7 @@ import { SearchX } from "lucide-react";
 export default function ForYouFeed() {
   const { data, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage, status } = useInfiniteQuery({
     queryKey: ["post-feed", "for-you"],
-    queryFn: ({ pageParam }) => kyInstance.get("/api/posts/for-you", pageParam ? { searchParams: { cursor: pageParam } } : {}).json<PostsPage>(),
+    queryFn: ({ pageParam }) => kyInstance.get("posts/for-you", pageParam ? { searchParams: { cursor: pageParam } } : {}).json<PostsPage>(),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor
   });

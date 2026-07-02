@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, use } from "react";
-import ky from "ky";
+import ky from "@/lib/ky";
 import { encryptMessage, decryptMessage } from "@/lib/chatCrypto";
 import { useSocket } from "@/providers/SocketProvider";
 import { useSession } from "@/providers/SessionProvider";
@@ -67,7 +67,7 @@ export default function ChatRoomPage(props: { params: Promise<{ conversationId: 
     useEffect(() => {
         const fetchInfo = async () => {
             try {
-                const url = `/api/chat/conversations`;
+                const url = `chat/conversations`;
                 const res = await ky.get(url).json<{ conversations: any[] }>();
 
                 const convo = res.conversations.find(c => c.conversationId === conversationId);
@@ -90,7 +90,7 @@ export default function ChatRoomPage(props: { params: Promise<{ conversationId: 
         const fetchMessages = async () => {
             fetchingInitial.current = true;
             try {
-                const url = `/api/chat/${conversationId}/messages?limit=40`;
+                const url = `chat/${conversationId}/messages?limit=40`;
                 const res = await ky.get(url).json<{ messages: any[], nextCursor: string | null, hasMore: boolean }>();
 
                 const decrypted = await Promise.all(res.messages.map(async (m) => {
@@ -120,7 +120,7 @@ export default function ChatRoomPage(props: { params: Promise<{ conversationId: 
         if (!keyHex || !hasMore || isLoadingMore || !nextCursor) return;
         setIsLoadingMore(true);
         try {
-            const url = `/api/chat/${conversationId}/messages?limit=40&cursor=${nextCursor}`;
+            const url = `chat/${conversationId}/messages?limit=40&cursor=${nextCursor}`;
             const res = await ky.get(url).json<{ messages: any[], nextCursor: string | null, hasMore: boolean }>();
 
             const decrypted = await Promise.all(res.messages.map(async (m) => {

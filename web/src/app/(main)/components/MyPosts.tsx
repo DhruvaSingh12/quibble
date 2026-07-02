@@ -24,7 +24,7 @@ export default function ByYouFeed() {
     queryFn: ({ pageParam }) =>
       kyInstance
         .get(
-          `/api/posts/user/${user.id}`,
+          `posts/user/${user.id}`,
           pageParam ? { searchParams: { cursor: pageParam } } : {},
         )
         .json<PostsPage>(),

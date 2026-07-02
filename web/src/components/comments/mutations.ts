@@ -1,5 +1,6 @@
 "use client";
 
+import kyInstance from "@/lib/ky";
 import { CommentData, CommentsPage } from "@/lib/types";
 import { useMutation, useQueryClient, InfiniteData } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
@@ -18,13 +19,10 @@ export function useCreateCommentMutation(postId: string) {
       parentId?: string;
       gifUrl?: string;
     }) => {
-      const res = await fetch(`/api/posts/${postId}/comments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content, parentId, gifUrl }),
-      });
-      if (!res.ok) throw new Error("Failed to create comment");
-      return res.json() as Promise<CommentData>;
+      const newComment = await kyInstance.post(`posts/${postId}/comments`, {
+        json: { content, parentId, gifUrl }
+      }).json<CommentData>();
+      return newComment;
     },
     onSuccess: (newComment) => {
       if (!newComment.parentId) {
@@ -77,12 +75,7 @@ export function useDeleteCommentMutation(postId: string) {
 
   return useMutation({
     mutationFn: async (commentId: string) => {
-      const res = await fetch(
-        `/api/comments/${commentId}`,
-        { method: "DELETE" }
-      );
-      if (!res.ok) throw new Error("Failed to delete comment");
-      return res.json();
+      await kyInstance.delete(`comments/${commentId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["comments", postId] });

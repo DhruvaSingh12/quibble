@@ -1,5 +1,6 @@
 "use client";
 
+import kyInstance from "@/lib/ky";
 import { CommentData, CommentReactionInfo } from "@/lib/types";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { Heart } from "lucide-react";
@@ -17,10 +18,7 @@ export default function CommentLikeButton({ comment }: CommentLikeButtonProps) {
 
   const mutation = useMutation({
     mutationFn: () =>
-      fetch(`/api/comments/${comment.id}/like`, { method: "POST" }).then((res) => {
-        if (!res.ok) throw new Error("Failed to toggle like");
-        return res.json() as Promise<CommentReactionInfo>;
-      }),
+      kyInstance.post(`comments/${comment.id}/like`).json<CommentReactionInfo>(),
     onMutate: async () => {
       // Invalidate specific comment queries if we know them, but for now we invalidate the general post feed
       // since comments are often fetched within post-comments or nested replies.

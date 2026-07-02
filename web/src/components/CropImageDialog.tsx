@@ -48,10 +48,10 @@ export default function CropImageDialog({
           style={{ maxHeight: '70vh' }}
         />
         <DialogFooter>
-          <Button variant="secondary" className="shadow-sm px-4" onClick={onClose}>
+          <Button variant="ghost" onClick={crop}>Crop</Button>
+          <Button variant="ghost" onClick={onClose}>
             Cancel
           </Button>
-          <Button className="px-4" onClick={crop}>Crop</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

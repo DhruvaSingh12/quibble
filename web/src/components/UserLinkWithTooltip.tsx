@@ -19,7 +19,7 @@ export default function UserLinkWithTooltip({
   const { data } = useQuery({
     queryKey: ["user-data", username],
     queryFn: () =>
-      kyInstance.get(`/api/users/${username}`).json<UserData>(),
+      kyInstance.get(`users/${username}`).json<UserData>(),
     retry(failureCount, error) {
       if (error instanceof HTTPError && error.response.status === 404) {
         return false;

@@ -27,7 +27,7 @@ export default function FollowerList({ userId, onClose }: FollowerListProps) {
     queryKey: ["followers", userId],
     queryFn: async ({ pageParam }) => {
       const searchParams = pageParam ? `?cursor=${pageParam}` : "";
-      const result = await kyInstance.get(`/api/users/${userId}/followers${searchParams}`).json<FollowerPage>();
+      const result = await kyInstance.get(`users/${userId}/followers${searchParams}`).json<FollowerPage>();
       return result;
     },
     initialPageParam: null as string | null,
@@ -76,7 +76,7 @@ export default function FollowerList({ userId, onClose }: FollowerListProps) {
               <div className="flex items-center gap-1 md:gap-2">
                 <Link
                   href={`/users/${follower.username}`}
-                  className="flex-shrink-0"
+                  className="shrink-0"
                   onClick={onClose}
                 >
                   <UserAvatar
@@ -102,7 +102,7 @@ export default function FollowerList({ userId, onClose }: FollowerListProps) {
                 </div>
 
                 {!isCurrentUser && (
-                  <div className="flex-shrink-0">
+                  <div className="shrink-0">
                     <FollowButton
                       userId={follower.id}
                       initialState={{
@@ -119,7 +119,7 @@ export default function FollowerList({ userId, onClose }: FollowerListProps) {
                 )}
 
                 {isCurrentUser && (
-                  <div className="flex-shrink-0">
+                  <div className="shrink-0">
                     <span className="rounded-full bg-muted px-3 py-2 text-base font-medium text-muted-foreground">
                       You
                     </span>

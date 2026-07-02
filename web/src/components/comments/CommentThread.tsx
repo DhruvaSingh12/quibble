@@ -2,6 +2,7 @@
 
 import { CommentsPage } from "@/lib/types";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import kyInstance from "@/lib/ky";
 import CommentItem from "./CommentItem";
 import { Loader2 } from "lucide-react";
 
@@ -27,14 +28,8 @@ export default function CommentThread({
   } = useInfiniteQuery({
     queryKey: ["replies", parentId],
     queryFn: async ({ pageParam }) => {
-      const url = new URL(
-        `/api/posts/${postId}/comments/${parentId}/replies`,
-        window.location.origin
-      );
-      if (pageParam) url.searchParams.set("cursor", pageParam);
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("Failed to fetch replies");
-      return res.json() as Promise<CommentsPage>;
+      const searchParams = pageParam ? { cursor: pageParam } : undefined;
+      return kyInstance.get(`posts/${postId}/comments/${parentId}/replies`, { searchParams }).json<CommentsPage>();
     },
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,

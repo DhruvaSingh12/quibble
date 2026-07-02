@@ -1,22 +1,18 @@
 import { ForgotPasswordValues } from "@/lib/validation";
+import kyInstance from "@/lib/ky";
+import { HTTPError } from "ky";
 
 export async function requestPasswordReset(
   values: ForgotPasswordValues
 ): Promise<{ error?: string }> {
   try {
-    const response = await fetch("/api/auth/forgot-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    });
-    const data = await response.json();
-
-    if (!response.ok) {
-      return { error: data.error || "Something went wrong. Please try again later." };
-    }
-
+    await kyInstance.post("auth/forgot-password", { json: values });
     return {};
   } catch (error) {
+    if (error instanceof HTTPError) {
+      const data = await error.response.json().catch(() => ({}));
+      return { error: data.error || "Something went wrong. Please try again later." };
+    }
     console.error("Password reset request error:", error);
     return {
       error: "Something went wrong. Please try again later.",

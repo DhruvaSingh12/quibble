@@ -22,7 +22,7 @@ export default function LinkPreview({ url }: LinkPreviewProps) {
     const { data: previewData, isLoading, isError } = useQuery({
         queryKey: ["link-preview", url],
         queryFn: async () => {
-            const data = await kyInstance.get('/api/integrations/link-preview', {
+            const data = await kyInstance.get('integrations/link-preview', {
                 searchParams: { url },
                 timeout: 8000,
                 retry: 1,
@@ -46,7 +46,7 @@ export default function LinkPreview({ url }: LinkPreviewProps) {
             <div className="mt-2 overflow-hidden rounded-lg border border-border bg-card">
                 <div className="flex gap-3 p-3">
                     <Skeleton className="h-[80px] w-[80px] shrink-0" />
-                    <div className="flex-grow space-y-2">
+                    <div className="grow space-y-2">
                         <Skeleton className="h-4 w-3/4" />
                         <Skeleton className="h-4 w-1/2" />
                     </div>
@@ -58,7 +58,7 @@ export default function LinkPreview({ url }: LinkPreviewProps) {
     if (!previewData) return null;
 
     return (
-        <Link 
+        <Link
             href={url}
             target="_blank"
             rel="noopener noreferrer"
@@ -82,7 +82,7 @@ export default function LinkPreview({ url }: LinkPreviewProps) {
                         />
                     </div>
                 )}
-                <div className="flex-grow overflow-hidden">
+                <div className="grow overflow-hidden">
                     <h3 className="line-clamp-1 font-semibold">
                         {previewData.title || previewData.siteName}
                     </h3>

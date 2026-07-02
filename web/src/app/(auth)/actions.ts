@@ -1,9 +1,8 @@
+import kyInstance from "@/lib/ky";
+
 export async function logout() {
     try {
-        await fetch("/api/auth/logout", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" }
-        });
+        await kyInstance.post("auth/logout");
     } catch (e) {
         console.error(e);
     }

@@ -3,6 +3,7 @@
 import { CommentsPage } from "@/lib/types";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import CommentInput from "./CommentInput";
+import kyInstance from "@/lib/ky";
 import CommentItem from "./CommentItem";
 import { Loader2 } from "lucide-react";
 
@@ -24,14 +25,8 @@ export default function CommentSection({
   } = useInfiniteQuery({
     queryKey: ["comments", postId],
     queryFn: async ({ pageParam }) => {
-      const url = new URL(
-        `/api/posts/${postId}/comments`,
-        window.location.origin
-      );
-      if (pageParam) url.searchParams.set("cursor", pageParam);
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("Failed to fetch comments");
-      return res.json() as Promise<CommentsPage>;
+      const searchParams = pageParam ? { cursor: pageParam } : undefined;
+      return kyInstance.get(`posts/${postId}/comments`, { searchParams }).json<CommentsPage>();
     },
     initialPageParam: null as string | null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,

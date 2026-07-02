@@ -1,5 +1,6 @@
 "use client";
 
+import kyInstance from "@/lib/ky";
 import { PostData, ReactionInfo } from "@/lib/types";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { ThumbsUp } from "lucide-react";
@@ -17,10 +18,7 @@ export default function LikeButton({ post }: LikeButtonProps) {
 
   const mutation = useMutation({
     mutationFn: () =>
-      fetch(`/api/posts/${post.id}/like`, { method: "POST" }).then((res) => {
-        if (!res.ok) throw new Error("Failed to toggle like");
-        return res.json() as Promise<ReactionInfo>;
-      }),
+      kyInstance.post(`posts/${post.id}/like`).json<ReactionInfo>(),
     onMutate: async () => {
       const queryFilter = { queryKey: ["post-feed"] };
       await queryClient.cancelQueries(queryFilter);

@@ -87,11 +87,10 @@ export function setSessionCookie(res: Response, sessionId: string, expiresAt: Da
   const isProduction = env.NODE_ENV === "production";
   res.cookie("session", sessionId, {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: isProduction ? "none" : "lax",
     path: "/",
     expires: expiresAt,
     secure: isProduction,
-    domain: isProduction ? ".quibble.com" : undefined,
   });
 }
 
@@ -99,11 +98,9 @@ export function clearSessionCookie(res: Response) {
   const isProduction = env.NODE_ENV === "production";
   res.cookie("session", "", {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: isProduction ? "none" : "lax",
     path: "/",
     maxAge: 0,
     secure: isProduction,
-    domain: isProduction ? ".quibble.com" : undefined,
   });
 }
-

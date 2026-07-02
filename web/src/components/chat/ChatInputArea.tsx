@@ -54,17 +54,17 @@ export function ChatInputArea({
     };
 
     return (
-        <div className="px-3 pb-3 bg-transparent backdrop-blur z-10 flex-none relative">
+        <div className="px-3 pb-3 bg-transparent backdrop-blur z-40 flex-none relative">
             {/* Popover / Panels relative to Input */}
             {activePanel !== "none" && (
-                <div className="absolute bottom-[calc(100%+10px)] left-2 z-20 w-80 bg-card rounded-2xl border shadow-xl overflow-hidden animate-in slide-in-from-bottom-2 fade-in">
-                    <div className="flex items-center justify-between p-2 border-b bg-muted/20">
+                <div className="absolute bottom-[calc(100%+10px)] left-2 z-50 w-80 bg-background rounded-2xl border shadow-xl overflow-hidden animate-in slide-in-from-bottom-2 fade-in">
+                    <div className="flex items-center justify-between p-3 pb-1">
                         <span className="text-sm font-semibold px-2 capitalize">{activePanel}</span>
                         <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => setActivePanel("none")}>
                             <X className="h-4 w-4" />
                         </Button>
                     </div>
-                    <div className="w-full relative bg-background" style={{ height: activePanel === "emoji" ? 400 : 300 }}>
+                    <div className="w-full relative" style={{ height: activePanel === "emoji" ? 400 : activePanel === "upload" ? "auto" : 300 }}>
                         {activePanel === "emoji" && (
                             <div className="absolute inset-0">
                                 <EmojiPicker
@@ -80,13 +80,13 @@ export function ChatInputArea({
                             <GifPicker onSelect={onGifSelect} onClose={() => setActivePanel("none")} />
                         )}
                         {activePanel === "upload" && (
-                            <div className="p-4 flex flex-col gap-3">
-                                <Button variant="outline" className="w-full justify-start gap-2 h-12" onClick={() => fileInputRef.current?.click()}>
-                                    <ImageIcon className="h-5 w-5 text-blue-500" />
+                            <div className="p-2 pb-3 flex flex-col gap-1">
+                                <Button variant="ghost" className="w-full justify-start gap-3 h-12 font-medium" onClick={() => fileInputRef.current?.click()}>
+                                    <ImageIcon className="h-5 w-5 opacity-80" />
                                     Photo or Video
                                 </Button>
-                                <Button variant="outline" className="w-full justify-start gap-2 h-12" onClick={() => fileInputRef.current?.click()}>
-                                    <Music className="h-5 w-5 text-purple-500" />
+                                <Button variant="ghost" className="w-full justify-start gap-3 h-12 font-medium" onClick={() => fileInputRef.current?.click()}>
+                                    <Music className="h-5 w-5 opacity-80" />
                                     Audio File
                                 </Button>
                                 <input

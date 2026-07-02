@@ -52,7 +52,7 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
       }
 
       const response = await kyInstance
-        .get("/api/tenor", { searchParams })
+        .get("tenor", { searchParams })
         .json<TenorResponse>();
 
       if (pos) {
@@ -128,7 +128,7 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
               {Array.from({ length: 6 }).map((_, i) => (
                 <div
                   key={`skeleton-${i}`}
-                  className={`w-full rounded-lg bg-muted animate-pulse break-inside-avoid mb-2 ${i % 3 === 0 ? "aspect-[4/3]" : i % 2 === 0 ? "aspect-[3/4]" : "aspect-square"
+                  className={`w-full rounded-lg bg-muted animate-pulse break-inside-avoid mb-2 ${i % 3 === 0 ? "aspect-4/3" : i % 2 === 0 ? "aspect-3/4" : "aspect-square"
                     }`}
                 />
               ))}

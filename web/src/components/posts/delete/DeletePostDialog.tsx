@@ -27,14 +27,14 @@ export default function DeletePostDialog({ post, open, onClose }: DeletePostDial
                 </DialogHeader>
                 <DialogFooter>
                     <LoadingButton 
-                    variant="destructive" 
+                    variant="ghost" 
                     onClick={() => mutation.mutate(post.id, {onSuccess: onClose})}
                     loading={mutation.isPending}
-                    className="bg-red-500 hover:bg-red-700"
+                    className="text-destructive hover:bg-muted"
                     >
                         Delete
                     </LoadingButton>
-                    <Button variant="outline" onClick={onClose} disabled={mutation.isPending} className="bg-white hover:bg-gray-100">Cancel</Button>
+                    <Button variant="ghost" onClick={onClose} disabled={mutation.isPending}>Cancel</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

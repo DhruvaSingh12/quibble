@@ -259,13 +259,8 @@ export default function PostEditor() {
           </DialogHeader>
           <DialogFooter>
             <Button
-              variant="outline"
-              onClick={() => setShowConfirmDialog(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
+              variant="ghost"
+              className="text-destructive hover:bg-muted"
               onClick={() => {
                 setShowConfirmDialog(false);
                 toast({
@@ -277,6 +272,12 @@ export default function PostEditor() {
               }}
             >
               Discard
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => setShowConfirmDialog(false)}
+            >
+              Cancel
             </Button>
           </DialogFooter>
         </DialogContent>

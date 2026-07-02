@@ -1,5 +1,6 @@
 "use client";
 
+import kyInstance from "@/lib/ky";
 import { PostData, ReactionInfo } from "@/lib/types";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { ThumbsDown } from "lucide-react";
@@ -17,12 +18,7 @@ export default function DislikeButton({ post }: DislikeButtonProps) {
 
   const mutation = useMutation({
     mutationFn: () =>
-      fetch(`/api/posts/${post.id}/dislike`, { method: "POST" }).then(
-        (res) => {
-          if (!res.ok) throw new Error("Failed to toggle dislike");
-          return res.json() as Promise<ReactionInfo>;
-        }
-      ),
+      kyInstance.post(`posts/${post.id}/dislike`).json<ReactionInfo>(),
     onMutate: async () => {
       const queryFilter = { queryKey: ["post-feed"] };
       await queryClient.cancelQueries(queryFilter);

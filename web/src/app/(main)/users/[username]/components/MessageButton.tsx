@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { Mail } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import ky from "ky";
+import ky from "@/lib/ky";
 import { useToast } from "@/components/ui/use-toast";
 
 interface MessageButtonProps {
@@ -19,7 +19,7 @@ export default function MessageButton({ userId }: MessageButtonProps) {
     const handleMessageClick = async () => {
         try {
             setLoading(true);
-            const url = `/api/chat/conversations`;
+            const url = `chat/conversations`;
             const res = await ky.post(url, {
                 json: { targetUserId: userId },
             }).json<{ conversationId: string }>();

@@ -1,5 +1,6 @@
 "use client";
 
+import kyInstance from "@/lib/ky";
 import { BookmarkInfo, PostData } from "@/lib/types";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { Bookmark } from "lucide-react";
@@ -16,10 +17,7 @@ export default function BookmarkButton({ post }: BookmarkButtonProps) {
 
   const mutation = useMutation({
     mutationFn: () =>
-      fetch(`/api/posts/${post.id}/bookmark`, { method: "POST" }).then((res) => {
-        if (!res.ok) throw new Error("Failed to toggle bookmark");
-        return res.json() as Promise<BookmarkInfo>;
-      }),
+      kyInstance.post(`posts/${post.id}/bookmark`).json<BookmarkInfo>(),
     onMutate: async () => {
       // Optimistically update all feeds containing this post
       const queryFilters = [{ queryKey: ["post-feed"] }, { queryKey: ["bookmarks-feed"] }];

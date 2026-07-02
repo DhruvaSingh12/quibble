@@ -24,7 +24,7 @@ export default function FollowButton({
   const queryKey: QueryKey = ["follower-info", userId];
 
   const { mutate } = useMutation({
-    mutationFn: () => kyInstance.post(`/api/users/${userId}/follow`),
+    mutationFn: () => kyInstance.post(`users/${userId}/follow`),
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey });
 

@@ -11,7 +11,7 @@ import { Bookmark } from "lucide-react";
 export default function BookmarksFeed() {
   const { data, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage, status } = useInfiniteQuery({
     queryKey: ["post-feed", "bookmarks"],
-    queryFn: ({ pageParam }) => kyInstance.get("/api/posts/bookmarks", pageParam ? { searchParams: { cursor: pageParam } } : {}).json<PostsPage>(),
+    queryFn: ({ pageParam }) => kyInstance.get("posts/bookmarks", pageParam ? { searchParams: { cursor: pageParam } } : {}).json<PostsPage>(),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor
   });

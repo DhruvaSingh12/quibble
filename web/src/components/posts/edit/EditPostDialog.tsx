@@ -10,7 +10,6 @@ import Placeholder from "@tiptap/extension-placeholder";
 import { TextStyle } from "@tiptap/extension-text-style";
 import Typography from "@tiptap/extension-typography";
 import CharacterCount from "@tiptap/extension-character-count";
-
 import HardBreak from "@tiptap/extension-hard-break";
 import React, { useEffect, useCallback, useState } from "react";
 import { useSession } from "@/providers/SessionProvider";
@@ -197,13 +196,8 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
           </DialogHeader>
           <DialogFooter>
             <Button
-              variant="outline"
-              onClick={() => setShowConfirmDialog(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
+              variant="ghost"
+              className="text-destructive hover:bg-muted"
               onClick={() => {
                 setShowConfirmDialog(false);
                 toast({
@@ -216,6 +210,12 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
               }}
             >
               Discard
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => setShowConfirmDialog(false)}
+            >
+              Cancel
             </Button>
           </DialogFooter>
         </DialogContent>
