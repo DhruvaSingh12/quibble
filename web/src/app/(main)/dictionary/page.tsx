@@ -45,15 +45,21 @@ export default function DictionaryPage() {
     queryKey: ["dictionary", activeSearchWord],
     queryFn: async () => {
       try {
-        const response = await kyInstance.get(`https://api.dictionaryapi.dev/api/v2/entries/en/${activeSearchWord}`).json<DictionaryResponse[]>();
-        if (!response || response.length === 0) {
+        const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${activeSearchWord}`);
+        
+        if (!response.ok) {
+            if (response.status === 404) {
+                throw new Error(`"${activeSearchWord}" not found in dictionary. Please check the spelling.`);
+            }
+            throw new Error(`Dictionary service error: ${response.statusText}`);
+        }
+
+        const data = await response.json() as DictionaryResponse[];
+        if (!data || data.length === 0) {
           throw new Error(`No definitions found for "${activeSearchWord}".`);
         }
-        return response[0];
+        return data[0];
       } catch (err: any) {
-        if (err.name === 'HTTPError' && err.response?.status === 404) {
-          throw new Error(`"${activeSearchWord}" not found in dictionary. Please check the spelling.`);
-        }
         throw new Error(err.message || "Dictionary service unavailable. Please try again later.");
       }
     },
@@ -67,8 +73,14 @@ export default function DictionaryPage() {
   const { data: suggestions = [] } = useQuery({
     queryKey: ["dictionary-suggestions", debouncedInputWord],
     queryFn: async () => {
-      const response = await kyInstance.get(`https://api.datamuse.com/sug?s=${debouncedInputWord}&max=5`).json<{ word: string }[]>();
-      return response.map(item => item.word);
+      try {
+        const response = await fetch(`https://api.datamuse.com/sug?s=${debouncedInputWord}&max=5`);
+        if (!response.ok) return [];
+        const data = await response.json() as { word: string }[];
+        return data.map(item => item.word);
+      } catch {
+        return [];
+      }
     },
     enabled: debouncedInputWord.length >= 2,
     staleTime: 1000 * 60 * 60, // 1 hour cache

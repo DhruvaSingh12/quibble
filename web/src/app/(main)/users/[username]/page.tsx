@@ -24,17 +24,25 @@ const getUser = cache(async (username: string) => {
   const cookieStore = await cookies();
   const sessionId = cookieStore.get("session")?.value;
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${username}`, {
-    headers: sessionId ? { Cookie: `session=${sessionId}` } : {},
-    cache: "no-store",
-  });
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${username}`, {
+      headers: sessionId ? { Cookie: `session=${sessionId}` } : {},
+      cache: "no-store",
+      signal: AbortSignal.timeout(8000)
+    });
 
-  if (!res.ok) {
-    if (res.status === 404) notFound();
-    throw new Error("Failed to fetch user");
+    if (!res.ok) {
+      if (res.status === 404) notFound();
+      throw new Error("Failed to fetch user");
+    }
+
+    return res.json() as Promise<UserData>;
+  } catch (e: any) {
+    if (e.name === "AbortError" || e.name === "TimeoutError" || e.message?.includes("fetch failed")) {
+      throw new Error("GATEWAY_TIMEOUT");
+    }
+    throw e;
   }
-
-  return res.json() as Promise<UserData>;
 });
 
 export async function generateMetadata({

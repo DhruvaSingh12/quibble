@@ -33,11 +33,15 @@ const getWhoToFollow = async (): Promise<UserData[]> => {
       headers: {
         "Cookie": `session=${sessionCookie}`
       },
-      next: { revalidate: 900 } // 15 minutes
+      next: { revalidate: 900 }, // 15 minutes
+      signal: AbortSignal.timeout(8000)
     });
     if (!res.ok) return [];
     return res.json();
-  } catch (error) {
+  } catch (error: any) {
+    if (error.name === "AbortError" || error.name === "TimeoutError" || error.message?.includes("fetch failed")) {
+      throw new Error("GATEWAY_TIMEOUT");
+    }
     return [];
   }
 };
@@ -100,11 +104,15 @@ const getTrendingTopics = async (): Promise<{ hashtag: string; count: number }[]
       headers: {
         "Cookie": `session=${sessionCookie}`
       },
-      next: { revalidate: 3600 } // 1 hour
+      next: { revalidate: 3600 }, // 1 hour
+      signal: AbortSignal.timeout(8000)
     });
     if (!res.ok) return [];
     return res.json();
-  } catch (error) {
+  } catch (error: any) {
+    if (error.name === "AbortError" || error.name === "TimeoutError" || error.message?.includes("fetch failed")) {
+      throw new Error("GATEWAY_TIMEOUT");
+    }
     return [];
   }
 };

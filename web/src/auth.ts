@@ -36,16 +36,23 @@ export const validateRequest = cache(
                 headers: {
                     Cookie: `${SESSION_COOKIE_NAME}=${sessionId}`
                 },
-                cache: "no-store"
+                cache: "no-store",
+                signal: AbortSignal.timeout(8000)
             });
-            if (!res.ok) return { user: null, session: null };
+            if (!res.ok) {
+                if (res.status === 401 || res.status === 403) return { user: null, session: null };
+                throw new Error("Failed to validate request");
+            }
 
             const data = await res.json();
             return {
                 user: data.user,
                 session: { id: sessionId, userId: data.user.id, expiresAt: new Date() }
             };
-        } catch {
+        } catch (e: any) {
+            if (e.name === "AbortError" || e.name === "TimeoutError" || e.message?.includes("fetch failed") || e.message?.includes("GATEWAY")) {
+                throw new Error("GATEWAY_TIMEOUT");
+            }
             return { user: null, session: null };
         }
     }

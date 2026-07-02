@@ -16,17 +16,25 @@ const getPost = cache(async (postId: string) => {
     const cookieStore = await cookies();
     const sessionId = cookieStore.get("session")?.value;
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/posts/${postId}`, {
-        headers: sessionId ? { Cookie: `session=${sessionId}` } : {},
-        cache: "no-store",
-    });
+    try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/posts/${postId}`, {
+            headers: sessionId ? { Cookie: `session=${sessionId}` } : {},
+            cache: "no-store",
+            signal: AbortSignal.timeout(8000)
+        });
 
-    if (!res.ok) {
-        if (res.status === 404) notFound();
-        throw new Error("Failed to fetch post");
+        if (!res.ok) {
+            if (res.status === 404) notFound();
+            throw new Error("Failed to fetch post");
+        }
+
+        return res.json() as Promise<PostData>;
+    } catch (e: any) {
+        if (e.name === "AbortError" || e.name === "TimeoutError" || e.message?.includes("fetch failed")) {
+            throw new Error("GATEWAY_TIMEOUT");
+        }
+        throw e;
     }
-
-    return res.json() as Promise<PostData>;
 });
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

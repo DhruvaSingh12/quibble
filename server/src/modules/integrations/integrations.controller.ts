@@ -115,11 +115,16 @@ export const getTenorGifs = async (req: Request, res: Response) => {
 
   try {
     const response = await fetch(url);
-    if (!response.ok) throw new Error(`Tenor API error: ${response.statusText}`);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Tenor API Error: ${response.status} - ${errorText}`);
+      throw new Error(`Tenor API error: ${response.statusText}`);
+    }
     const data = await response.json();
     res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch GIFs" });
+  } catch (error: any) {
+    console.error("Failed to fetch Tenor GIFs:", error.message);
+    res.status(500).json({ error: "Failed to fetch GIFs from Tenor API" });
   }
 };
 
