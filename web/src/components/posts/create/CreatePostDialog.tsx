@@ -191,8 +191,8 @@ export default function PostEditor() {
   const handleGifSelect = (url: string) => {
     if (selectedGif) {
       toast({
-        title: "One GIF per post",
-        description: "You can only add one GIF per post.",
+        title: "One KLIPY per post",
+        description: "You can only add one KLIPY per post.",
         variant: "destructive",
       });
       return;
@@ -372,7 +372,7 @@ export default function PostEditor() {
                     }`}
                   disabled={!selectedGif}
                 >
-                  GIF
+                  KLIPY
                 </button>
               </Tabs>
             )}

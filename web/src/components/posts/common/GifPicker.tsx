@@ -97,7 +97,7 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search GIFs..."
+            placeholder="Search KLIPY"
             className="pl-9 bg-card text-card-foreground"
           />
         </form>

@@ -12,7 +12,7 @@ export default function GifPreview({ url, onRemove }: GifPreviewProps) {
       <div className="relative rounded-lg overflow-hidden bg-card border flex-1 flex items-center justify-center p-2 min-h-0">
         <Image
           src={url}
-          alt="Selected GIF"
+          alt="Selected KLIPY"
           width={500}
           height={220}
           className="max-h-full h-full w-auto max-w-full object-contain rounded-md"
@@ -21,7 +21,7 @@ export default function GifPreview({ url, onRemove }: GifPreviewProps) {
         <button
           onClick={onRemove}
           className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-muted transition-colors bg-background/80 shadow"
-          title="Remove GIF"
+          title="Remove KLIPY"
         >
           <X className="text-foreground h-3.5 w-3.5" />
         </button>

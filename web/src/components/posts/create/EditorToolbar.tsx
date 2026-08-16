@@ -110,9 +110,9 @@ export default function EditorToolbar({
         onClick={() => {
           if (selectedGif) {
             toast({
-              title: "One GIF per post",
+              title: "One KLIPY per post",
               description:
-                "You can only add one GIF per post. Remove the existing GIF first.",
+                "You can only add one KLIPY per post. Remove the existing KLIPY first.",
               variant: "destructive",
             });
             return;
@@ -121,7 +121,7 @@ export default function EditorToolbar({
         }}
         isActive={showGifPicker}
         icon={HiMiniGif}
-        title="GIF"
+        title="KLIPY"
       />
     </div>
   );
