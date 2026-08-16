@@ -4,14 +4,13 @@ import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { FaMagnifyingGlass, FaX } from "react-icons/fa6";
-import kyInstance from "@/lib/ky";
 
 interface GifPickerProps {
   onSelect: (gifUrl: string) => void;
   onClose: () => void;
 }
 
-interface TenorGif {
+interface KlipyGif {
   id: string;
   media_formats: {
     gif: {
@@ -26,33 +25,40 @@ interface TenorGif {
   content_description: string;
 }
 
-interface TenorResponse {
-  results: TenorGif[];
+interface KlipyResponse {
+  results: KlipyGif[];
   next: string;
 }
 
 export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [gifs, setGifs] = useState<TenorGif[]>([]);
+  const [gifs, setGifs] = useState<KlipyGif[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [nextPos, setNextPos] = useState("");
 
   const fetchGifs = async (query: string, pos?: string) => {
     setIsLoading(true);
     try {
-      const searchParams: Record<string, string> = {};
-      if (query) {
-        searchParams.q = query;
-      } else {
-        searchParams.type = "trending";
-      }
-      if (pos) {
-        searchParams.pos = pos;
-      }
+      const apiKey = process.env.NEXT_PUBLIC_KLIPY_API_KEY || "";
+      const clientKey = "quibble";
+      const limit = 20;
 
-      const response = await kyInstance
-        .get("integrations/tenor", { searchParams })
-        .json<TenorResponse>();
+      let url = "";
+      if (query) {
+        url = `https://api.klipy.co/v2/search?q=${query}&key=${apiKey}&client_key=${clientKey}&limit=${limit}&media_filter=gif,tinygif`;
+      } else {
+        url = `https://api.klipy.co/v2/featured?key=${apiKey}&client_key=${clientKey}&limit=${limit}&media_filter=gif,tinygif`;
+      }
+      if (pos) url += `&pos=${pos}`;
+
+      const response = await fetch(url).then(async res => {
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error(`Klipy API Error: ${res.status} - ${errorText}`);
+          throw new Error(`Klipy API Error: ${res.status} - ${errorText}`);
+        }
+        return res.json() as Promise<KlipyResponse>;
+      });
 
       if (pos) {
         setGifs((prev) => [...prev, ...response.results]);

@@ -115,37 +115,4 @@ export const getLinkPreview = async (req: Request, res: Response) => {
   }
 };
 
-export const getTenorGifs = async (req: Request, res: Response) => {
-  const { q, type, pos } = req.query;
-  const apiKey = process.env.TENOR_API_KEY;
-  const clientKey = "quibble";
-  const limit = 20;
-
-  if (!apiKey) return res.status(500).json({ error: "Tenor API key not configured" });
-
-  let url = "";
-  if (type === "trending") {
-    url = `https://tenor.googleapis.com/v2/featured?key=${apiKey}&client_key=${clientKey}&limit=${limit}&media_filter=gif,tinygif`;
-  } else if (q) {
-    url = `https://tenor.googleapis.com/v2/search?q=${q}&key=${apiKey}&client_key=${clientKey}&limit=${limit}&media_filter=gif,tinygif`;
-  } else {
-    return res.status(400).json({ error: "Invalid request" });
-  }
-
-  if (pos) url += `&pos=${pos}`;
-
-  try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Tenor API Error: ${response.status} - ${errorText}`);
-      throw new Error(`Tenor API error: ${response.statusText}`);
-    }
-    const data = await response.json();
-    res.json(data);
-  } catch (error: any) {
-    console.error("Failed to fetch Tenor GIFs:", error.message);
-    res.status(500).json({ error: "Failed to fetch GIFs from Tenor API" });
-  }
-};
 
