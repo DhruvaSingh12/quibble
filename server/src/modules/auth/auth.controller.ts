@@ -52,12 +52,8 @@ export const signup = async (req: Request, res: Response) => {
     data: { email, otp, userId, expiresAt },
   });
 
-  const emailResult = await sendOTPEmail(email, otp, username);
-  if (!emailResult.success) {
-    await prisma.emailVerification.deleteMany({ where: { email, userId } });
-    await prisma.user.delete({ where: { id: userId } });
-    return res.status(500).json({ error: "Failed to send verification email" });
-  }
+  // Fire email asynchronously so we don't block the response (prevents 504s on slow SMTP connections)
+  sendOTPEmail(email, otp, username).catch((err) => console.error("OTP send error:", err));
 
   res.status(201).json({ requiresVerification: true, email });
 };
@@ -86,7 +82,7 @@ export const login = async (req: Request, res: Response) => {
 
 export const verifyEmail = async (req: Request, res: Response) => {
   const { email, otp } = req.body;
-  
+
   const verification = await prisma.emailVerification.findFirst({
     where: { email, otp },
     orderBy: { createdAt: "desc" },
@@ -125,10 +121,8 @@ export const resendOtp = async (req: Request, res: Response) => {
     data: { email, otp, userId: user.id, expiresAt },
   });
 
-  const emailResult = await sendOTPEmail(email, otp, user.username);
-  if (!emailResult.success) {
-    return res.status(500).json({ error: "Failed to send verification email" });
-  }
+  // Fire email asynchronously
+  sendOTPEmail(email, otp, user.username).catch((err) => console.error("OTP resend error:", err));
   res.json({ success: true });
 };
 
@@ -148,13 +142,14 @@ export const forgotPassword = async (req: Request, res: Response) => {
     data: { userId: user.id, token, expires },
   });
 
-  await sendPasswordResetEmail(email, token, user.username);
+  // Fire email asynchronously
+  sendPasswordResetEmail(email, token, user.username).catch((err) => console.error("Password reset email error:", err));
   res.json({ success: true });
 };
 
 export const resetPassword = async (req: Request, res: Response) => {
   const { token, password } = req.body;
-  
+
   const resetRecord = await prisma.passwordReset.findUnique({
     where: { token },
     include: { user: true },
@@ -165,7 +160,7 @@ export const resetPassword = async (req: Request, res: Response) => {
   }
 
   const passwordHash = await hash(password, AUTH_CONSTANTS.ARGON2_OPTIONS);
-  
+
   await prisma.user.update({
     where: { id: resetRecord.userId },
     data: { passwordHash },
@@ -173,7 +168,7 @@ export const resetPassword = async (req: Request, res: Response) => {
 
   await prisma.passwordReset.deleteMany({ where: { userId: resetRecord.userId } });
   await invalidateAllUserSessions(resetRecord.userId);
-  
+
   res.json({ success: true });
 };
 
