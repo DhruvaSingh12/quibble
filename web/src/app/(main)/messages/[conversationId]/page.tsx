@@ -14,7 +14,7 @@ import { ChatSelectionActionBar } from "@/components/chat/ChatSelectionActionBar
 import { CameraModal } from "@/components/chat/CameraModal";
 
 interface ChatPayload {
-    type: "text" | "image" | "video" | "audio" | "gif" | "pdf";
+    type: "text" | "image" | "video" | "audio" | "gif" | "pdf" | "call";
     content: string;
 }
 
@@ -30,10 +30,13 @@ function parsePayload(raw: string): ChatPayload {
     return { type: "text", content: raw };
 }
 
+import { useCall } from "@/providers/CallProvider";
+
 export default function ChatRoomPage(props: { params: Promise<{ conversationId: string }> }) {
     const { conversationId } = use(props.params);
     const { user } = useSession();
     const socket = useSocket();
+    const { lastCallSummary, clearLastCallSummary } = useCall();
 
     const [messages, setMessages] = useState<any[]>([]);
     const [friend, setFriend] = useState<any>(null);
@@ -231,6 +234,20 @@ export default function ChatRoomPage(props: { params: Promise<{ conversationId: 
             socket.off("chat_message_reacted", handleMessageReacted);
         };
     }, [socket, keyHex, conversationId, user?.id]);
+
+    useEffect(() => {
+        if (lastCallSummary && lastCallSummary.conversationId === conversationId && keyHex) {
+            handleSendPayload({
+                type: "call",
+                content: JSON.stringify({
+                    duration: lastCallSummary.duration,
+                    type: lastCallSummary.type,
+                    status: lastCallSummary.status
+                })
+            });
+            clearLastCallSummary();
+        }
+    }, [lastCallSummary, conversationId, keyHex]);
 
     const handleSendPayload = async (payload: ChatPayload) => {
         if (!socket || !keyHex || !isMutualFollow) return;

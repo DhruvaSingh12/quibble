@@ -58,7 +58,7 @@ export default function CommentItem({
       {/* Vertical thread line */}
       {depth > 0 && (
         <div
-          className="absolute left-[-12px] top-0 bottom-0 w-[2px] bg-border hover:bg-muted-foreground/40 cursor-pointer transition-colors"
+          className="absolute left-[-12px] top-0 bottom-0 w-0.5 bg-border hover:bg-muted-foreground/40 cursor-pointer transition-colors"
           onClick={() => setShowReplies(false)}
           title="Collapse thread"
         />
@@ -149,7 +149,7 @@ export default function CommentItem({
                   </p>
                 )}
                 {comment.gifUrl && (
-                  <div className="mt-2 rounded-xl overflow-hidden max-w-[250px] bg-muted">
+                  <div className="mt-2 rounded-xl overflow-hidden max-w-62.5 bg-muted">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={comment.gifUrl} alt="GIF" className="w-full object-cover" />
                   </div>

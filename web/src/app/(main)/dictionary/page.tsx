@@ -132,7 +132,7 @@ export default function DictionaryPage() {
   const errorMessage = queryError ? queryError.message : "";
 
   return (
-    <div className="w-full mt-[3px] lg:mt-[8px] flex-col rounded-lg items-center justify-center">
+    <div className="w-full mt-[3px] lg:mt-2 flex-col rounded-lg items-center justify-center">
       <div className="w-full max-w-none">
         <div className="p-3 sm:p-4">
           <div className="flex gap-2 sm:gap-3 items-center">
@@ -154,7 +154,7 @@ export default function DictionaryPage() {
                   className="p-1 text-muted-foreground hover:text-foreground transition-colors"
                   aria-label="Search"
                 >
-                  <SearchIcon size={16} className="sm:w-[18px] sm:h-[18px]" />
+                  <SearchIcon size={16} className="sm:w-4.5 sm:h-4.5" />
                 </button>
               </div>
 

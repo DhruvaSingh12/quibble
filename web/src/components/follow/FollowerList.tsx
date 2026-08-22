@@ -39,7 +39,7 @@ export default function FollowerList({ userId, onClose }: FollowerListProps) {
   const followers = data?.pages.flatMap(page => page.followerList) || [];
 
   if (status === "pending") {
-    return <BounceLoader className="min-h-[200px]" />;
+    return <BounceLoader className="min-h-50" />;
   }
 
   if (status === "error") {
@@ -130,7 +130,7 @@ export default function FollowerList({ userId, onClose }: FollowerListProps) {
           );
         })}
       </ul>
-      {isFetchingNextPage && <BounceLoader className="min-h-[100px]" />}
+      {isFetchingNextPage && <BounceLoader className="min-h-25" />}
     </InfiniteScrollContainer>
   );
 }

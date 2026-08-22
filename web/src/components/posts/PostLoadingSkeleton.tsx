@@ -18,7 +18,7 @@ export function PostLoadingSkeleton() {
         {/* User Info & Header row */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <Skeleton className="size-[50px] rounded-full" />
+            <Skeleton className="size-12.5 rounded-full" />
             <div className="space-y-2">
               <Skeleton className="h-4 w-32 rounded" />
               <Skeleton className="h-3 w-24 rounded" />

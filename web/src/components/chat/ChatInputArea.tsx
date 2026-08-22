@@ -124,7 +124,7 @@ export function ChatInputArea({
                             className={`rounded-full h-8 w-8 sm:h-10 sm:w-10 flex-none transition-colors ${activePanel === "upload" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted/60"}`}
                             onClick={() => setActivePanel(activePanel === "upload" ? "none" : "upload")}
                         >
-                            <Paperclip className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px]" />
+                            <Paperclip className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
                         </Button>
 
                         <Button
@@ -135,7 +135,7 @@ export function ChatInputArea({
                             onClick={onCameraClick}
                             title="Take Photo"
                         >
-                            <Camera className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px]" />
+                            <Camera className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
                         </Button>
 
                         <Button
@@ -158,7 +158,7 @@ export function ChatInputArea({
                             onChange={(e) => handleTyping(e as any)}
                             onKeyDown={handleKeyDown}
                             placeholder="Message..."
-                            className="flex-1 bg-transparent px-1 sm:px-2 py-2 text-[14px] sm:text-[15px] focus:outline-none min-w-0 placeholder:text-muted-foreground/70 resize-none overflow-y-auto max-h-[120px]"
+                            className="flex-1 bg-transparent px-1 sm:px-2 py-2 text-[14px] sm:text-[15px] focus:outline-none min-w-0 placeholder:text-muted-foreground/70 resize-none overflow-y-auto max-h-30"
                             style={{ height: 'auto' }}
                         />
 
@@ -169,7 +169,7 @@ export function ChatInputArea({
                             className={`rounded-full h-8 w-8 sm:h-10 sm:w-10 flex-none transition-colors ${activePanel === "emoji" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted/60"}`}
                             onClick={() => setActivePanel(activePanel === "emoji" ? "none" : "emoji")}
                         >
-                            <FaFaceKissBeam className="w-[18px] h-[18px] sm:w-[20px] sm:h-[20px]" />
+                            <FaFaceKissBeam className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
                         </Button>
 
                         <Button
@@ -179,7 +179,7 @@ export function ChatInputArea({
                             disabled={!inputText.trim()}
                             className="rounded-full h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center bg-transparent hover:bg-transparent p-0 transition-all disabled:opacity-50 text-primary disabled:text-muted-foreground"
                         >
-                            <FaCircleChevronRight className="w-[24px] h-[24px] sm:w-[28px] sm:h-[28px]" />
+                            <FaCircleChevronRight className="w-6 h-6 sm:w-7 sm:h-7" />
                         </Button>
                     </div>
                 </form>

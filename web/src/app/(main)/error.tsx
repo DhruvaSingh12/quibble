@@ -21,7 +21,7 @@ export default function Error({
         <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">
           System malfunction.
         </h1>
-        <p className="max-w-[380px] text-sm md:text-[15px] text-muted-foreground leading-relaxed">
+        <p className="max-w-95 text-sm md:text-[15px] text-muted-foreground leading-relaxed">
           It seems we&apos;ve encountered an unexpected glitch in the matrix. Don&apos;t panic, just try again.
         </p>
         <button

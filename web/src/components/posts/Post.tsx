@@ -47,7 +47,7 @@ export default function Post({ post }: PostProps) {
               <Link href={`/users/${post.user.username}`}>
                 <UserAvatar
                   size={500}
-                  className="w-[50px]"
+                  className="w-12.5"
                   avatarUrl={post.user.avatarUrl}
                 />
               </Link>
@@ -110,7 +110,7 @@ export default function Post({ post }: PostProps) {
             onClick={() => router.push(`/posts/${post.id}`)}
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
           >
-            <MessageSquare className="size-[18px]" />
+            <MessageSquare className="size-4.5" />
             <span className="tabular-nums text-[13px]">{post._count.comments}</span>
           </button>
           <BookmarkButton post={post} />
@@ -118,7 +118,7 @@ export default function Post({ post }: PostProps) {
             onClick={() => setShowShareModal(true)}
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
           >
-            <HiOutlineShare className="size-[18px]" />
+            <HiOutlineShare className="size-4.5" />
           </button>
         </div>
       </div>

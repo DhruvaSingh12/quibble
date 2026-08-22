@@ -37,7 +37,7 @@ export default function HashtagPage() {
     const posts = data?.pages.flatMap(page => page.posts) || [];
 
     return (
-        <div className="w-full mt-[3px] lg:mt-[8px] flex flex-col rounded-lg p-4 items-center justify-center space-y-4">
+        <div className="w-full mt-[3px] lg:mt-2 flex flex-col rounded-lg p-4 items-center justify-center space-y-4">
             <div className="w-full border-b border-border pb-4">
                 <h1 className="text-3xl font-bold">#{hashtag}</h1>
                 <p className="text-muted-foreground mt-2">

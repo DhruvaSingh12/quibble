@@ -160,7 +160,7 @@ export default function RichTextRenderer({
             TiptapImage.configure({
                 allowBase64: true,
                 HTMLAttributes: {
-                    class: 'rounded-lg max-h-[300px] object-contain my-2',
+                    class: 'rounded-lg max-h-75 object-contain my-2',
                 },
             }),
         ],
@@ -245,12 +245,12 @@ export default function RichTextRenderer({
                 <div className="mb-3">
                     <div className="flex gap-2 overflow-x-auto snap-x snap-mandatory pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] scrollbar-none">
                         {gifUrls.map((url, index) => (
-                            <div key={index} className="relative flex-none h-[200px] md:h-[280px] rounded-lg overflow-hidden bg-muted/30 snap-start border">
+                            <div key={index} className="relative flex-none h-50 md:h-70 rounded-lg overflow-hidden bg-muted/30 snap-start border">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                     src={url}
                                     alt={`GIF ${index + 1}`}
-                                    className="h-full w-auto min-w-[150px] max-w-[85vw] object-cover"
+                                    className="h-full w-auto min-w-37.5 max-w-[85vw] object-cover"
                                 />
                                 <div className="absolute bottom-2 right-2 bg-foreground/90 backdrop-blur-sm text-background text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm">
                                     GIF

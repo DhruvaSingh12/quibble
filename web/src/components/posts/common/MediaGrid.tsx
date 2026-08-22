@@ -17,10 +17,10 @@ export default function MediaGrid({ attachments }: MediaGridProps) {
       {attachments.map((media) => (
         <div
           key={media.id}
-          className="relative flex-none h-[200px] md:h-[280px] rounded-lg overflow-hidden bg-muted/30 snap-start border"
+          className="relative flex-none h-50 md:h-70 rounded-lg overflow-hidden bg-muted/30 snap-start border"
         >
           {media.type === "PDF" || media.mimeType === "application/pdf" ? (
-            <PdfPreviewCard url={media.url} className="h-[200px] md:h-[280px] rounded-lg border-none" />
+            <PdfPreviewCard url={media.url} className="h-50 md:h-70 rounded-lg border-none" />
           ) : media.type === "VIDEO" ? (
             <VideoPlayer media={media} />
           ) : (
@@ -28,7 +28,7 @@ export default function MediaGrid({ attachments }: MediaGridProps) {
             <img
               src={media.url}
               alt="Post attachment"
-              className="h-full w-auto min-w-[150px] max-w-[85vw] object-cover"
+              className="h-full w-auto min-w-37.5 max-w-[85vw] object-cover"
             />
           )}
         </div>
@@ -62,7 +62,7 @@ function VideoPlayer({ media }: { media: Media }) {
       <video
         ref={videoRef}
         src={media.url}
-        className="h-full w-auto min-w-[200px] max-w-[85vw] object-cover bg-foreground/5"
+        className="h-full w-auto min-w-50 max-w-[85vw] object-cover bg-foreground/5"
         preload="metadata"
         controls={isPlaying}
         playsInline

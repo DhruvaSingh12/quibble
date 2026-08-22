@@ -80,7 +80,7 @@ export default function BookmarkButton({ post }: BookmarkButtonProps) {
       )}
     >
       <Bookmark
-        className={cn("size-[18px]", isBookmarked && "fill-primary")}
+        className={cn("size-4.5", isBookmarked && "fill-primary")}
       />
     </button>
   );

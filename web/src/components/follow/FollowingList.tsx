@@ -39,7 +39,7 @@ export default function FollowingList({ userId, onClose }: FollowingListProps) {
   const following = data?.pages.flatMap(page => page.followingList) || [];
 
   if (status === "pending") {
-    return <BounceLoader className="min-h-[200px]" />;
+    return <BounceLoader className="min-h-50" />;
   }
 
   if (status === "error") {
@@ -131,7 +131,7 @@ export default function FollowingList({ userId, onClose }: FollowingListProps) {
           );
         })}
       </ul>
-      {isFetchingNextPage && <BounceLoader className="min-h-[100px]" />}
+      {isFetchingNextPage && <BounceLoader className="min-h-25" />}
     </InfiniteScrollContainer>
   );
 }

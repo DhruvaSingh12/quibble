@@ -136,7 +136,7 @@ export function CustomAudioPlayer({ src }: { src: string }) {
     };
 
     return (
-        <div className="bg-background/80 backdrop-blur p-2 px-3 rounded-2xl flex items-center gap-3 shadow-sm border border-border/40 w-[240px] md:w-[280px]">
+        <div className="bg-background/80 backdrop-blur p-2 px-3 rounded-2xl flex items-center gap-3 shadow-sm border border-border/40 w-60 md:w-70">
             <audio
                 ref={audioRef}
                 src={src}

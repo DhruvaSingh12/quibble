@@ -17,7 +17,7 @@ export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageP
   if (!email) {
     return (
       <main className="min-h-screen flex items-center justify-center p-4 bg-background">
-        <div className="flex flex-col md:flex-row h-full w-full max-w-[900px] md:h-[600px] overflow-hidden rounded-lg border border-border bg-card shadow-2xl">
+        <div className="flex flex-col md:flex-row h-full w-full max-w-225 md:h-150 overflow-hidden rounded-lg border border-border bg-card shadow-2xl">
 
           {/* Welcome Panel */}
           <div className="hidden md:flex w-1/2 bg-muted relative flex-col items-center justify-center p-8 text-center bg-linear-to-br from-primary/5 via-transparent to-transparent">
@@ -55,7 +55,7 @@ export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageP
 
   return (
     <main className="min-h-screen flex items-center justify-center p-4 bg-background">
-      <div className="flex flex-col md:flex-row h-full w-full max-w-[900px] md:h-[600px] overflow-hidden rounded-lg border border-border bg-card shadow-2xl">
+      <div className="flex flex-col md:flex-row h-full w-full max-w-225 md:h-150 overflow-hidden rounded-lg border border-border bg-card shadow-2xl">
 
         {/* Welcome Panel */}
         <div className="hidden md:flex w-1/2 bg-muted relative flex-col items-center justify-center p-8 text-center bg-linear-to-br from-primary/5 via-transparent to-transparent">

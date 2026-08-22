@@ -1,17 +1,5 @@
 import { useState } from 'react';
 import { X, Trash2 } from 'lucide-react';
-import {
-    FaFaceDizzy,
-    FaFaceGrinWide,
-    FaFaceGrinHearts,
-    FaFaceGrinSquintTears,
-    FaFaceKissWinkHeart,
-    FaFaceSadCry,
-    FaFaceSurprise,
-    FaHeart,
-    FaThumbsUp,
-    FaFaceKiss
-} from 'react-icons/fa6';
 
 interface ChatSelectionActionBarProps {
     selectedCount: number;
@@ -47,23 +35,23 @@ export function ChatSelectionActionBar({
                     {selectedCount === 1 && (
                         <div className="hidden sm:flex items-center gap-1.5 mr-4 bg-muted/40 p-1.5 rounded-full border border-border/50">
                             {[
-                                { id: 'face-dizzy', icon: FaFaceDizzy },
-                                { id: 'face-grin-wide', icon: FaFaceGrinWide },
-                                { id: 'face-grin-hearts', icon: FaFaceGrinHearts },
-                                { id: 'face-grin-squint-tears', icon: FaFaceGrinSquintTears },
-                                { id: 'face-kiss-wink-heart', icon: FaFaceKissWinkHeart },
-                                { id: 'face-sad-cry', icon: FaFaceSadCry },
-                                { id: 'face-surprise', icon: FaFaceSurprise },
-                                { id: 'heart', icon: FaHeart },
-                                { id: 'thumbsup', icon: FaThumbsUp },
-                                { id: 'face-kiss', icon: FaFaceKiss }
+                                { id: 'face-dizzy', icon: '😵' },
+                                { id: 'face-grin-wide', icon: '😀' },
+                                { id: 'face-grin-hearts', icon: '😍' },
+                                { id: 'face-grin-squint-tears', icon: '🤣' },
+                                { id: 'face-kiss-wink-heart', icon: '😘' },
+                                { id: 'face-sad-cry', icon: '😭' },
+                                { id: 'face-surprise', icon: '😮' },
+                                { id: 'heart', icon: '❤️' },
+                                { id: 'thumbsup', icon: '👍' },
+                                { id: 'face-kiss', icon: '😚' }
                             ].map((reaction) => (
                                 <button
                                     key={reaction.id}
                                     className={`p-1.5 hover:bg-muted rounded-full transition-transform hover:scale-110`}
                                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); onReact(reaction.id); }}
                                 >
-                                    <reaction.icon className="w-5 h-5" />
+                                    <span className="text-[18px] leading-none">{reaction.icon}</span>
                                 </button>
                             ))}
                         </div>
@@ -82,23 +70,23 @@ export function ChatSelectionActionBar({
                 <div className="sm:hidden absolute top-16 left-1/2 -translate-x-1/2 py-1 px-2.5 bg-background/95 backdrop-blur-md z-40 border border-border/60 shadow-lg rounded-2xl flex items-center justify-center max-w-[90vw] animate-in slide-in-from-top-2 duration-200">
                     <div className="grid grid-cols-5 gap-1">
                         {[
-                            { id: 'face-dizzy', icon: FaFaceDizzy },
-                            { id: 'face-grin-wide', icon: FaFaceGrinWide },
-                            { id: 'face-grin-hearts', icon: FaFaceGrinHearts },
-                            { id: 'face-grin-squint-tears', icon: FaFaceGrinSquintTears },
-                            { id: 'face-kiss-wink-heart', icon: FaFaceKissWinkHeart },
-                            { id: 'face-sad-cry', icon: FaFaceSadCry },
-                            { id: 'face-surprise', icon: FaFaceSurprise },
-                            { id: 'heart', icon: FaHeart },
-                            { id: 'thumbsup', icon: FaThumbsUp },
-                            { id: 'face-kiss', icon: FaFaceKiss }
+                            { id: 'face-dizzy', icon: '😵' },
+                            { id: 'face-grin-wide', icon: '😀' },
+                            { id: 'face-grin-hearts', icon: '😍' },
+                            { id: 'face-grin-squint-tears', icon: '🤣' },
+                            { id: 'face-kiss-wink-heart', icon: '😘' },
+                            { id: 'face-sad-cry', icon: '😭' },
+                            { id: 'face-surprise', icon: '😮' },
+                            { id: 'heart', icon: '❤️' },
+                            { id: 'thumbsup', icon: '👍' },
+                            { id: 'face-kiss', icon: '😚' }
                         ].map((reaction) => (
                             <button
                                 key={reaction.id}
                                 className={`p-2 hover:bg-muted rounded-full transition-transform active:scale-95`}
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); onReact(reaction.id); }}
                             >
-                                <reaction.icon className="w-5 h-5" />
+                                <span className="text-[18px] leading-none">{reaction.icon}</span>
                             </button>
                         ))}
                     </div>

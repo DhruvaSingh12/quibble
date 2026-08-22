@@ -96,7 +96,7 @@ export default function DislikeButton({ post }: DislikeButtonProps) {
       )}
     >
       <ThumbsDown
-        className={cn("size-[18px]", isDisliked && "fill-destructive")}
+        className={cn("size-4.5", isDisliked && "fill-destructive")}
       />
       <span className="tabular-nums text-[13px]">{dislikeCount}</span>
     </button>

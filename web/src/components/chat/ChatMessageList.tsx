@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Check, CheckCheck, Trash2, FileText, X, Reply } from 'lucide-react';
+import { Play, Check, CheckCheck, Trash2, Phone, PhoneMissed, Video } from 'lucide-react';
 import PdfPreviewCard from "../posts/common/PdfPreviewCard";
-import { FaFaceDizzy, FaFaceGrinWide, FaFaceGrinHearts, FaFaceGrinSquintTears, FaFaceKissWinkHeart, FaFaceSadCry, FaFaceSurprise, FaHeart, FaThumbsUp, FaFaceKiss } from 'react-icons/fa6';
 import { format, isSameDay, isToday, isYesterday } from "date-fns";
 import { CustomAudioPlayer } from "@/components/chat/MediaPlayers";
 import InfiniteScrollContainer from "@/components/InfiniteScrollContainer";
@@ -9,7 +8,7 @@ import BounceLoader from "@/components/BounceLoader";
 import { MediaModal } from "@/components/chat/MediaModal";
 
 interface ChatPayload {
-    type: "text" | "image" | "video" | "audio" | "gif" | "pdf";
+    type: "text" | "image" | "video" | "audio" | "gif" | "pdf" | "call";
     content: string;
 }
 
@@ -51,17 +50,17 @@ const ReactionBadge = ({
         return () => window.removeEventListener("click", handleOutsideClick);
     }, [activeEmojiMenu]);
 
-    const emojiMap: Record<string, any> = {
-        'face-dizzy': FaFaceDizzy,
-        'face-grin-wide': FaFaceGrinWide,
-        'face-grin-hearts': FaFaceGrinHearts,
-        'face-grin-squint-tears': FaFaceGrinSquintTears,
-        'face-kiss-wink-heart': FaFaceKissWinkHeart,
-        'face-sad-cry': FaFaceSadCry,
-        'face-surprise': FaFaceSurprise,
-        'heart': FaHeart,
-        'thumbsup': FaThumbsUp,
-        'face-kiss': FaFaceKiss,
+    const emojiMap: Record<string, string> = {
+        'face-dizzy': '😵',
+        'face-grin-wide': '😀',
+        'face-grin-hearts': '😍',
+        'face-grin-squint-tears': '🤣',
+        'face-kiss-wink-heart': '😘',
+        'face-sad-cry': '😭',
+        'face-surprise': '😮',
+        'heart': '❤️',
+        'thumbsup': '👍',
+        'face-kiss': '😚',
     };
 
     const grouped = reactions.reduce((acc, r) => {
@@ -77,10 +76,10 @@ const ReactionBadge = ({
                 const hasMyReaction = reactions.some(r => r.userId === currentUserId && r.emoji === emoji);
                 const isSingle = count === 1;
 
-                const shapeClass = isSingle ? "w-[26px] h-[26px]" : "h-[26px] px-2.5 gap-1";
+                const shapeClass = isSingle ? "w-6.5 h-6.5" : "h-6.5 px-2.5 gap-1";
                 const colorClass = hasMyReaction
-                    ? "bg-primary/15 border-primary/25 text-primary shadow-sm hover:bg-primary/25"
-                    : "bg-muted/80 border-border/30 text-foreground shadow-sm hover:bg-muted";
+                    ? "bg-background border-border text-primary shadow-sm hover:bg-muted"
+                    : "bg-background border-border text-foreground shadow-sm hover:bg-muted";
 
                 return (
                     <div
@@ -93,7 +92,7 @@ const ReactionBadge = ({
                         }}
                         className={`flex items-center justify-center rounded-full border text-[11px] font-semibold animate-in zoom-in duration-200 pointer-events-auto relative ${shapeClass} ${colorClass} ${hasMyReaction ? 'cursor-pointer' : ''}`}
                     >
-                        <Icon className="w-3.5 h-3.5" />
+                        <span className="text-3.25 leading-none">{emojiMap[emoji]}</span>
                         {!isSingle && <span className="text-[10px] text-foreground/90 font-medium">{count}</span>}
 
                         {activeEmojiMenu === emoji && (
@@ -238,7 +237,7 @@ export function ChatMessageList({
         switch (payload.type) {
             case "pdf":
                 return (
-                    <div className={compact ? "w-full h-full aspect-square" : "w-[220px] sm:w-[260px] aspect-square"}>
+                    <div className={compact ? "w-full h-full aspect-square" : "w-55 sm:w-65 aspect-square"}>
                         <PdfPreviewCard url={payload.content} className="w-full h-full rounded-xl shadow-sm border-none" />
                     </div>
                 );
@@ -285,6 +284,39 @@ export function ChatMessageList({
                 );
             case "audio":
                 return <CustomAudioPlayer src={payload.content} />;
+            case "call":
+                try {
+                    const callData = JSON.parse(payload.content);
+                    const isVideo = callData.type === 'video';
+                    const isMissed = callData.status === 'missed';
+                    const Icon = isMissed ? PhoneMissed : (isVideo ? Video : Phone);
+
+                    const formatDuration = (seconds: number) => {
+                        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+                        const s = (seconds % 60).toString().padStart(2, '0');
+                        return `${m}:${s}`;
+                    };
+
+                    return (
+                        <div className="flex items-center gap-3 px-1 py-1">
+                            <div className={`p-2.5 rounded-full ${isMissed ? 'bg-destructive/15 text-destructive' : 'bg-primary/15 text-primary'}`}>
+                                <Icon className="w-5 h-5" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="font-semibold text-sm">
+                                    {isMissed ? (isVideo ? 'Missed Video Call' : 'Missed Audio Call') : (isVideo ? 'Video Call' : 'Audio Call')}
+                                </span>
+                                {!isMissed && callData.duration > 0 && (
+                                    <span className="text-xs text-muted-foreground font-medium">
+                                        {formatDuration(callData.duration)}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    );
+                } catch (e) {
+                    return <ExpandableText content="[Call Log]" />;
+                }
             case "text":
             default:
                 return <ExpandableText content={payload.content || "Empty"} />;
@@ -410,19 +442,19 @@ export function ChatMessageList({
                                         onTouchEnd={handleTouchEnd}
                                         onTouchMove={handleTouchEnd}
                                     >
-                                        <div className={`rounded-2xl w-fit max-w-[250px] sm:max-w-[300px] bg-muted/20 border border-border/10 shadow-sm p-1 relative ${m.payload?.type === "pdf" ? "" : "h-[250px]"}`}>
+                                        <div className={`rounded-2xl w-fit max-w-62.5 sm:max-w-75 bg-muted/20 border border-border/10 shadow-sm p-1 relative ${m.payload?.type === "pdf" ? "" : "h-62.5"}`}>
                                             {isSelected && <div className="absolute inset-0 bg-primary/20 z-20 pointer-events-none rounded-2xl"></div>}
                                             <div className="relative w-full h-full overflow-hidden rounded-xl pointer-events-auto flex flex-col">
                                                 {renderMessageContent(m.payload, m.id, false)}
                                                 {m.payload?.type === "pdf" ? (
                                                     <div className="flex items-center justify-end gap-1 text-[10px] opacity-70 mt-1 mr-1 mb-0.5 pointer-events-none">
                                                         <span>{format(new Date(m.createdAt || Date.now()), "h:mm a")}</span>
-                                                        {isMe && (m.readAt ? <CheckCheck className="w-[14px] h-[14px] ml-0.5" strokeWidth={1.5} /> : <Check className="w-[13px] h-[13px] ml-0.5" strokeWidth={1.5} />)}
+                                                        {isMe && (m.readAt ? <CheckCheck className="w-3.5 h-3.5 ml-0.5" strokeWidth={1.5} /> : <Check className="w-3.25 h-3.25 ml-0.5" strokeWidth={1.5} />)}
                                                     </div>
                                                 ) : (
                                                     <div className="absolute bottom-1 right-2 flex items-center gap-1 text-[10px] text-white bg-black/40 px-1.5 py-0.5 rounded-full backdrop-blur-sm pointer-events-none">
                                                         <span>{format(new Date(m.createdAt || Date.now()), "h:mm a")}</span>
-                                                        {isMe && (m.readAt ? <CheckCheck className="w-[14px] h-[14px] ml-0.5" strokeWidth={1.5} /> : <Check className="w-[13px] h-[13px] ml-0.5" strokeWidth={1.5} />)}
+                                                        {isMe && (m.readAt ? <CheckCheck className="w-3.5 h-3.5 ml-0.5" strokeWidth={1.5} /> : <Check className="w-3.25 h-3.25 ml-0.5" strokeWidth={1.5} />)}
                                                     </div>
                                                 )}
                                             </div>
@@ -456,7 +488,7 @@ export function ChatMessageList({
                                 `}>
                                     <div
                                         className={`
-                                            rounded-2xl px-4 py-2.5 shadow-sm min-w-[80px] cursor-pointer relative overflow-hidden border
+                                            rounded-2xl px-4 py-2.5 shadow-sm min-w-20 cursor-pointer relative overflow-hidden border
                                             ${isMe ? "bg-primary/10 text-primary border-primary/15 rounded-br-sm" : "bg-muted/40 border-border/30 text-foreground rounded-bl-sm"}
                                         `}
                                         onClick={(e) => handleMessageInteraction(e, interactionId)}
@@ -470,7 +502,7 @@ export function ChatMessageList({
                                             {renderMessageContent(m.payload, m.id, false)}
                                             <div className="float-right flex items-center gap-1 text-[10px] opacity-70 mt-1 ml-3 -mb-1">
                                                 <span>{format(new Date(m.createdAt || Date.now()), "h:mm a")}</span>
-                                                {isMe && (m.readAt ? <CheckCheck className="w-[14px] h-[14px] ml-0.5" strokeWidth={1.5} /> : <Check className="w-[13px] h-[13px] ml-0.5" strokeWidth={1.5} />)}
+                                                {isMe && (m.readAt ? <CheckCheck className="w-3.5 h-3.5 ml-0.5" strokeWidth={1.5} /> : <Check className="w-3.25 h-3.25 ml-0.5" strokeWidth={1.5} />)}
                                             </div>
                                             <div className="clear-both" />
                                         </div>
@@ -499,7 +531,7 @@ export function ChatMessageList({
                                         </div>
                                     )}
                                     <div className={`max-w-[85%] lg:max-w-[70%] relative ${isMe ? "items-end" : "items-start"} opacity-100 transition-opacity`}>
-                                        <div className={`rounded-2xl bg-muted/20 border border-border/10 shadow-sm p-1 ${isPdfGroup ? "grid grid-cols-2 gap-1 w-[250px] sm:w-[300px]" : "columns-2 gap-1 w-[250px] sm:w-[300px]"}`}>
+                                        <div className={`rounded-2xl bg-muted/20 border border-border/10 shadow-sm p-1 ${isPdfGroup ? "grid grid-cols-2 gap-1 w-62.5 sm:w-75" : "columns-2 gap-1 w-62.5 sm:w-75"}`}>
                                             {group.messages.map((m: any) => {
                                                 const interactionId = m.id || m.localId;
                                                 const isSelected = selectedMessageIds.has(interactionId);
@@ -521,7 +553,7 @@ export function ChatMessageList({
                                                             </div>
                                                         )}
                                                         {m.deletedAt ? (
-                                                            <div className="w-full h-full min-h-[150px] flex flex-col items-center justify-center bg-muted/50 border border-border/40 text-muted-foreground p-4 gap-2 rounded-xl overflow-hidden">
+                                                            <div className="w-full h-full min-h-37.5 flex flex-col items-center justify-center bg-muted/50 border border-border/40 text-muted-foreground p-4 gap-2 rounded-xl overflow-hidden">
                                                                 <Trash2 className="w-5 h-5 opacity-70" />
                                                                 <span className="text-xs text-center italic">Deleted</span>
                                                             </div>
@@ -531,12 +563,12 @@ export function ChatMessageList({
                                                                 {isPdfGroup ? (
                                                                     <div className="flex items-center justify-end gap-1 text-[10px] opacity-70 mt-1 mr-1 mb-0.5 pointer-events-none">
                                                                         <span>{format(new Date(m.createdAt || Date.now()), "h:mm a")}</span>
-                                                                        {isMe && (m.readAt ? <CheckCheck className="w-[14px] h-[14px] ml-0.5" strokeWidth={1.5} /> : <Check className="w-[13px] h-[13px] ml-0.5" strokeWidth={1.5} />)}
+                                                                        {isMe && (m.readAt ? <CheckCheck className="w-3.5 h-3.5 ml-0.5" strokeWidth={1.5} /> : <Check className="w-3.25 h-3.25 ml-0.5" strokeWidth={1.5} />)}
                                                                     </div>
                                                                 ) : (
                                                                     <div className="absolute bottom-1 right-2 flex items-center gap-1 text-[10px] text-white bg-black/40 px-1.5 py-0.5 rounded-full backdrop-blur-sm pointer-events-none">
                                                                         <span>{format(new Date(m.createdAt || Date.now()), "h:mm a")}</span>
-                                                                        {isMe && (m.readAt ? <CheckCheck className="w-[14px] h-[14px] ml-0.5" strokeWidth={1.5} /> : <Check className="w-[13px] h-[13px] ml-0.5" strokeWidth={1.5} />)}
+                                                                        {isMe && (m.readAt ? <CheckCheck className="w-3.5 h-3.5 ml-0.5" strokeWidth={1.5} /> : <Check className="w-3.25 h-3.25 ml-0.5" strokeWidth={1.5} />)}
                                                                     </div>
                                                                 )}
                                                             </div>

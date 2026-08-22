@@ -112,7 +112,7 @@ export default function CommentInput({
               className="w-full resize-none bg-transparent text-sm outline-none border-b border-border focus:border-primary pb-2 transition-colors placeholder:text-muted-foreground"
             />
             {gifUrl && (
-              <div className="relative mt-2 w-max max-w-[200px]">
+              <div className="relative mt-2 w-max max-w-50">
                 <Image
                   src={gifUrl}
                   alt="Selected GIF"
@@ -159,7 +159,7 @@ export default function CommentInput({
               </div>
             </div>
             {showGifPicker && (
-              <div className="mt-2 border rounded-xl overflow-hidden h-[300px]">
+              <div className="mt-2 border rounded-xl overflow-hidden h-75">
                 <GifPicker
                   onSelect={(url) => {
                     setGifUrl(url);

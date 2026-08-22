@@ -3,19 +3,19 @@ import { X, ChevronLeft, ChevronRight, Check, CheckCheck, Trash2, Smile } from '
 import { format } from "date-fns";
 import { CustomVideoPlayer } from './MediaPlayers';
 import PdfPreviewCard from '../posts/common/PdfPreviewCard';
-import { FaFaceDizzy, FaFaceGrinWide, FaFaceGrinHearts, FaFaceGrinSquintTears, FaFaceKissWinkHeart, FaFaceSadCry, FaFaceSurprise, FaHeart, FaThumbsUp, FaFaceKiss, FaG, FaI, FaF } from 'react-icons/fa6';
+import { FaF, FaG, FaI } from 'react-icons/fa6';
 
-const emojiMap: Record<string, any> = {
-    'face-dizzy': FaFaceDizzy,
-    'face-grin-wide': FaFaceGrinWide,
-    'face-grin-hearts': FaFaceGrinHearts,
-    'face-grin-squint-tears': FaFaceGrinSquintTears,
-    'face-kiss-wink-heart': FaFaceKissWinkHeart,
-    'face-sad-cry': FaFaceSadCry,
-    'face-surprise': FaFaceSurprise,
-    'heart': FaHeart,
-    'thumbsup': FaThumbsUp,
-    'face-kiss': FaFaceKiss,
+const emojiMap: Record<string, string> = {
+    'face-dizzy': '😵',
+    'face-grin-wide': '😀',
+    'face-grin-hearts': '😍',
+    'face-grin-squint-tears': '🤣',
+    'face-kiss-wink-heart': '😘',
+    'face-sad-cry': '😭',
+    'face-surprise': '😮',
+    'heart': '❤️',
+    'thumbsup': '👍',
+    'face-kiss': '😚',
 };
 
 interface MediaModalProps {
@@ -152,12 +152,12 @@ export function MediaModal({ isOpen, onClose, mediaList, initialIndex, onReact, 
                 className="relative w-full max-w-[90vw] md:max-w-[70vw] h-[70vh] bg-background border border-border/50 rounded-2xl shadow-2xl p-4 flex flex-col items-center justify-center animate-in zoom-in-95 duration-200 group/modal"
                 onClick={(e) => e.stopPropagation()} // Prevent closing when clicking media
             >
-                <div className="absolute top-4 right-4 md:top-6 md:right-6 flex items-center gap-2.5 bg-black/50 text-white px-3 py-1.5 rounded-full backdrop-blur-md z-50 shadow-sm text-[12px] font-medium h-[30px]">
+                <div className="absolute top-4 right-4 md:top-6 md:right-6 flex items-center gap-2.5 bg-black/50 text-white px-3 py-1.5 rounded-full backdrop-blur-md z-50 shadow-sm text-[12px] font-medium h-7.5">
                     {media.type === "gif" && (
                         <div className="flex items-center gap-0.5 text-white/95 border-r border-white/20 pr-2">
-                            <FaG className="w-[10px] h-[10px]" />
-                            <FaI className="w-[10px] h-[10px]" />
-                            <FaF className="w-[10px] h-[10px]" />
+                            <FaG className="w-2.5 h-2.5" />
+                            <FaI className="w-2.5 h-2.5" />
+                            <FaF className="w-2.5 h-2.5" />
                         </div>
                     )}
 
@@ -220,7 +220,7 @@ export function MediaModal({ isOpen, onClose, mediaList, initialIndex, onReact, 
                         onTouchEnd={handleTouchEnd}
                         onTouchMove={handleTouchMove}
                     >
-                        <PdfPreviewCard url={media.content} className="max-w-[800px] w-full shadow-md" />
+                        <PdfPreviewCard url={media.content} className="max-w-200 w-full shadow-md" />
                     </div>
                 ) : (
                     <div
@@ -247,7 +247,7 @@ export function MediaModal({ isOpen, onClose, mediaList, initialIndex, onReact, 
                 )}
 
                 {media.reactions && media.reactions.length > 0 && (
-                    <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6 flex items-center gap-2 bg-black/50 text-white px-3 py-1.5 rounded-full backdrop-blur-md z-50 shadow-sm text-[12px] font-medium h-[30px] pointer-events-auto">
+                    <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6 flex items-center gap-2 bg-black/50 text-white px-3 py-1.5 rounded-full backdrop-blur-md z-50 shadow-sm text-[12px] font-medium h-7.5 pointer-events-auto">
                         {Object.entries(
                             media.reactions.reduce((acc, r) => {
                                 acc[r.emoji] = (acc[r.emoji] || 0) + 1;
@@ -269,7 +269,7 @@ export function MediaModal({ isOpen, onClose, mediaList, initialIndex, onReact, 
                                         }}
                                         className={`flex items-center gap-1 relative ${hasMyReaction ? 'cursor-pointer hover:text-white/80 transition-colors' : ''}`}
                                     >
-                                        <Icon className="w-3.5 h-3.5" />
+                                        <span className="text-[14px] leading-none">{Icon}</span>
                                         {count > 1 && <span className="ml-0.5 text-[11px]">{count}</span>}
 
                                         {activeEmojiMenu === emoji && (
@@ -299,16 +299,16 @@ export function MediaModal({ isOpen, onClose, mediaList, initialIndex, onReact, 
                     <div className="absolute bottom-16 md:bottom-20 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 bg-background/90 border border-border shadow-lg p-1 rounded-2xl md:rounded-full backdrop-blur max-w-[90vw] md:max-w-none overflow-x-auto">
                         <div className="grid grid-cols-5 sm:grid-cols-10 gap-1">
                             {[
-                                { id: 'face-dizzy', icon: FaFaceDizzy },
-                                { id: 'face-grin-wide', icon: FaFaceGrinWide },
-                                { id: 'face-grin-hearts', icon: FaFaceGrinHearts },
-                                { id: 'face-grin-squint-tears', icon: FaFaceGrinSquintTears },
-                                { id: 'face-kiss-wink-heart', icon: FaFaceKissWinkHeart },
-                                { id: 'face-sad-cry', icon: FaFaceSadCry },
-                                { id: 'face-surprise', icon: FaFaceSurprise },
-                                { id: 'heart', icon: FaHeart },
-                                { id: 'thumbsup', icon: FaThumbsUp },
-                                { id: 'face-kiss', icon: FaFaceKiss }
+                                { id: 'face-dizzy', icon: '😵' },
+                                { id: 'face-grin-wide', icon: '😀' },
+                                { id: 'face-grin-hearts', icon: '😍' },
+                                { id: 'face-grin-squint-tears', icon: '🤣' },
+                                { id: 'face-kiss-wink-heart', icon: '😘' },
+                                { id: 'face-sad-cry', icon: '😭' },
+                                { id: 'face-surprise', icon: '😮' },
+                                { id: 'heart', icon: '❤️' },
+                                { id: 'thumbsup', icon: '👍' },
+                                { id: 'face-kiss', icon: '😚' }
                             ].map((reaction) => {
                                 const isSelected = media.reactions?.some(r => r.userId === currentUserId && r.emoji === reaction.id);
                                 return (
@@ -317,7 +317,7 @@ export function MediaModal({ isOpen, onClose, mediaList, initialIndex, onReact, 
                                         className={`p-1.5 hover:bg-muted rounded-full transition-transform active:scale-95 flex items-center justify-center ${isSelected ? 'bg-primary/10 scale-105 border border-primary/20' : ''}`}
                                         onClick={(e) => { e.stopPropagation(); onReact(media.id!, reaction.id); setShowReactPanel(false); }}
                                     >
-                                        <reaction.icon className={`w-5 h-5 ${isSelected ? 'text-primary' : 'text-foreground'}`} />
+                                        <span className={`text-[18px] leading-none ${isSelected ? 'opacity-100' : 'opacity-80'}`}>{reaction.icon}</span>
                                     </button>
                                 );
                             })}

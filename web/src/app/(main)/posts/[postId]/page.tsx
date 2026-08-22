@@ -65,7 +65,7 @@ export default async function Page({ params }: PageProps) {
     const post = await getPost(postId);
 
     return (
-        <main className="w-full mt-[3px] lg:mt-[8px] flex flex-col rounded-lg items-center justify-center">
+        <main className="w-full mt-[3px] lg:mt-2 flex flex-col rounded-lg items-center justify-center">
             <div className="w-full flex-col min-w-0">
                 <SinglePost post={post} />
                 <CommentSection postId={postId} postAuthorId={post.userId} />

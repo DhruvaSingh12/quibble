@@ -10,7 +10,7 @@ export default function NotFound() {
         <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">
           Page not found.
         </h1>
-        <p className="max-w-[380px] text-sm md:text-[15px] text-muted-foreground leading-relaxed">
+        <p className="max-w-95 text-sm md:text-[15px] text-muted-foreground leading-relaxed">
           You seem to have reached a page that doesn&apos;t exist or may never exist. Turn back now, traveler.
         </p>
         <Link

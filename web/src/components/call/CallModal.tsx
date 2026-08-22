@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useCall } from "@/providers/CallProvider";
 import { Button } from "@/components/ui/Button";
 import { Phone, PhoneOff, Video, VideoOff, Mic, MicOff, Loader2 } from "lucide-react";
@@ -19,11 +19,31 @@ export function CallModal() {
         rejectCall,
         endCall,
         toggleMute,
-        toggleVideo
+        toggleVideo,
+        remoteVideoEnabled
     } = useCall();
 
     const localVideoRef = useRef<HTMLVideoElement>(null);
     const remoteVideoRef = useRef<HTMLVideoElement>(null);
+
+    const [duration, setDuration] = useState(0);
+
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+        if (callState === "active") {
+            setDuration(0);
+            interval = setInterval(() => {
+                setDuration(prev => prev + 1);
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [callState]);
+
+    const formatDuration = (seconds: number) => {
+        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const s = (seconds % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    };
 
     useEffect(() => {
         if (localVideoRef.current && localStream) {
@@ -77,17 +97,35 @@ export function CallModal() {
         return (
             <div className="fixed inset-0 z-50 bg-background flex flex-col">
                 {/* Remote Stream Background */}
-                <div className="flex-1 relative w-full h-full bg-muted flex items-center justify-center overflow-hidden">
-                    {remoteStream ? (
-                        <video
-                            ref={remoteVideoRef}
-                            autoPlay
-                            playsInline
-                            className="w-full h-full object-cover"
-                        />
-                    ) : (
-                        <div className="flex flex-col items-center text-muted-foreground">
-                            <UserAvatar avatarUrl={peer?.avatarUrl} size={128} className="w-32 h-32 mb-4 opacity-50" />
+                <div className="flex-1 relative w-full h-full bg-background flex flex-col items-center justify-center overflow-hidden">
+                    <video
+                        ref={remoteVideoRef}
+                        autoPlay
+                        playsInline
+                        className={isVideo && remoteVideoEnabled ? "w-full h-full object-contain" : "hidden"}
+                    />
+                    
+                    {(!isVideo || !remoteVideoEnabled) && (
+                        <div className="flex flex-col items-center animate-in zoom-in-95 duration-300">
+                            <UserAvatar avatarUrl={peer?.avatarUrl} size={160} className="w-40 h-40 mb-6 shadow-2xl border-4 border-primary/20" />
+                            <h2 className="text-3xl font-bold mb-2">{peer?.displayName}</h2>
+                            {!isVideo && (
+                                <p className="text-muted-foreground text-lg font-medium">
+                                    {formatDuration(duration)}
+                                </p>
+                            )}
+                        </div>
+                    )}
+
+                    {isVideo && (
+                        <div className="absolute top-6 left-6 z-10 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full text-white font-medium shadow-lg animate-in fade-in">
+                            {formatDuration(duration)}
+                        </div>
+                    )}
+
+                    {isVideo && !remoteStream && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground bg-background/50 backdrop-blur-sm z-10">
+                            <Loader2 className="animate-spin mb-4 w-8 h-8" />
                             <p>Connecting media...</p>
                         </div>
                     )}
@@ -102,7 +140,7 @@ export function CallModal() {
                                 autoPlay
                                 playsInline
                                 muted
-                                className="w-full h-full object-cover mirror"
+                                className="w-full h-full object-contain mirror"
                                 style={{ transform: "scaleX(-1)" }}
                             />
                         ) : (

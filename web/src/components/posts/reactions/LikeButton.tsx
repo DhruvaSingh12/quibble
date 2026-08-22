@@ -94,7 +94,7 @@ export default function LikeButton({ post }: LikeButtonProps) {
       )}
     >
       <ThumbsUp
-        className={cn("size-[18px]", isLiked && "fill-primary")}
+        className={cn("size-4.5", isLiked && "fill-primary")}
       />
       <span className="tabular-nums text-[13px]">{likeCount}</span>
     </button>

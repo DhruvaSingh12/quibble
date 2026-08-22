@@ -20,7 +20,7 @@ export default function GlobalError({
           <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">
             {isGateway ? "Server is Waking Up" : "Something went wrong."}
           </h1>
-          <p className="max-w-[380px] text-sm md:text-[15px] text-muted-foreground leading-relaxed">
+          <p className="max-w-95 text-sm md:text-[15px] text-muted-foreground leading-relaxed">
             {isGateway
               ? "It usually takes about 30 seconds to wake back up. Please give it a moment and retry!"
               : "An unexpected error occurred while loading this page. We're looking into it."}

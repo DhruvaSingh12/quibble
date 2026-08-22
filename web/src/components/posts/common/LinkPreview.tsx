@@ -44,7 +44,7 @@ export default function LinkPreview({ url }: LinkPreviewProps) {
         return (
             <div className="mt-2 overflow-hidden rounded-lg border border-border bg-card">
                 <div className="flex gap-3 p-3">
-                    <Skeleton className="h-[80px] w-[80px] shrink-0" />
+                    <Skeleton className="h-20 w-20 shrink-0" />
                     <div className="grow space-y-2">
                         <Skeleton className="h-4 w-3/4" />
                         <Skeleton className="h-4 w-1/2" />
@@ -66,7 +66,7 @@ export default function LinkPreview({ url }: LinkPreviewProps) {
         >
             <div className="flex gap-3 p-3">
                 {previewData.image && previewData.image.startsWith('http') && (
-                    <div className="relative h-[80px] w-[80px] shrink-0 overflow-hidden rounded-lg bg-accent/10">
+                    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-accent/10">
                         <img
                             src={previewData.image}
                             alt={previewData.title || "Link preview image"}

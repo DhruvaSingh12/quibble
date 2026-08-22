@@ -22,7 +22,7 @@ export default function UserButton({ className }: UserButtonProps) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className={cn("rounded-full flex-none", className)}>
-          <UserAvatar avatarUrl={user?.avatarUrl} size={500} className="w-[40px] lg:w-[48px]" />
+          <UserAvatar avatarUrl={user?.avatarUrl} size={500} className="w-10 lg:w-12" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" alignOffset={-12}>

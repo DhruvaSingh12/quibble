@@ -77,7 +77,7 @@ export default async function Page({ params }: PageProps) {
   const user = await getUser(username);
 
   return (
-    <main className="w-full mt-[3px] lg:mt-[8px] flex-col rounded-lg p-4 items-center justify-center space-y-4">
+    <main className="w-full mt-[3px] lg:mt-2 flex-col rounded-lg p-4 items-center justify-center space-y-4">
       <div className="w-full min-w-0 space-y-4 px-2">
         <UserProfile user={user} loggedInUserId={loggedInUser.id} />
         <UserPosts userId={user.id} />

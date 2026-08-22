@@ -312,7 +312,7 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
               variant="outline"
               onClick={handleClose}
               disabled={mutation.isPending}
-              className="min-w-[120px]"
+              className="min-w-30"
             >
               Cancel
             </Button>
@@ -320,7 +320,7 @@ export default function EditPostDialog({ post, open, onClose }: EditPostDialogPr
               loading={mutation.isPending}
               onClick={onSubmit}
               disabled={!textLength || input.trim() === post.content.trim()}
-              className="min-w-[120px]"
+              className="min-w-30"
             >
               {mutation.isPending ? "Saving..." : "Save changes"}
             </LoadingButton>

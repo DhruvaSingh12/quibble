@@ -23,7 +23,7 @@ export default async function Layout({
         <CallProvider>
           <div suppressHydrationWarning={true} className="flex w-full h-full fixed inset-0">
             {/* Sidebar */}
-            <div className="hidden md:flex flex-col w-[200px] lg:w-[300px] bg-background pl-2 py-2 h-full">
+            <div className="hidden md:flex flex-col w-50 lg:w-75 bg-background pl-2 py-2 h-full">
               <MenuBar />
             </div>
 
@@ -36,7 +36,7 @@ export default async function Layout({
                 <div id="main-scroll-area" className="flex-1 min-w-0 h-full overflow-y-auto scrollbar-hide bg-card rounded-lg border border-border shadow-sm">
                   {children}
                 </div>
-                <div className="hidden lg:block w-[200px] lg:w-[300px] flex-none h-full overflow-y-auto scrollbar-hide">
+                <div className="hidden lg:block w-50 lg:w-75 flex-none h-full overflow-y-auto scrollbar-hide">
                   <TrendsSidebar className="space-y-2 pb-2" />
                 </div>
               </div>

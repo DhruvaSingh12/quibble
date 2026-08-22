@@ -36,7 +36,7 @@ export default function FollowConnectionModal({
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto mt-2 h-full min-h-[300px]">
+          <div className="flex-1 overflow-y-auto mt-2 h-full min-h-75">
             <TabsContent value="followers" className="m-0 h-full data-[state=active]:flex flex-col">
               <FollowerList userId={userId} onClose={onClose} />
             </TabsContent>

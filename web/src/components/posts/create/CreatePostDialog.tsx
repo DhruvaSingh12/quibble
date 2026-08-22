@@ -77,7 +77,7 @@ export default function PostEditor() {
       TiptapImage.configure({
         allowBase64: true,
         HTMLAttributes: {
-          class: "rounded-lg max-h-[300px] object-contain",
+          class: "rounded-lg max-h-75 object-contain",
         },
       }),
       PasteExtension.configure({
@@ -161,7 +161,7 @@ export default function PostEditor() {
   const onSubmit = useCallback(() => {
     let finalContent = input;
     if (selectedGif) {
-      finalContent = `<img src="${selectedGif}" class="rounded-lg max-h-[150px] object-contain" />${input}`;
+      finalContent = `<img src="${selectedGif}" class="rounded-lg max-h-37.5 object-contain" />${input}`;
     }
 
     const attachments = media.attachments
@@ -288,7 +288,7 @@ export default function PostEditor() {
         <UserAvatar
           avatarUrl={user.avatarUrl}
           size={40}
-          className="w-[40px] lg:w-[50px]"
+          className="w-10 lg:w-12.5"
         />
         <button
           onClick={openDialog}
@@ -423,7 +423,7 @@ export default function PostEditor() {
                 variant="outline"
                 onClick={handleCancel}
                 disabled={mutation.isPending}
-                className="min-w-[120px]"
+                className="min-w-30"
               >
                 Cancel
               </Button>
@@ -431,7 +431,7 @@ export default function PostEditor() {
                 loading={mutation.isPending}
                 onClick={onSubmit}
                 disabled={!canPost}
-                className="min-w-[120px]"
+                className="min-w-30"
               >
                 {mutation.isPending ? "Posting..." : "Post"}
               </LoadingButton>

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <main className="min-h-screen flex items-center justify-center p-4 bg-background">
-      <div className="flex flex-col md:flex-row h-full w-full max-w-[900px] md:h-[600px] overflow-hidden rounded-lg border border-border bg-card shadow-2xl">
+      <div className="flex flex-col md:flex-row h-full w-full max-w-225 md:h-150 overflow-hidden rounded-lg border border-border bg-card shadow-2xl">
         
         {/* Form Area (Left for Signup) */}
         <div className="w-full md:w-1/2 h-full flex flex-col p-6 md:px-8 md:py-12 overflow-y-auto">
